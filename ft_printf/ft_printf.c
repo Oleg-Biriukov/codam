@@ -35,7 +35,7 @@ static void	*convert(int c, va_list args)
 	else if (c == '%')
 		ft_putchar_fd('%', 0);
 	else if (c == 'u')
-		ft_putchar_fd(va_arg(args, unsigned int), 0);
+		ft_putnbr_fd(va_arg(args, unsigned int), 0);
 	else
 		return (NULL);
 	return (args);
@@ -51,21 +51,24 @@ int	ft_printf(const char *format, ...)
 {
 	va_list	args;
 	t_list	*array;
+	t_list	*beg_array;
 
 	array = sav_offset(NULL, format);
+	beg_array = array;
 	va_start(args, format);
-	while (array->next != NULL)
+	while (array != NULL)
 	{
 		ft_putnchar_fd((char *) format, array->content - (void *) format);
 		convert(*((char *) array->content + 1), args);
-		format += array->content - (void *) format + 1;
+		format += array->content - (void *) format + 2;
 		array = array->next;
 	}
-	fr_ee_all(args, array);
+	ft_putstr_fd((char *) format, 0);
+	fr_ee_all(args, beg_array);
 	return (0);
 }
 
 int main()
 {
-	return (ft_printf("1234%%789%d\n", 56));
+	return (ft_printf("1234%d%c789%d%s\n%c12\n%u", 56, ' ', 0, "\n10\n11", '\t', -1));
 }
