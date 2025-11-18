@@ -1,7 +1,7 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                         ::::::::           */
-/*   libft.h                                             :+:    :+:           */
+/*   ft_printf.h                                             :+:    :+:           */
 /*                                                      +:+                   */
 /*   By: obirukov <obirukov@student.codam.nl>          +#+                    */
 /*                                                    +#+                     */
@@ -10,14 +10,15 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#ifndef LIBFT_H
-# define LIBFT_H
+#ifndef PRINTF_H
+# define PRINTF_H
 # include <stdio.h>
 # include <stdlib.h>
 # include <bsd/string.h>
 # include <unistd.h>
 # include <fcntl.h>
 # include <stdarg.h>
+# include <stdint.h>
 
 typedef struct	s_list
 {
@@ -40,10 +41,13 @@ int		ft_strncmp(const char *s1, const char *s2, size_t n);
 void	*ft_calloc(size_t nmemb, size_t size);
 void	ft_putchar_fd(char c, int fd);
 void	ft_putstr_fd(char *s, int fd);
+void	ft_puthex_fd(unsigned int num, int fd, int mode);
 void	ft_putnbr_fd(int n, int fd);
+void	ft_putunnbr_fd(size_t n, int fd);
 void	*ft_memchr(const void *s, int c, size_t n);
 void	*ft_memset(void *s, int c, size_t n);
 void	ft_putendl_fd(char *s, int fd);
+void	ft_putptr_fd(void *ptr, int fd);
 void	ft_bzero(void *s, size_t n);
 void	*ft_memcpy(void *dest, const void *src, size_t n);
 void	ft_striteri(char *s, void (*f)(unsigned int, char*));
