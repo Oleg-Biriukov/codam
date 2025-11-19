@@ -47,37 +47,44 @@ static int	convert(char c, va_list args)
 int	ft_printf(const char *format, ...)
 {
 	va_list	args;
-	// s_list	*array;
-	// s_list	*beg_array;
 	int		counter;
-	char	*range;
+	int		check;
 
-	// array = sav_offset(NULL, format);
-	// beg_array = array;
 	va_start(args, format);
 	counter = 0;
 	while (*format != '\0')
 	{
-		range = (char *) format;
-		while (*range != '%' && *range != '\0')
-			range++;
-		counter += ft_putnchar_fd((char *) format, range - format);
-		counter += convert(*(range + 1), args);
-		format += range - format + 2;
+		while (*format != '%' && *format != '\0')
+			counter += ft_putchar_fd(*(format++), 0);
+		if (*format == '\0')
+			break;
+		check = convert(*(format + 1), args);
+		if (check < 0)
+		{
+			va_end(args);
+			counter = -1;
+		}
+		counter += check;
+		format += 2;
 	}
-	counter += ft_putstr_fd((char *) format, 0);
+	if (*format != '\0')
+		ft_putstr_fd((char *) format, 0);
 	va_end(args);
 	return (counter);
 }
 
-// int main()
-// {
-// 	int i, b;
+int main()
+{
+	int i, b;
+	// char s2[20] = "hiiiii\0";
 
-// 	i = printf("%d", 0);
-// 	printf("\n=========================\n");
-// 	b = ft_printf("%d", 0);
-// 	printf("\n=========================\n");
-// 	ft_printf("%d %d", i, b);
-// 	return 0;
-// }
+	i = printf("%d%%%%%%%", INT_MAX, INT_MIN);
+	printf("\n=========================\n");
+	b = ft_printf("%d%%%%%%%", INT_MAX, INT_MIN);
+	ft_printf("\n=========================\n");
+	ft_printf("%d %d", i, b);
+	ft_printf("\n=========================\n");
+	b = ft_printf("%d%%%%%%%\n", INT_MAX, INT_MIN);
+
+	return 0;
+}
