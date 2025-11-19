@@ -1,27 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                         ::::::::           */
-/*   ft_isdigit.c                                        :+:    :+:           */
+/*   ft_putchar_fd.c                                     :+:    :+:           */
 /*                                                      +:+                   */
-/*   By: obirukov <obirukov@student.codam.nl>          +#+                    */
+/*   By: obirukov <marvin@42.fr>                       +#+                    */
 /*                                                    +#+                     */
-/*   Created: 2025/10/07 13:37:50 by obirukov       #+#    #+#                */
-/*   Updated: 2025/10/07 13:48:46 by obirukov       ########   odam.nl        */
+/*   Created: 2025/10/16 12:58:31 by obirukov       #+#    #+#                */
+/*   Updated: 2025/10/20 19:46:54 by obirukov       ########   odam.nl        */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "ft_printf.h"
 
-int	ft_isdigit(int c)
+int	ft_putchar_fd(char c, int fd)
 {
-	if (c >= 48 && c <= 57)
-	{
-		return (2048);
-	}
-	return (0);
+	return (write(fd, &c, 1));
 }
-
-/*int main()
-{
-	printf("isdigit: %d\nft_isdigit: %d", isdigit('5'), ft_isdigit('5'));
-}*/

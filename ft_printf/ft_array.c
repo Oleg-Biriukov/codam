@@ -1,10 +1,10 @@
 #include "ft_printf.h"
 
-t_list	*la_init(void *content)
+s_list	*la_init(void *content)
 {
-	t_list	*array;
+	s_list	*array;
 
-	array = malloc(sizeof(t_list));
+	array = malloc(sizeof(s_list));
 	if (array == NULL)
 		return (NULL);
 	array->prev = NULL;
@@ -13,16 +13,16 @@ t_list	*la_init(void *content)
 	return (array);
 }
 
-t_list	*la_start(t_list *array)
+s_list	*la_start(s_list *array)
 {
 	if (array->prev != NULL)
 		return (la_start(array->prev));
 	return (array);
 }
 
-t_list	*la_append(t_list *array, void *content)
+s_list	*la_append(s_list *array, void *content)
 {
-	t_list	*next_array;
+	s_list	*next_array;
 
 	if (!array)
 		return (la_init(content));
@@ -34,9 +34,9 @@ t_list	*la_append(t_list *array, void *content)
 	return (next_array);
 }
 
-void	*la_free(t_list *array)
+void	*la_free(s_list *array)
 {
-	t_list	*next_array;
+	s_list	*next_array;
 	if (array == NULL)
 		return (NULL);
 	array = la_start(array);
@@ -50,7 +50,7 @@ void	*la_free(t_list *array)
 	return (NULL);
 }
 
-size_t	la_len(t_list *array)
+size_t	la_len(s_list *array)
 {
 	size_t	len;
 
@@ -66,7 +66,7 @@ size_t	la_len(t_list *array)
 
 /*int main ()
 {
-	t_list	*array=NULL;
+	s_list	*array=NULL;
 
 	array = la_append(array, "123");
 	if (!array)

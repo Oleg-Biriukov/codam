@@ -1,16 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                         ::::::::           */
-/*   ft_itoa.c                                           :+:    :+:           */
+/*   ft_putnbr_fd.c                                      :+:    :+:           */
 /*                                                      +:+                   */
 /*   By: obirukov <obirukov@student.codam.nl>          +#+                    */
 /*                                                    +#+                     */
 /*   Created: 2025/10/16 13:58:33 by obirukov       #+#    #+#                */
-/*   Updated: 2025/10/26 16:39:03 by obirukov       ########   odam.nl        */
+/*   Updated: 2025/10/26 16:38:57 by obirukov       ########   odam.nl        */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "ft_printf.h"
 
 static int	vton(int value, int n)
 {
@@ -40,50 +40,45 @@ static size_t	len_i(int n)
 	return (len);
 }
 
-static char	*convert(int n, char *num, size_t count)
+static void	convert(int n, size_t count, int fd)
 {
 	if (count-- != len_i(n))
 	{
-		*num++ = '0';
-		return (convert(n, num, count));
+		ft_putchar_fd('0', fd);
+		return (convert(n, count, fd));
 	}
 	if (count == 0)
 	{
-		*num++ = n + 48;
-		*num = '\0';
-		return (num);
+		ft_putchar_fd(n + 48, fd);
+		return ;
 	}
-	*num++ = (n / vton(10, len_i(n) - 1)) + 48;
-	return (convert(n % vton(10, len_i(n) - 1), num, count));
+	ft_putchar_fd((n / vton(10, len_i(n) - 1)) + 48, fd);
+	return (convert(n % vton(10, len_i(n) - 1), count, fd));
 }
 
-char	*ft_itoa(int n)
+int	ft_putnbr_fd(int n, int fd)
 {
-	int		i;
-	char	*num;
+	int	len;
 
-	i = 0;
+	len = 0;
 	if (n < 0)
 	{
 		if (n == -2147483648)
-			return (ft_strdup("-2147483648"));
+		{
+			ft_putstr_fd("-2147483648", fd);
+			return (ft_strlen("-2147483648"));
+		}
 		n *= -1;
-		num = malloc(sizeof(char *) * (len_i(n) + 2));
-		if (num == NULL)
-			return (NULL);
-		*num++ = '-';
-		i++;
+		len++;
+		ft_putchar_fd('-', fd);
 	}
-	else
-		num = malloc(sizeof(char *) * (len_i(n) + 1));
-	if (num == NULL)
-		return (NULL);
-	return (convert(n, num, len_i(n)) - len_i(n) - i);
+	convert(n, len_i(n), fd);
+	len += len_i(n);
+	return (len);
 }
 
-/*int main()
+/*int main(int argc, char **argv)
 {
-	char *str = ft_itoa(1000034);
-	printf("%s\n", str);
-	free(str);
+	if(argc < 2)	return 1;
+	ft_putnbr_fd(ft_atoi(argv[1]), 1);
 }*/

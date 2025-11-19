@@ -1,27 +1,33 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                         ::::::::           */
-/*   ft_isprint.c                                        :+:    :+:           */
+/*   ft_strlen.c                                         :+:    :+:           */
 /*                                                      +:+                   */
 /*   By: obirukov <obirukov@student.codam.nl>          +#+                    */
 /*                                                    +#+                     */
-/*   Created: 2025/10/07 14:30:20 by obirukov       #+#    #+#                */
-/*   Updated: 2025/10/07 14:48:32 by obirukov       ########   odam.nl        */
+/*   Created: 2025/10/06 16:23:45 by obirukov       #+#    #+#                */
+/*   Updated: 2025/10/06 16:31:17 by obirukov       ########   odam.nl        */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "libft.h"
+#include "printf.h"
 
-int	ft_isprint(int c)
+size_t	ft_strlen(const char *s)
 {
-	if (c >= 32 && c <= 126)
+	size_t	i;
+
+	i = 0;
+	while (*s != '\0')
 	{
-		return (16384);
+		s++;
+		i++;
 	}
-	return (0);
+	return (i);
 }
 
-/*int main()
+/*int main(int argc, char** argv)
 {
-	printf("isprint: %d\nft_isprint: %d", isprint(127), ft_isprint(127));
+	if (argc == 1)	return 0;
+	printf("strlen: %lu\tft_strlen: %lu", strlen(argv[1]), ft_strlen(argv[1]));
+
 }*/
