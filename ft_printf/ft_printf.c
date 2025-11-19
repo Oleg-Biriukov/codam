@@ -28,8 +28,10 @@ static int	convert(t_list *array, va_list args)
 {
 	size_t	un_var;
 	char	c;
+	int 	counter;
 
 	c = *((char *) array->content + 1);
+	counter = 0;
 	if (c == 'd')
 		ft_putnbr_fd(va_arg(args, int), 0);
 	else if (c == 'i')
@@ -81,7 +83,7 @@ int	ft_printf(const char *format, ...)
 	return (0);
 }
 
-int main()
+/*int main()
 {
 	// int i = 10;
 
@@ -89,4 +91,4 @@ int main()
 	printf("\n=========================\n");
 	return (ft_printf("cspdiuxX%d%s%d", 10, " 11 12 13 ", 14));
 	return 0;
-}
+}*/
