@@ -44,6 +44,12 @@ static int	convert(char c, va_list args)
 	return (counter);
 }
 
+int	free_all(va_list args)
+{
+	va_end(args);
+	return (-1);
+}
+
 int	ft_printf(const char *format, ...)
 {
 	va_list	args;
@@ -59,16 +65,13 @@ int	ft_printf(const char *format, ...)
 		if (*format == '\0')
 			break;
 		check = convert(*(format + 1), args);
-		if (check < 0)
-		{
-			va_end(args);
-			counter = -1;
-		}
+		if (check < 0 )
+			return (free_all(args));
 		counter += check;
 		format += 2;
 	}
 	if (*format != '\0')
-		ft_putstr_fd((char *) format, 0);
+		counter += ft_putstr_fd((char *) format, 0);
 	va_end(args);
 	return (counter);
 }
@@ -77,14 +80,14 @@ int main()
 {
 	int i, b;
 	// char s2[20] = "hiiiii\0";
-
+	
 	i = printf("%d%%%%%%%", INT_MAX, INT_MIN);
 	printf("\n=========================\n");
 	b = ft_printf("%d%%%%%%%", INT_MAX, INT_MIN);
 	ft_printf("\n=========================\n");
 	ft_printf("%d %d", i, b);
 	ft_printf("\n=========================\n");
-	b = ft_printf("%d%%%%%%%\n", INT_MAX, INT_MIN);
-
+	b = ft_printf("%d%%%%%%\n", INT_MAX, INT_MIN);
+	printf("%d\n", b);
 	return 0;
 }
