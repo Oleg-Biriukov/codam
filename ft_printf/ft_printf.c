@@ -62,8 +62,8 @@ int	ft_printf(const char *format, ...)
 	{
 		while (*format != '%' && *format != '\0')
 			counter += ft_putchar_fd(*(format++), 0);
-		if (*format == '\0')
-			break;
+		if (*format == '\0' || *(format + 1) == '\0')
+			break ;
 		check = convert(*(format + 1), args);
 		if (check < 0 )
 			return (free_all(args));
