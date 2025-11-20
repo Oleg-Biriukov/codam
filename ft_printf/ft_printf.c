@@ -81,13 +81,13 @@ int main()
 	int i, b;
 	// char s2[20] = "hiiiii\0";
 	
-	i = printf("%d%%%%%%%", INT_MAX, INT_MIN);
+	i = printf(" NULL %s NULL ", NULL);
 	printf("\n=========================\n");
-	b = ft_printf("%d%%%%%%%", INT_MAX, INT_MIN);
+	b = ft_printf(" NULL %s NULL ", NULL);
 	ft_printf("\n=========================\n");
 	ft_printf("%d %d", i, b);
-	ft_printf("\n=========================\n");
-	b = ft_printf("%d%%%%%%\n", INT_MAX, INT_MIN);
-	printf("%d\n", b);
+	// ft_printf("\n=========================\n");
+	// b = ft_printf("%d%%%%%%\n", INT_MAX, INT_MIN);
+	// printf("%d\n", b);
 	return 0;
 }
