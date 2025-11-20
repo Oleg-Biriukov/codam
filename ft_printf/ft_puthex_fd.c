@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                         ::::::::           */
+/*   ft_puthex_fd.c                                      :+:    :+:           */
+/*                                                      +:+                   */
+/*   By: obirukov <obirukov@student.codam.nl>          +#+                    */
+/*                                                    +#+                     */
+/*   Created: 2025/11/20 18:53:38 by obirukov       #+#    #+#                */
+/*   Updated: 2025/11/20 18:53:41 by obirukov       ########   odam.nl        */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "ft_printf.h"
 
 int	ft_puthex_fd(unsigned int num, int fd, int mode)

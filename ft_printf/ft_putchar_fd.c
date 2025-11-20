@@ -3,10 +3,10 @@
 /*                                                         ::::::::           */
 /*   ft_putchar_fd.c                                     :+:    :+:           */
 /*                                                      +:+                   */
-/*   By: obirukov <marvin@42.fr>                       +#+                    */
+/*   By: obirukov <obirukov@student.codam.nl>          +#+                    */
 /*                                                    +#+                     */
-/*   Created: 2025/10/16 12:58:31 by obirukov       #+#    #+#                */
-/*   Updated: 2025/10/20 19:46:54 by obirukov       ########   odam.nl        */
+/*   Created: 2025/11/20 18:54:09 by obirukov       #+#    #+#                */
+/*   Updated: 2025/11/20 18:54:12 by obirukov       ########   odam.nl        */
 /*                                                                            */
 /* ************************************************************************** */
 

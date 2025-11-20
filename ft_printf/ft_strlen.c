@@ -16,6 +16,8 @@ size_t	ft_strlen(const char *s)
 {
 	size_t	i;
 
+	if (!s)
+		return (0);
 	i = 0;
 	while (*s != '\0')
 	{
@@ -28,6 +30,7 @@ size_t	ft_strlen(const char *s)
 /*int main(int argc, char** argv)
 {
 	if (argc == 1)	return 0;
-	printf("strlen: %lu\tft_strlen: %lu", strlen(argv[1]), ft_strlen(argv[1]));
+	printf("strlen: %lu\tft_strlen: %lu", 
+	strlen(argv[1]), ft_strlen(argv[1]));
 
 }*/

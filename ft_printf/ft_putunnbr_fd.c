@@ -12,7 +12,7 @@
 
 #include "ft_printf.h"
 
-static int	vton(size_t value, int n)
+static int	vton(unsigned int value, int n)
 {
 	int	cval;
 
@@ -25,7 +25,7 @@ static int	vton(size_t value, int n)
 	return (value);
 }
 
-static size_t	len_i(size_t n)
+static unsigned int	len_i(unsigned int n)
 {
 	size_t	len;
 
@@ -38,7 +38,7 @@ static size_t	len_i(size_t n)
 	return (len);
 }
 
-static void	convert(size_t n, size_t count, int fd)
+static void	convert(unsigned int n, unsigned int count, int fd)
 {
 	if (count-- != len_i(n))
 	{
@@ -54,7 +54,7 @@ static void	convert(size_t n, size_t count, int fd)
 	return (convert(n % vton(10, len_i(n) - 1), count, fd));
 }
 
-int	ft_putunnbr_fd(size_t n, int fd)
+int	ft_putunnbr_fd(unsigned int n, int fd)
 {
 	convert(n, len_i(n), fd);
 	return (len_i(n));
