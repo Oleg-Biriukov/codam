@@ -27,32 +27,41 @@ void	swap(t_stack *stack, char mode)
 t_stack	*push_a(t_stack *stack_a, t_stack *stack_b)
 {
 	t_stack	*push;
+	t_stack *next;
 
+	stack_a = la_start(stack_a);
+	stack_b = la_start(stack_b);
 	if (la_len(stack_b) < 1)
 		return (stack_b);
+	next = stack_b->next;
 	push = la_init(stack_b->content);
 	if (!push)
 		return (push);
 	push->next = stack_a;
 	stack_a->prev = push;
-	get_elem(stack_b, 1)->prev = NULL;
+	next->prev = NULL;
 	free(stack_b);
 	ft_putstr("pa\n");
-	return (push);
+	return (next);
 }
 
 t_stack	*push_b(t_stack *stack_a, t_stack *stack_b)
 {
 	t_stack *push;
+	t_stack	*next;
 
+	stack_a = la_start(stack_a);
+	stack_b = la_start(stack_b);
 	if (la_len(stack_a) < 1)
 		return (stack_a);
+	next = stack_a->next;
 	push = la_init(stack_a->content);
 	if (!push)
 		return (push);
 	push->next = stack_b;
-	get_elem(stack_b, 1)->prev = NULL;
-	free(stack_b);
+	stack_b->prev = push;
+	next->prev = NULL;
+	free(stack_a);
 	ft_putstr("pb\n");
-	return (push);
+	return (next);
 }
