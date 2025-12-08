@@ -24,26 +24,35 @@ void	swap(t_stack *stack, char mode)
 	(get_elem(stack, 1))->content = buf;
 }
 
-void	push(t_stack *stack_a, t_stack *stack_b, char mode)
+t_stack	*push_a(t_stack *stack_a, t_stack *stack_b)
 {
 	t_stack	*push;
 
-	if (mode == 'a')
-	{
-		if (la_len(stack_b) < 1)
-			return ;
-		push = la_init(stack_b->content);
-		if (!push)
-			return (ft_putstr("Error\n"));
-		push->next = stack_a;
-		stack_a->prev = push;
-		return (ft_putstr("pa\n"));
-	}
+	if (la_len(stack_b) < 1)
+		return (stack_b);
+	push = la_init(stack_b->content);
+	if (!push)
+		return (push);
+	push->next = stack_a;
+	stack_a->prev = push;
+	get_elem(stack_b, 1)->prev = NULL;
+	free(stack_b);
+	ft_putstr("pa\n");
+	return (push);
+}
+
+t_stack	*push_b(t_stack *stack_a, t_stack *stack_b)
+{
+	t_stack *push;
+
 	if (la_len(stack_a) < 1)
-		return ;
+		return (stack_a);
 	push = la_init(stack_a->content);
 	if (!push)
-		return (ft_putstr("Error\n"));
+		return (push);
 	push->next = stack_b;
-	return ((ft_putstr("pb\n")));
+	get_elem(stack_b, 1)->prev = NULL;
+	free(stack_b);
+	ft_putstr("pb\n");
+	return (push);
 }

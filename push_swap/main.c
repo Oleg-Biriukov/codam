@@ -59,7 +59,7 @@ int main(int argc, char **argv)
 	}
 	test(stack_a, stack_b);
 	printf("\n======================\n");
-	push(stack_a, stack_b, 'b');
+	stack_a = push_b(stack_a, stack_b);
 	test(stack_a, stack_b);
 	return (free_all(stack_a, stack_b));
 }
