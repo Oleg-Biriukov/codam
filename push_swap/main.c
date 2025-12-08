@@ -29,7 +29,7 @@ static int	is_digit(char *str)
 {
 	while (*str)
 	{
-		if (!(*str >= 48 && *str <= 57))
+		if (!(*str >= 48 && *str <= 57) && *str != 32)
 		{
 			ft_putstr("Error\n");
 			return (0);
@@ -51,17 +51,32 @@ int main(int argc, char **argv)
 {
 	t_span	*s;
 	int		i;
+	int		offset;
 
 	s = malloc(sizeof(t_span));
-	if (argc < 2 || !is_digit(argv[1]) || !s)
+	if (argc < 2 || !s)
 		return (0);
-	s->stack_a = la_append(NULL, (void *)(argv[1]));
-	i = 2;
+	i = 1;
 	while (i < argc)
 	{
-		if (!is_digit(argv[i]) || !s->stack_a)
+		if (!is_digit(argv[i]))
 			return (free_all(s));
-		s->stack_a = la_append(s->stack_a, (void *) argv[i++]);
+		offset = 0;
+		while (1)
+		{
+			if ((*argv[i] == '\0' || *argv[i] == ' ') && *(argv[i] + 1) != '\0')
+			{
+				s->stack_a = la_append(s->stack_a, (void *) argv[i] - offset);
+				offset = 0;
+				if (!s->stack_a)
+					return (free_all(s));
+			}
+			if (*argv[i] == '\0')
+				break;
+			offset++;
+			argv[i]++;
+		}
+		i++;
 	}
 	test(s->stack_a, s->stack_b);
 	printf("\n======================\n");

@@ -83,6 +83,8 @@ void	rotate(t_stack *stack, char *mode)
 
 	if (!stack)
 		return ;
+	if (la_len(stack) < 2)
+		return ;
 	stack = la_start(stack);
 	while (stack)
 	{
@@ -99,6 +101,8 @@ void	rev_rotate(t_stack *stack, char *mode)
 	void	*buf;
 
 	if (!stack)
+		return ;
+	if (la_len(stack) < 2)
 		return ;
 	stack = get_elem(stack, la_len(stack) - 1);
 	while (stack->prev)
