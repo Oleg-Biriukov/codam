@@ -14,7 +14,7 @@
 # define FT_PRINTF_H
 # include <stdarg.h>
 # include <stdint.h>
-# include <limits.h>
+# include <limits->h>
 # include <unistd.h>
 # include <stdlib.h>
 # include <stdio.h>

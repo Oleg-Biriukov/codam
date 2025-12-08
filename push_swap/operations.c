@@ -8,60 +8,105 @@ t_stack	*get_elem(t_stack *stack, int num)
 	return (stack);
 }
 
-void	swap(t_stack *stack, char mode)
+void	swap(t_stack *stack, char *mode)
 {
 	void	*buf;
 
 	if (la_len(stack) < 2)
 		return ;
-	if (mode == 'a')
-		ft_putstr("sa\n");
-	else
-		ft_putstr("sb\n");
+	ft_putstr(mode);
 	stack = la_start(stack);
 	buf = stack->content;
 	stack->content = (get_elem(stack, 1))->content;
 	(get_elem(stack, 1))->content = buf;
 }
 
-t_stack	*push_a(t_stack *stack_a, t_stack *stack_b)
-{
-	t_stack	*push;
-	t_stack *next;
-
-	stack_a = la_start(stack_a);
-	stack_b = la_start(stack_b);
-	if (la_len(stack_b) < 1)
-		return (stack_b);
-	next = stack_b->next;
-	push = la_init(stack_b->content);
-	if (!push)
-		return (push);
-	push->next = stack_a;
-	stack_a->prev = push;
-	next->prev = NULL;
-	free(stack_b);
-	ft_putstr("pa\n");
-	return (next);
-}
-
-t_stack	*push_b(t_stack *stack_a, t_stack *stack_b)
+t_span	*push_a(t_span *s, char *mode)
 {
 	t_stack *push;
 	t_stack	*next;
 
-	stack_a = la_start(stack_a);
-	stack_b = la_start(stack_b);
-	if (la_len(stack_a) < 1)
-		return (stack_a);
-	next = stack_a->next;
-	push = la_init(stack_a->content);
+	if (la_len(s->stack_b) < 1)
+		return (s);
+	s->stack_b = la_start(s->stack_b);
+	next = s->stack_b->next;
+	push = la_init(s->stack_b->content);
 	if (!push)
-		return (push);
-	push->next = stack_b;
-	stack_b->prev = push;
-	next->prev = NULL;
-	free(stack_a);
-	ft_putstr("pb\n");
-	return (next);
+		return (NULL);
+	if (s->stack_a)
+	{
+		s->stack_a = la_start(s->stack_a);
+		push->next = s->stack_a;
+		s->stack_a->prev = push;
+	}
+	else
+		s->stack_a = push;
+	if (next)
+		next->prev = NULL;
+	free(s->stack_b);
+	s->stack_b = next;
+	ft_putstr(mode);
+	return (s);
+}
+
+t_span	*push_b(t_span *s, char *mode)
+{
+	t_stack *push;
+	t_stack	*next;
+
+	if (la_len(s->stack_a) < 1)
+		return (s);
+	s->stack_a = la_start(s->stack_a);
+	next = s->stack_a->next;
+	push = la_init(s->stack_a->content);
+	if (!push)
+		return (NULL);
+	if (s->stack_b)
+	{
+		s->stack_b = la_start(s->stack_b);
+		push->next = s->stack_b;
+		s->stack_b->prev = push;
+	}
+	else
+		s->stack_b = push;
+	if (next)
+		next->prev = NULL;
+	free(s->stack_a);
+	s->stack_a = next;
+	ft_putstr(mode);
+	return (s);
+}
+
+void	rotate(t_stack *stack, char *mode)
+{
+	void	*buf;
+
+	if (!stack)
+		return ;
+	stack = la_start(stack);
+	while (stack)
+	{
+		buf = stack->content;
+		stack->content = (get_elem(stack, 1))->content;
+		(get_elem(stack, 1))->content = buf;
+		stack = stack->next;
+	}
+	ft_putstr(mode);
+}
+
+void	rev_rotate(t_stack *stack, char *mode)
+{
+	void	*buf;
+
+	if (!stack)
+		return ;
+	stack = get_elem(stack, la_len(stack) - 1);
+	while (stack->prev)
+	{
+		buf = stack->content;
+		stack->content = (stack->prev)->content;
+		(stack->prev)->content = buf;
+		stack = stack->prev;
+	}
+	ft_putstr(mode);
 }
