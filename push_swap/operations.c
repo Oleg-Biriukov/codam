@@ -33,6 +33,7 @@ t_span	*push_a(t_span *s, char *mode)
 	push = la_init(s->stack_b->content);
 	if (!push)
 		return (NULL);
+	ft_putstr(mode);
 	if (s->stack_a)
 	{
 		s->stack_a = la_start(s->stack_a);
@@ -45,7 +46,6 @@ t_span	*push_a(t_span *s, char *mode)
 		next->prev = NULL;
 	free(s->stack_b);
 	s->stack_b = next;
-	ft_putstr(mode);
 	return (s);
 }
 
@@ -61,6 +61,7 @@ t_span	*push_b(t_span *s, char *mode)
 	push = la_init(s->stack_a->content);
 	if (!push)
 		return (NULL);
+	ft_putstr(mode);
 	if (s->stack_b)
 	{
 		s->stack_b = la_start(s->stack_b);
@@ -73,7 +74,6 @@ t_span	*push_b(t_span *s, char *mode)
 		next->prev = NULL;
 	free(s->stack_a);
 	s->stack_a = next;
-	ft_putstr(mode);
 	return (s);
 }
 
@@ -83,6 +83,7 @@ void	rotate(t_stack *stack, char *mode)
 
 	if (!stack)
 		return ;
+	ft_putstr(mode);
 	if (la_len(stack) < 2)
 		return ;
 	stack = la_start(stack);
@@ -93,7 +94,6 @@ void	rotate(t_stack *stack, char *mode)
 		(get_elem(stack, 1))->content = buf;
 		stack = stack->next;
 	}
-	ft_putstr(mode);
 }
 
 void	rev_rotate(t_stack *stack, char *mode)
@@ -102,6 +102,7 @@ void	rev_rotate(t_stack *stack, char *mode)
 
 	if (!stack)
 		return ;
+	ft_putstr(mode);
 	if (la_len(stack) < 2)
 		return ;
 	stack = get_elem(stack, la_len(stack) - 1);
@@ -112,5 +113,4 @@ void	rev_rotate(t_stack *stack, char *mode)
 		(stack->prev)->content = buf;
 		stack = stack->prev;
 	}
-	ft_putstr(mode);
 }

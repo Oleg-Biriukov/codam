@@ -27,6 +27,11 @@ void	test(t_stack *stack_a, t_stack *stack_b)
 
 static int	is_digit(char *str)
 {
+	if (*str == '\0')
+	{
+		ft_putstr("Error\n");
+		return (0);
+	}
 	while (*str)
 	{
 		if (!(*str >= 48 && *str <= 57) && *str != 32)
