@@ -1,22 +1,35 @@
 #include "push_swap.h"
 
-int calc_op(t_stack *stack_b, int num)
+int calc_op(t_span *s, int num)
 {
 	int op;
 	int pos;
 
 	op = 1;
 	pos = 0;
-	stack_b = la_start(stack_b);
-	while (stack_b)
+	s->stack_b = la_start(s->stack_b);
+	while (s->stack_b)
 	{
-		if (num < ft_atoi((char *) stack_b->content))
+		if (num < ft_atoi((char *) s->stack_b->content))
 			break ;
-		stack_b = stack_b->next;
+		s->stack_b = s->stack_b->next;
 		pos++;
 	}
-	op += la_len(la_start(stack_b)) - pos;
-	return (op);
+	op += la_len(la_start(s->stack_b)) - pos;
+	if (pos > la_len(la_start(s->stack_b)) / 2)
+	{
+		pos = 0;
+		while (pos++ < op)
+			rev_rotate(s->stack_b, "rrb\n");
+		return (op);
+	}
+	else
+	{
+		op = 0;
+		while (op++ <= pos)
+			rotate(s->stack_b, "rb\n");
+		return (pos + 1);
+	}
 }
 
 int is_ascending(t_stack *stack)

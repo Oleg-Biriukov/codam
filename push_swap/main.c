@@ -76,33 +76,29 @@ static t_span	*sort(t_span *s)
 	s = push_b(s, "pb\n");
 	len = la_len(la_start(s->stack_a));
 	op = len >> 1;
-	while (is_ascending(s->stack_a) && len-- <= 3)
+	while (len-- <= 3)
 	{
 		s->stack_a = la_start(s->stack_a);
 		while (s->stack_a)
 		{
-			if (op < calc_op(s->stack_b, ft_atoi((char *) s->stack_a->content)))
+			if (op < calc_op(s, ft_atoi((char *) s->stack_a->content)))
 			{
 				pos = s->stack_a;
-				op = calc_op(s->stack_b, ft_atoi((char *) s->stack_a->content));
+				op = calc_op(s, ft_atoi((char *) s->stack_a->content));
 			}
 			s->stack_a = s->stack_a->next;
 		}
-		// if (len - op > len / 2)
-		// 	while (op--)
-		// 		rev_rotate(s->stack_b, "rrb\n");
-		// else
-		// 	while (op--)
-		// 		rotate(s->stack_b, "rrb\n");
 		op = la_len(pos);
 		if (len - op > len / 2)
 			while (len - op--)
 				rev_rotate(s->stack_a, "rra\n");
 		else
 			while (len - op--)
-				rotate(s->stack_a, "rra\n");
+				rotate(s->stack_a, "ra\n");
 		s = push_b(s, "pb\n");
 	}
+	while (is_ascending(s->stack_a))
+		rotate(s->stack_a, "ra\n");
 	return (s);
 }
 
