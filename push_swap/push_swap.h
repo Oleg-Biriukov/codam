@@ -22,11 +22,12 @@ t_stack	*get_elem(t_stack *stack, int num);
 t_stack	*la_init(void *content);
 t_span	*push_a(t_span *s, char *mode);
 t_span	*push_b(t_span *s, char *mode);
+size_t	la_len(t_stack *array);
 void 	*la_free(t_stack *array);
-int		ft_atoi(const char *nptr);
 void	ft_putstr(char *s);
 void	rev_rotate(t_stack *stack, char *mode);
 void	rotate(t_stack *stack, char *mode);
 void	swap(t_stack *stack, char *mode);
-size_t	la_len(t_stack *array);
+void	free_all(t_span *s);
+int		ft_atoi(const char *nptr);
 #endif

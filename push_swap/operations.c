@@ -32,7 +32,7 @@ t_span	*push_a(t_span *s, char *mode)
 	next = s->stack_b->next;
 	push = la_init(s->stack_b->content);
 	if (!push)
-		return (NULL);
+		free_all(s);
 	ft_putstr(mode);
 	if (s->stack_a)
 	{
@@ -60,7 +60,7 @@ t_span	*push_b(t_span *s, char *mode)
 	next = s->stack_a->next;
 	push = la_init(s->stack_a->content);
 	if (!push)
-		return (NULL);
+		free_all(s);
 	ft_putstr(mode);
 	if (s->stack_b)
 	{
