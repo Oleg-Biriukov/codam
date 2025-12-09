@@ -68,6 +68,41 @@ static t_span	*convert(char *arg, t_span *s)
 
 static t_span	*sort(t_span *s)
 {
+	int		len;
+	int 	op;
+	t_stack	*pos;
+
+	s = push_b(s, "pb\n");
+	s = push_b(s, "pb\n");
+	len = la_len(la_start(s->stack_a));
+	op = len >> 1;
+	while (is_ascending(s->stack_a) && len-- <= 3)
+	{
+		s->stack_a = la_start(s->stack_a);
+		while (s->stack_a)
+		{
+			if (op < calc_op(s->stack_b, ft_atoi((char *) s->stack_a->content)))
+			{
+				pos = s->stack_a;
+				op = calc_op(s->stack_b, ft_atoi((char *) s->stack_a->content));
+			}
+			s->stack_a = s->stack_a->next;
+		}
+		// if (len - op > len / 2)
+		// 	while (op--)
+		// 		rev_rotate(s->stack_b, "rrb\n");
+		// else
+		// 	while (op--)
+		// 		rotate(s->stack_b, "rrb\n");
+		op = la_len(pos);
+		if (len - op > len / 2)
+			while (len - op--)
+				rev_rotate(s->stack_a, "rra\n");
+		else
+			while (len - op--)
+				rotate(s->stack_a, "rra\n");
+		s = push_b(s, "pb\n");
+	}
 	return (s);
 }
 
@@ -97,6 +132,10 @@ int main(int argc, char **argv)
 		s = convert(argv[i], s);
 		i++;
 	}
+	test(s->stack_a, s->stack_b);
+	printf("\n======================\n");
+	s = sort(s);
+	test(s->stack_a, s->stack_b);
 	free_all(s);
 }
 

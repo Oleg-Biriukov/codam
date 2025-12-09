@@ -15,7 +15,7 @@ int calc_op(t_stack *stack_b, int num)
 		stack_b = stack_b->next;
 		pos++;
 	}
-	op += la_len(stack_b) - pos;
+	op += la_len(la_start(stack_b)) - pos;
 	return (op);
 }
 

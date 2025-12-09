@@ -30,4 +30,6 @@ void	rotate(t_stack *stack, char *mode);
 void	swap(t_stack *stack, char *mode);
 void	free_all(t_span *s);
 int		ft_atoi(const char *nptr);
+int		calc_op(t_stack *stack_b, int num);
+int		is_ascending(t_stack *stack);
 #endif

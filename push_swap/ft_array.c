@@ -57,7 +57,6 @@ size_t	la_len(t_stack *array)
 	len = 0;
 	if (!array)
 		return (0);
-	array = la_start(array);
 	while (array != NULL)
 	{
 		len++;
