@@ -15,8 +15,6 @@ t_stack	*la_init(void *content)
 
 t_stack	*la_start(t_stack *array)
 {
-	if (!array)
-		return (NULL);
 	if (array->prev != NULL)
 		return (la_start(array->prev));
 	return (array);
@@ -52,7 +50,7 @@ void 	*la_free(t_stack *array)
 	return (NULL);
 }
 
-int	la_len(t_stack *array)
+size_t	la_len(t_stack *array)
 {
 	size_t	len;
 

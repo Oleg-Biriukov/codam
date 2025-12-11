@@ -75,30 +75,21 @@ static t_span	*sort(t_span *s)
 	s = push_b(s, "pb\n");
 	s = push_b(s, "pb\n");
 	len = la_len(la_start(s->stack_a));
-	op = len >> 1;
+	op = len << 2;
 	while (len-- <= 3)
 	{
 		s->stack_a = la_start(s->stack_a);
 		while (s->stack_a)
 		{
-			if (op < calc_op(s, ft_atoi((char *) s->stack_a->content)))
+			if (op > calc_op(s->stack_b, ft_atoi((char *) s->stack_a->content), s->rotations))
 			{
 				pos = s->stack_a;
-				op = calc_op(s, ft_atoi((char *) s->stack_a->content));
+				op = calc_op(s->stack_b, ft_atoi((char *) s->stack_a->content), s->rotations);
 			}
 			s->stack_a = s->stack_a->next;
 		}
-		op = la_len(pos);
-		if (len - op > len / 2)
-			while (len - op--)
-				rev_rotate(s->stack_a, "rra\n");
-		else
-			while (len - op--)
-				rotate(s->stack_a, "ra\n");
 		s = push_b(s, "pb\n");
 	}
-	while (is_ascending(s->stack_a))
-		rotate(s->stack_a, "ra\n");
 	return (s);
 }
 
@@ -106,6 +97,7 @@ void	free_all(t_span *s)
 {
 	la_free(s->stack_a);
 	la_free(s->stack_b);
+	free(s->rotations);
 	free(s);
 	exit(1);
 }
@@ -114,9 +106,11 @@ int main(int argc, char **argv)
 {
 	t_span	*s;
 	int		i;
+	int		*rotations;
 
 	s = malloc(sizeof(t_span));
-	if (argc < 2 || !s)
+	s->rotations = (int *) malloc(sizeof(int) * 2);
+	if (argc < 2 || !s || !s->rotations)
 		return (0);
 	i = 1;
 	s->stack_b = NULL;
@@ -130,33 +124,13 @@ int main(int argc, char **argv)
 	}
 	test(s->stack_a, s->stack_b);
 	printf("\n======================\n");
-	s = sort(s);
+	*s->rotations = -2;
+	*(s->rotations + 1) = -3;
+	s = push_b(s, "pb\n");
+	s = push_b(s, "pb\n");
+	s = push_b(s, "pb\n");
+	do_smart_rotation(s);
 	test(s->stack_a, s->stack_b);
 	free_all(s);
 }
 
-	// test(s->stack_a, s->stack_b);
-	// printf("\n======================\n");
-	// swap(s->stack_a, "sa\n");
-	// test(s->stack_a, s->stack_b);
-	// printf("\n======================\n");
-	// s = push_b(s, "pb\n");
-	// s = push_b(s, "pb\n");
-	// s = push_b(s, "pb\n");
-	// test(s->stack_a, s->stack_b);
-	// printf("\n======================\n");
-	// rotate(s->stack_a, "ra\n");
-	// rotate(s->stack_b, "rb\n");
-	// test(s->stack_a, s->stack_b);
-	// printf("\n======================\n");
-	// rev_rotate(s->stack_a, "rra\n");
-	// rev_rotate(s->stack_b, "rrb\n");
-	// test(s->stack_a, s->stack_b);
-	// printf("\n======================\n");
-	// swap(s->stack_a, "sa\n");
-	// test(s->stack_a, s->stack_b);
-	// printf("\n======================\n");
-	// s = push_a(s, "pa\n");
-	// s = push_a(s, "pa\n");
-	// s = push_a(s, "pa\n");
-	// test(s->stack_a, s->stack_b);

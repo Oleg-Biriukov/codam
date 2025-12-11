@@ -77,6 +77,7 @@ t_span	*push_b(t_span *s, char *mode)
 	return (s);
 }
 
+
 void	rotate(t_stack *stack, char *mode)
 {
 	void	*buf;

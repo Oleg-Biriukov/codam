@@ -14,6 +14,7 @@ typedef struct	t_span
 {
 	t_stack	*stack_a;
 	t_stack	*stack_b;
+	int		*rotations;
 }				t_span;
 
 t_stack	*la_start(t_stack *array);
@@ -22,14 +23,16 @@ t_stack	*get_elem(t_stack *stack, int num);
 t_stack	*la_init(void *content);
 t_span	*push_a(t_span *s, char *mode);
 t_span	*push_b(t_span *s, char *mode);
+size_t	la_len(t_stack *array);
 void 	*la_free(t_stack *array);
 void	ft_putstr(char *s);
 void	rev_rotate(t_stack *stack, char *mode);
+void	do_smart_rotation(t_span *s);
 void	rotate(t_stack *stack, char *mode);
 void	swap(t_stack *stack, char *mode);
 void	free_all(t_span *s);
 int		ft_atoi(const char *nptr);
-int		calc_op(t_span *s, int num);
+int		calc_op(t_stack *stack_b, int num, int *rotations);
 int		is_ascending(t_stack *stack);
-int		la_len(t_stack *array);
+int		is_deascending(t_stack *stack);
 #endif
