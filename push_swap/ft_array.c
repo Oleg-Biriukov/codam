@@ -15,6 +15,8 @@ t_stack	*la_init(void *content)
 
 t_stack	*la_start(t_stack *array)
 {
+	if (!array)
+		return (NULL);
 	if (array->prev != NULL)
 		return (la_start(array->prev));
 	return (array);

@@ -1,7 +1,7 @@
 
 #include "push_swap.h"
 
-void	test(t_stack *stack_a, t_stack *stack_b)
+void	test(t_stack *stack_a, t_stack *stack_b, t_span *s)
 {
 	if (stack_a)
 		stack_a = la_start(stack_a);
@@ -11,11 +11,11 @@ void	test(t_stack *stack_a, t_stack *stack_b)
 	while((stack_a || stack_b))
 	{
 		if (stack_a != NULL)
-			printf("%d | ", ft_atoi((char *) stack_a->content));
+			printf("%ld | ", ft_atoi((char *) stack_a->content, s));
 		else
 			printf("  | ");
 		if (stack_b != NULL)
-			printf("%d\n", ft_atoi((char *) stack_b->content));
+			printf("%ld\n", ft_atoi((char *) stack_b->content, s));
 		else
 			printf("\n");	
 		if (stack_a)
@@ -34,7 +34,8 @@ static int	is_digit(char *str)
 	}
 	while (*str)
 	{
-		if (!(*str >= 48 && *str <= 57) && *str != 32)
+		if (!(*str >= 48 && *str <= 57)
+			&& *str != 32 && *str != 45)
 		{
 			ft_putstr("Error\n");
 			return (0);
@@ -53,6 +54,11 @@ static t_span	*convert(char *arg, t_span *s)
 	{
 		if ((*arg == '\0' || *arg == ' ') && *(arg + 1) != '\0')
 		{
+			while (*arg == ' ')
+			{
+				offset++;
+				arg++;
+			}
 			s->stack_a = la_append(s->stack_a, (void *) arg - offset);
 			offset = 0;
 			if (!s->stack_a)
@@ -75,19 +81,26 @@ static t_span	*sort(t_span *s)
 	s = push_b(s, "pb\n");
 	s = push_b(s, "pb\n");
 	len = la_len(la_start(s->stack_a));
-	op = len << 2;
 	while (len-- <= 3)
 	{
+		op = INT_MAX;
 		s->stack_a = la_start(s->stack_a);
-		while (s->stack_a)
+		while (s->stack_a->next)
 		{
-			if (op > calc_op(s->stack_b, ft_atoi((char *) s->stack_a->content), s->rotations))
+			if (op > calc_op(s, ft_atoi((char *) s->stack_a->content, s)))
 			{
 				pos = s->stack_a;
-				op = calc_op(s->stack_b, ft_atoi((char *) s->stack_a->content), s->rotations);
+				calc_op(s, ft_atoi((char *) s->stack_a->content, s));
 			}
 			s->stack_a = s->stack_a->next;
 		}
+		op = len - la_len(pos);
+		if (op > len / 2)
+			s->rotations[0] = la_len(pos);
+		else
+			s->rotations[0] = op;
+		do_smart_rotation(s);
+		s->stack_a = la_start(s->stack_a);
 		s = push_b(s, "pb\n");
 	}
 	return (s);
@@ -122,15 +135,10 @@ int main(int argc, char **argv)
 		s = convert(argv[i], s);
 		i++;
 	}
-	test(s->stack_a, s->stack_b);
-	printf("\n======================\n");
-	*s->rotations = -2;
-	*(s->rotations + 1) = -3;
-	s = push_b(s, "pb\n");
-	s = push_b(s, "pb\n");
-	s = push_b(s, "pb\n");
-	do_smart_rotation(s);
-	test(s->stack_a, s->stack_b);
+	s->stack_a = la_start(s->stack_a);
+	check_valid(s);
+	test(s->stack_a, s->stack_b, s);
+	
 	free_all(s);
 }
 

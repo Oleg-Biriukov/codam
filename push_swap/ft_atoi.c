@@ -1,6 +1,6 @@
 #include "push_swap.h"
 
-static int	vton(int value, int n)
+static long int	vton(int value, int n)
 {
 	int	cval;
 
@@ -29,11 +29,18 @@ static const char	*skipzero(const char *nptr)
 	return (nptr);
 }
 
-int	ft_atoi(const char *nptr)
+static int	out_limit(t_span *s)
 {
-	int	value;
-	int	i;
-	int	sign;
+	ft_putstr("Error\n");
+	free_all(s);
+	return (0);
+}
+
+long int	ft_atoi(const char *nptr, t_span *s)
+{
+	long int	value;
+	int			i;
+	int			sign;
 
 	value = 0;
 	i = 0;
@@ -47,7 +54,7 @@ int	ft_atoi(const char *nptr)
 	while (nptr[i] >= 48 && nptr[i] <= 57)
 		i++;
 	if (i < 1 || i >= 20)
-		return (0);
+		return (out_limit(s));
 	nptr += i - 1;
 	while (i - 1 > 0)
 	{

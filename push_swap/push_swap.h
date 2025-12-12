@@ -3,6 +3,7 @@
 # include <stdlib.h>
 # include <stdio.h>
 # include <unistd.h>
+# include <limits.h>
 typedef struct	t_stack
 {
 	struct t_stack	*next;
@@ -17,22 +18,24 @@ typedef struct	t_span
 	int		*rotations;
 }				t_span;
 
-t_stack	*la_start(t_stack *array);
-t_stack	*la_append(t_stack *array, void *content);
-t_stack	*get_elem(t_stack *stack, int num);
-t_stack	*la_init(void *content);
-t_span	*push_a(t_span *s, char *mode);
-t_span	*push_b(t_span *s, char *mode);
-size_t	la_len(t_stack *array);
-void 	*la_free(t_stack *array);
-void	ft_putstr(char *s);
-void	rev_rotate(t_stack *stack, char *mode);
-void	do_smart_rotation(t_span *s);
-void	rotate(t_stack *stack, char *mode);
-void	swap(t_stack *stack, char *mode);
-void	free_all(t_span *s);
-int		ft_atoi(const char *nptr);
-int		calc_op(t_stack *stack_b, int num, int *rotations);
-int		is_ascending(t_stack *stack);
-int		is_deascending(t_stack *stack);
+long int	ft_atoi(const char *nptr, t_span *s);
+t_stack		*la_start(t_stack *array);
+t_stack		*la_append(t_stack *array, void *content);
+t_stack		*get_elem(t_stack *stack, int num);
+t_stack		*la_init(void *content);
+t_span		*push_a(t_span *s, char *mode);
+t_span		*push_b(t_span *s, char *mode);
+size_t		la_len(t_stack *array);
+void 		*la_free(t_stack *array);
+void		rev_rotate(t_stack *stack, char *mode);
+void		ft_putstr(char *s);
+void		do_smart_rotation(t_span *s);
+void		rotate(t_stack *stack, char *mode);
+void		swap(t_stack *stack, char *mode);
+void		free_all(t_span *s);
+void		check_valid(t_span *s);
+int			calc_op(t_span *s, int num);
+int			is_ascending(t_stack *stack, t_span *s);
+int			is_deascending(t_stack *stack, t_span *s);
+int			ft_strlen(char *str);
 #endif

@@ -1,6 +1,36 @@
 #include "push_swap.h"
 
-static int	ft_strlen(char *str)
+void	check_valid(t_span *s)
+{
+	t_stack	*elem;
+	t_stack	*array;
+	int		n;
+
+	array = s->stack_a;
+	elem = s->stack_a;
+	while (elem)
+	{
+		n = ft_atoi((char *) elem->content, s);
+		if (n > INT_MAX || ft_atoi((char *) elem->content, s) < INT_MIN)
+		{
+			ft_putstr("Error\n");
+			free_all(s);
+		}
+		while (array)
+		{
+			if (ft_atoi((char *) array->content, s) == n && array != elem)
+			{
+				ft_putstr("Error\n");
+				free_all(s);
+			}
+			array = array->next;
+		}
+		array = s->stack_a;
+		elem = elem->next;
+	}
+}
+
+int	ft_strlen(char *str)
 {
 	int	len;
 

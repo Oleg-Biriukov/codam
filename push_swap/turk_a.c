@@ -2,98 +2,126 @@
 
 void	do_smart_rotation(t_span *s)
 {
-	int	*rstack_a;
-	int	*rstack_b;
-
-	rstack_a = s->rotations;
-	rstack_b = s->rotations + 1;
-	if (*rstack_a > 0 && *rstack_b > 0)
-		while ((*rstack_a-- != 0 || *rstack_b-- != 0))
+	if (s->rotations[0] > 0 && s->rotations[1] > 0)
+		while (s->rotations[0] != 0 && s->rotations[1] != 0)
 		{
+			s->rotations[0]--;
+			s->rotations[1]--;
 			rotate(s->stack_a, "");
 			rotate(s->stack_b, "rr\n");
 		}
-	else if (*rstack_a < 0 && *rstack_b < 0)
-		while ((*rstack_a++ != 0 || *rstack_b++ != 0))
+	else if (s->rotations[0] < 0 && s->rotations[1] < 0)
+		while (s->rotations[0] != 0 && s->rotations[1] != 0)
 		{
+			s->rotations[0]++;
+			s->rotations[1]++;
 			rotate(s->stack_a, "");
 			rotate(s->stack_b, "rrr\n");
 		}
-	while ((*rstack_a != 0 && *rstack_b != 0))
+	while (s->rotations[0] != 0)
 	{
-		if (*rstack_a > 0)
+		if (s->rotations[0] > 0)
 		{
 			rotate(s->stack_a, "ra\n");
-			*rstack_a -= 1;
+			s->rotations[0] -= 1;
 		}
-		else
+		else if (s->rotations[0] < 0)
 		{
 			rev_rotate(s->stack_a, "rra\n");
-			*rstack_a += 1;
+			s->rotations[0] += 1;
 		}
-		if (*rstack_b > 0)
+	}
+	while (s->rotations[1] != 0)
+	{
+		if (s->rotations[1] > 0)
 		{
-			*rstack_b -= 1;
+			s->rotations[1] -= 1;
 			rotate(s->stack_b, "rb\n");
 		}
-		else
+		else if (s->rotations[1] < 0)
 		{
-			*rstack_b += 1;
+			s->rotations[1] += 1;
 			rev_rotate(s->stack_b, "rrb\n");
 		}
 	}
 }
 
-int calc_op(t_stack *stack_b, int num, int *rotations)
+int calc_op(t_span *s, int num)
 {
 	int	pos;
 
-	stack_b = la_start(stack_b);
-	while (stack_b)
+	s->stack_b = la_start(s->stack_b);
+	while (s->stack_b)
 	{
-		if (num > ft_atoi((char *) stack_b->content))
+		if (num > ft_atoi((char *) s->stack_b->content, s))
 			break ;
-		stack_b = stack_b->next;
+		s->stack_b = s->stack_b->next;
 	}
-	pos = la_len(la_start(stack_b)) - la_len(stack_b);
-	if (pos > la_len(la_start(stack_b)) / 2)
+	pos = la_len(la_start(s->stack_b)) - la_len(s->stack_b);
+	if (pos > la_len(la_start(s->stack_b)) / 2)
 	{
-		*(rotations + 1) = la_len(stack_b) * -1;
-		return (la_len(stack_b));
+		*(s->rotations + 1) = la_len(s->stack_b) * -1;
+		return (la_len(s->stack_b));
 	}
 	else
 	{
-		*(rotations + 1) = pos;
+		*(s->rotations + 1) = pos;
 		return (pos);
 	}
 }
 
-int is_ascending(t_stack *stack)
+int is_ascending(t_stack *stack, t_span *s)
 {
 	int num;
 
 	stack = la_start(stack);
 	while (stack->next->next)
 	{
-		num = ft_atoi((char *) stack->content);
-		if (num > ft_atoi((char *) (stack->next)->content))
+		num = ft_atoi((char *) stack->content, s);
+		if (num > ft_atoi((char *) (stack->next)->content, s))
 			return (0);
 		stack = stack->next;
 	}
 	return (1);
 }
 
-int is_deascending(t_stack *stack)
+int is_deascending(t_stack *stack, t_span *s)
 {
 	int num;
 
 	stack = la_start(stack);
 	while (stack->next->next)
 	{
-		num = ft_atoi((char *) stack->content);
-		if (num < ft_atoi((char *) (stack->next)->content))
+		num = ft_atoi((char *) stack->content, s);
+		if (num < ft_atoi((char *) (stack->next)->content, s))
 			return (0);
 		stack = stack->next;
 	}
 	return (1);
+}
+
+void	sort_three(t_span *s)
+{
+	int		biggest;
+	t_stack	*stack;
+
+	stack = s->stack_a;
+	biggest = ft_atoi((char *) stack->content, s);
+	if (is_deascending(s->stack_a, s))
+	{
+		rotate(s->stack_a, "ra\n");
+		rotate(s->stack_a, "ra\n");
+		return ;
+	}
+	while (stack->next)
+	{
+		if ( biggest < ft_atoi((char *) stack->content, s))
+			biggest = ft_atoi((char *) s->stack_a->content, s);
+		stack = stack->next;
+	}
+	stack = s->stack_a;
+	if (ft_atoi((char *) stack->next->content, s) == biggest)
+	{
+		if (ft_atoi((char *) stack->content, s) == ft_atoi((char *) stack->next->next->content, s))
+	}
 }
