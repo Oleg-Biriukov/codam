@@ -138,7 +138,9 @@ int main(int argc, char **argv)
 	s->stack_a = la_start(s->stack_a);
 	check_valid(s);
 	test(s->stack_a, s->stack_b, s);
-	
+	printf("=================================\n");
+	sort_three(s);
+	test(s->stack_a, s->stack_b, s);
 	free_all(s);
 }
 

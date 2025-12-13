@@ -75,7 +75,7 @@ int is_ascending(t_stack *stack, t_span *s)
 	int num;
 
 	stack = la_start(stack);
-	while (stack->next->next)
+	while (stack->next)
 	{
 		num = ft_atoi((char *) stack->content, s);
 		if (num > ft_atoi((char *) (stack->next)->content, s))
@@ -90,7 +90,7 @@ int is_deascending(t_stack *stack, t_span *s)
 	int num;
 
 	stack = la_start(stack);
-	while (stack->next->next)
+	while (stack->next)
 	{
 		num = ft_atoi((char *) stack->content, s);
 		if (num < ft_atoi((char *) (stack->next)->content, s))
@@ -109,19 +109,23 @@ void	sort_three(t_span *s)
 	biggest = ft_atoi((char *) stack->content, s);
 	if (is_deascending(s->stack_a, s))
 	{
-		rotate(s->stack_a, "ra\n");
-		rotate(s->stack_a, "ra\n");
-		return ;
+		swap(s->stack_a, "sa\n");
+		return (rev_rotate(s->stack_a, "rra\n"));
 	}
 	while (stack->next)
 	{
 		if ( biggest < ft_atoi((char *) stack->content, s))
-			biggest = ft_atoi((char *) s->stack_a->content, s);
+			biggest = ft_atoi((char *) stack->content, s);
 		stack = stack->next;
 	}
 	stack = s->stack_a;
 	if (ft_atoi((char *) stack->next->content, s) == biggest)
-	{
-		if (ft_atoi((char *) stack->content, s) == ft_atoi((char *) stack->next->next->content, s))
-	}
+		if (ft_atoi((char *) stack->content, s) < ft_atoi((char *) stack->next->next->content, s))
+		{
+			swap(s->stack_a, "sa\n");
+			return (rotate(s->stack_a, "ra\n"));
+		}
+	
+	if (!is_ascending(s->stack_a, s))
+		rotate(s->stack_a, "ra\n");
 }

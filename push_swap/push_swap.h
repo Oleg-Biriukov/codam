@@ -33,6 +33,7 @@ void		do_smart_rotation(t_span *s);
 void		rotate(t_stack *stack, char *mode);
 void		swap(t_stack *stack, char *mode);
 void		free_all(t_span *s);
+void		sort_three(t_span *s);
 void		check_valid(t_span *s);
 int			calc_op(t_span *s, int num);
 int			is_ascending(t_stack *stack, t_span *s);
