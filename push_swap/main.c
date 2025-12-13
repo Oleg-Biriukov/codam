@@ -1,27 +1,32 @@
 
 #include "push_swap.h"
 
-void	test(t_stack *stack_a, t_stack *stack_b, t_span *s)
+void	test(t_span *s)
 {
-	if (stack_a)
-		stack_a = la_start(stack_a);
-	if (stack_b)
-		stack_b = la_start(stack_b);
+	t_stack	*a;
+	t_stack	*b;
+
+	a = s->stack_a;
+	b = s->stack_b;
+	if (a)
+		a = la_start(a);
+	if (b)
+		b = la_start(b);
 	printf("a | b\n");
-	while((stack_a || stack_b))
+	while((a || b))
 	{
-		if (stack_a != NULL)
-			printf("%ld | ", ft_atoi((char *) stack_a->content, s));
+		if (a != NULL)
+			printf("%ld | ", ft_atoi((char *) a->content, s));
 		else
 			printf("  | ");
-		if (stack_b != NULL)
-			printf("%ld\n", ft_atoi((char *) stack_b->content, s));
+		if (b != NULL)
+			printf("%ld\n", ft_atoi((char *) b->content, s));
 		else
 			printf("\n");	
-		if (stack_a)
-			stack_a = stack_a->next;
-		if (stack_b)
-			stack_b = stack_b->next;
+		if (a)
+			a = a->next;
+		if (b)
+			b = b->next;
 	}
 }
 
@@ -77,32 +82,37 @@ static t_span	*sort(t_span *s)
 	int		len;
 	int 	op;
 	t_stack	*pos;
+	t_stack	*cur;
 
 	s = push_b(s, "pb\n");
 	s = push_b(s, "pb\n");
-	len = la_len(la_start(s->stack_a));
-	while (len-- <= 3)
+	if (!is_deascending(s->stack_b, s))
+		rotate(s->stack_b, "ra\n");
+	cur = s->stack_a;
+	len = la_len(la_start(cur));
+	while (la_len(la_start(cur)) != 3)
 	{
 		op = INT_MAX;
-		s->stack_a = la_start(s->stack_a);
-		while (s->stack_a->next)
+		while (cur)
 		{
-			if (op > calc_op(s, ft_atoi((char *) s->stack_a->content, s)))
+			if (op > calc_op(s, ft_atoi((char *) cur->content, s)))
 			{
-				pos = s->stack_a;
-				calc_op(s, ft_atoi((char *) s->stack_a->content, s));
+				pos = cur;
+				op = calc_op(s, ft_atoi((char *) cur->content, s));
 			}
-			s->stack_a = s->stack_a->next;
+			cur = cur->next;
 		}
-		op = len - la_len(pos);
+		op = la_len(la_start(cur)) - (la_len(pos) - 1);
 		if (op > len / 2)
-			s->rotations[0] = la_len(pos);
+			s->rotations[0] += la_len(pos) - 1;
 		else
-			s->rotations[0] = op;
+			s->rotations[0] -= op;
 		do_smart_rotation(s);
-		s->stack_a = la_start(s->stack_a);
 		s = push_b(s, "pb\n");
+		cur = s->stack_a;
 	}
+	sort_three(s);
+	do_smart_rotation(s);
 	return (s);
 }
 
@@ -123,6 +133,8 @@ int main(int argc, char **argv)
 
 	s = malloc(sizeof(t_span));
 	s->rotations = (int *) malloc(sizeof(int) * 2);
+	s->rotations[0] = 0;
+	s->rotations[1] = 0;
 	if (argc < 2 || !s || !s->rotations)
 		return (0);
 	i = 1;
@@ -137,10 +149,10 @@ int main(int argc, char **argv)
 	}
 	s->stack_a = la_start(s->stack_a);
 	check_valid(s);
-	test(s->stack_a, s->stack_b, s);
+	test(s);
+	s = sort(s);
 	printf("=================================\n");
-	sort_three(s);
-	test(s->stack_a, s->stack_b, s);
+	test(s);
 	free_all(s);
 }
 

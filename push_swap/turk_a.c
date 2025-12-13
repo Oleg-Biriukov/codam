@@ -1,5 +1,27 @@
 #include "push_swap.h"
 
+int	is_biggest(t_span *s, t_stack *stack, int num)
+{
+	while (stack)
+	{
+		if (num < ft_atoi((char *) stack->content, s))
+			return (0);
+		stack = stack->next;
+	}
+	return (1);
+}
+
+int	is_smallest(t_span *s, t_stack *stack, int num)
+{
+	while (stack)
+	{
+		if (num > ft_atoi((char *) stack->content, s))
+			return (0);
+		stack = stack->next;
+	}
+	return (1);
+}
+
 void	do_smart_rotation(t_span *s)
 {
 	if (s->rotations[0] > 0 && s->rotations[1] > 0)
@@ -48,24 +70,29 @@ void	do_smart_rotation(t_span *s)
 
 int calc_op(t_span *s, int num)
 {
-	int	pos;
+	int		pos;
+	t_stack	*stack;
 
-	s->stack_b = la_start(s->stack_b);
-	while (s->stack_b)
+	stack = la_start(s->stack_b);
+	if (is_biggest(s, stack, num) && is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
+		return (0);
+	if (is_smallest(s, stack, num) && is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
+		return (s->rotations[1] = 1);
+	while (stack->next)
 	{
-		if (num > ft_atoi((char *) s->stack_b->content, s))
+		if (num < ft_atoi((char *) stack->content, s) && num > ft_atoi((char *) stack->next->content, s))
 			break ;
-		s->stack_b = s->stack_b->next;
+		stack = stack->next;
 	}
-	pos = la_len(la_start(s->stack_b)) - la_len(s->stack_b);
-	if (pos > la_len(la_start(s->stack_b)) / 2)
+	pos = la_len(la_start(stack)) - (la_len(stack) - 1);
+	if (pos > la_len(la_start(stack)) / 2)
 	{
-		*(s->rotations + 1) = la_len(s->stack_b) * -1;
-		return (la_len(s->stack_b));
+		s->rotations[1] = (la_len(stack) - 1) * -1;
+		return (la_len(stack));
 	}
 	else
 	{
-		*(s->rotations + 1) = pos;
+		s->rotations[1] = pos;
 		return (pos);
 	}
 }
@@ -103,29 +130,44 @@ int is_deascending(t_stack *stack, t_span *s)
 void	sort_three(t_span *s)
 {
 	int		biggest;
+	int		smallest;
+	int		cur;
 	t_stack	*stack;
 
 	stack = s->stack_a;
-	biggest = ft_atoi((char *) stack->content, s);
 	if (is_deascending(s->stack_a, s))
 	{
 		swap(s->stack_a, "sa\n");
-		return (rev_rotate(s->stack_a, "rra\n"));
+		s->rotations[0] += -1;
+		return ;
 	}
-	while (stack->next)
+	if (is_ascending(s->stack_a, s))
+		return ;
+	while (stack)
 	{
-		if ( biggest < ft_atoi((char *) stack->content, s))
+		cur = ft_atoi((char *) stack->content, s);
+		if (is_biggest(s, s->stack_a, cur))
 			biggest = ft_atoi((char *) stack->content, s);
+		if (is_smallest(s, s->stack_a, cur))
+			smallest = ft_atoi((char *) stack->content, s);
 		stack = stack->next;
 	}
 	stack = s->stack_a;
-	if (ft_atoi((char *) stack->next->content, s) == biggest)
-		if (ft_atoi((char *) stack->content, s) < ft_atoi((char *) stack->next->next->content, s))
-		{
-			swap(s->stack_a, "sa\n");
-			return (rotate(s->stack_a, "ra\n"));
-		}
-	
+	if (ft_atoi((char *) stack->next->content, s) == biggest
+		&& ft_atoi((char *) stack->next->next->content, s) != smallest)
+	{
+		s->rotations[0] += -1;
+		return (swap(s->stack_a, "sa\n"));
+	}
+	if (ft_atoi((char *) stack->content, s) != smallest
+		&& ft_atoi((char *) stack->next->next->content, s) == biggest)
+		return (swap(s->stack_a, "sa\n"));
 	if (!is_ascending(s->stack_a, s))
-		rotate(s->stack_a, "ra\n");
+		if (ft_atoi((char *) stack->content, s) == biggest)
+		{
+			s->rotations[0] += 1;
+			return ;
+		}
+	s->rotations[0] += -1;
+	return ;
 }
