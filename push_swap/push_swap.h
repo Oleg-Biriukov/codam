@@ -9,6 +9,7 @@ typedef struct	t_stack
 	struct t_stack	*next;
 	struct t_stack	*prev;
 	void			*content;
+	int				pos;
 }				t_stack;
 
 typedef struct	t_span
@@ -21,7 +22,6 @@ typedef struct	t_span
 long int	ft_atoi(const char *nptr, t_span *s);
 t_stack		*la_start(t_stack *array);
 t_stack		*la_append(t_stack *array, void *content);
-t_stack		*get_elem(t_stack *stack, int num);
 t_stack		*la_init(void *content);
 t_span		*push_a(t_span *s, char *mode);
 t_span		*push_b(t_span *s, char *mode);

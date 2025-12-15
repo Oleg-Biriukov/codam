@@ -79,35 +79,37 @@ static t_span	*convert(char *arg, t_span *s)
 
 static t_span	*sort(t_span *s)
 {
-	int		len;
+	int		calc;
 	int 	op;
 	t_stack	*pos;
 	t_stack	*cur;
 
 	s = push_b(s, "pb\n");
 	s = push_b(s, "pb\n");
-	if (!is_deascending(s->stack_b, s))
-		rotate(s->stack_b, "ra\n");
 	cur = s->stack_a;
-	len = la_len(la_start(cur));
 	while (la_len(la_start(cur)) != 3)
 	{
 		op = INT_MAX;
 		while (cur)
 		{
-			if (op > calc_op(s, ft_atoi((char *) cur->content, s)))
+			calc = calc_op(s, ft_atoi((char *) cur->content, s));
+			if (calc < 0)
+				calc *= -1;
+			if (op > calc)
 			{
-				pos = cur;
 				op = calc_op(s, ft_atoi((char *) cur->content, s));
+				pos = cur;
 				s->rotations[1] = op;
+				calc = la_len(la_start(cur)) - (la_len(pos));
+				if (op > la_len(la_start(cur)) / 2)
+					s->rotations[0] = la_len(pos);
+				else
+					s->rotations[0] = calc;
 			}
+			
 			cur = cur->next;
 		}
-		op = la_len(la_start(s->stack_a)) - (la_len(pos) - 1);
-		if (op > len-- / 2)
-			s->rotations[0] += la_len(pos) - 1;
-		else
-			s->rotations[0] -= op;
+		
 		do_smart_rotation(s);
 		s = push_b(s, "pb\n");
 		cur = s->stack_a;
@@ -136,8 +138,8 @@ int main(int argc, char **argv)
 
 	s = malloc(sizeof(t_span));
 	s->rotations = (int *) malloc(sizeof(int) * 2);
-	s->rotations[0] = 0;
-	s->rotations[1] = 0;
+	s->rotations[0] = INT_MAX;
+	s->rotations[1] = INT_MAX;
 	if (argc < 2 || !s || !s->rotations)
 		return (0);
 	i = 1;
@@ -152,10 +154,12 @@ int main(int argc, char **argv)
 	}
 	s->stack_a = la_start(s->stack_a);
 	check_valid(s);
-	test(s);
+	// test(s);
 	s = sort(s);
-	printf("=================================\n");
-	test(s);
+	// printf("=================================\n");
+	while (!is_deascending(s->stack_b, s))
+		rotate(s->stack_b, "");
+	// test(s);
 	free_all(s);
 }
 

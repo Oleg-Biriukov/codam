@@ -66,6 +66,8 @@ void	do_smart_rotation(t_span *s)
 			rev_rotate(s->stack_b, "rrb\n");
 		}
 	}
+	s->rotations[0] = 0;
+	s->rotations[1] = 0;
 }
 
 int calc_op(t_span *s, int num)
@@ -74,10 +76,30 @@ int calc_op(t_span *s, int num)
 	t_stack	*stack;
 
 	stack = la_start(s->stack_b);
-	if (is_biggest(s, stack, num) && is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
-		return (0);
-	if (is_smallest(s, stack, num) && is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
-		return (1);
+	if (is_biggest(s, stack, num)) // error
+	{
+		if (is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
+			return (0);
+		while (!is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
+			stack = stack->next;
+		pos = la_len(la_start(stack)) - (la_len(stack));
+		if (pos > la_len(stack) / 2)
+			return ((la_len(stack)) * -1);
+		else
+			return (pos);
+	}
+	if (is_smallest(s, stack, num))
+	{
+		if (is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
+			return (0);
+		while (!is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
+			stack = stack->next;
+		pos = la_len(la_start(stack)) - (la_len(stack));
+		if (pos > la_len(stack) / 2)
+			return ((la_len(stack)) * -1);
+		else
+			return (pos);
+	}
 	while (stack->next)
 	{
 		if (num < ft_atoi((char *) stack->content, s) && num > ft_atoi((char *) stack->next->content, s))
@@ -85,14 +107,11 @@ int calc_op(t_span *s, int num)
 		stack = stack->next;
 	}
 	pos = la_len(la_start(stack)) - (la_len(stack) - 1);
-	if (pos > la_len(la_start(stack)) / 2)
-	{
-		return (la_len(stack));
-	}
-	else
-	{
-		return (pos);
-	}
+	if (pos == 0)
+		return (1);
+	else if (pos > la_len(la_start(stack)) / 2)
+		return ((la_len(stack) - 1) * -1);
+	return (pos);
 }
 
 int is_ascending(t_stack *stack, t_span *s)

@@ -1,6 +1,6 @@
 #include "push_swap.h"
 
-t_stack	*get_elem(t_stack *stack, int num)
+static t_stack	*get_elem(t_stack *stack, int num)
 {
 	stack = la_start(stack);
 	while (num-- && stack)
@@ -88,11 +88,11 @@ void	rotate(t_stack *stack, char *mode)
 	if (la_len(la_start(stack)) < 2)
 		return ;
 	stack = la_start(stack);
-	while (stack)
+	while (stack->next)
 	{
 		buf = stack->content;
-		stack->content = (get_elem(stack, 1))->content;
-		(get_elem(stack, 1))->content = buf;
+		stack->content = stack->next->content;
+		stack->next->content = buf;
 		stack = stack->next;
 	}
 }
@@ -110,8 +110,8 @@ void	rev_rotate(t_stack *stack, char *mode)
 	while (stack->prev)
 	{
 		buf = stack->content;
-		stack->content = (stack->prev)->content;
-		(stack->prev)->content = buf;
+		stack->content = stack->prev->content;
+		stack->prev->content = buf;
 		stack = stack->prev;
 	}
 }
