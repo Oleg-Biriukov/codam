@@ -77,7 +77,7 @@ int calc_op(t_span *s, int num)
 	if (is_biggest(s, stack, num) && is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
 		return (0);
 	if (is_smallest(s, stack, num) && is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
-		return (s->rotations[1] = 1);
+		return (1);
 	while (stack->next)
 	{
 		if (num < ft_atoi((char *) stack->content, s) && num > ft_atoi((char *) stack->next->content, s))
@@ -87,12 +87,10 @@ int calc_op(t_span *s, int num)
 	pos = la_len(la_start(stack)) - (la_len(stack) - 1);
 	if (pos > la_len(la_start(stack)) / 2)
 	{
-		s->rotations[1] = (la_len(stack) - 1) * -1;
 		return (la_len(stack));
 	}
 	else
 	{
-		s->rotations[1] = pos;
 		return (pos);
 	}
 }

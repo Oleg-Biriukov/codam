@@ -99,11 +99,12 @@ static t_span	*sort(t_span *s)
 			{
 				pos = cur;
 				op = calc_op(s, ft_atoi((char *) cur->content, s));
+				s->rotations[1] = op;
 			}
 			cur = cur->next;
 		}
-		op = la_len(la_start(cur)) - (la_len(pos) - 1);
-		if (op > len / 2)
+		op = la_len(la_start(s->stack_a)) - (la_len(pos) - 1);
+		if (op > len-- / 2)
 			s->rotations[0] += la_len(pos) - 1;
 		else
 			s->rotations[0] -= op;
@@ -111,8 +112,10 @@ static t_span	*sort(t_span *s)
 		s = push_b(s, "pb\n");
 		cur = s->stack_a;
 	}
-	sort_three(s);
-	do_smart_rotation(s);
+	// sort_three(s);
+	// do_smart_rotation(s);
+	// sort_three(s);
+	// do_smart_rotation(s);
 	return (s);
 }
 
