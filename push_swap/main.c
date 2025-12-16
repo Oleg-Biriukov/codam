@@ -77,34 +77,64 @@ static t_span	*convert(char *arg, t_span *s)
 	return (s);
 }
 
+int	calculation(t_stack *cur, t_stack *pos, t_span *s)
+{
+	int	calc;
+
+	calc = la_len(la_start(cur)) - (la_len(pos));
+	if (calc > la_len(la_start(cur)) / 2)
+		return (la_len(pos) * -1);
+	return (calc);
+}
+
+static int	smart_sum(t_span *s, t_stack *cur)
+{
+	int	op;
+	int	calc;
+
+	calc = calc_op(s, ft_atoi((char *) cur->content, s));
+	op = calculation(cur, cur, s);
+	if (calc < 0 && op < 0)
+	{
+		calc = calc * -1 - op * -1;
+		if (calc < 0)
+			return (calc * -1);
+		return (calc);
+	}
+	if (calc > 0 && op > 0)
+	{
+		calc = calc - op;
+		if (calc < 0)
+			return (calc * -1);
+		return (calc);
+	}
+	if (calc < 0 && op >= 0)
+		return (calc * -1 + op);
+	if (op < 0 && calc >= 0)
+		return (calc + op * -1);
+	return (0);
+}
+
 static t_span	*sort(t_span *s)
 {
-	int		calc;
-	int 	op;
-	t_stack	*pos;
-	t_stack	*cur;
+	t_stack			*pos;
+	t_stack			*cur;
+	unsigned int	sum;
 
 	s = push_b(s, "pb\n");
 	s = push_b(s, "pb\n");
 	cur = s->stack_a;
 	while (la_len(la_start(cur)) != 3)
 	{
-		op = INT_MAX;
+		sum = UINT_MAX;
 		while (cur)
 		{
-			calc = calc_op(s, ft_atoi((char *) cur->content, s));
-			if (calc < 0)
-				calc *= -1;
-			if (op > calc)
+			if (sum > smart_sum(s, cur))
 			{
-				op = calc_op(s, ft_atoi((char *) cur->content, s));
+				sum = smart_sum(s, cur);
 				pos = cur;
-				s->rotations[1] = op;
-				calc = la_len(la_start(cur)) - (la_len(pos));
-				if (op > la_len(la_start(cur)) / 2)
-					s->rotations[0] = la_len(pos);
-				else
-					s->rotations[0] = calc;
+				s->rotations[1] = calc_op(s, ft_atoi((char *) cur->content, s));
+				s->rotations[0] = calculation(cur, pos, s);
 			}
 			
 			cur = cur->next;
@@ -114,8 +144,6 @@ static t_span	*sort(t_span *s)
 		s = push_b(s, "pb\n");
 		cur = s->stack_a;
 	}
-	// sort_three(s);
-	// do_smart_rotation(s);
 	// sort_three(s);
 	// do_smart_rotation(s);
 	return (s);
@@ -157,9 +185,9 @@ int main(int argc, char **argv)
 	// test(s);
 	s = sort(s);
 	// printf("=================================\n");
-	while (!is_deascending(s->stack_b, s))
-		rotate(s->stack_b, "");
-	// test(s);
+	// while (!is_deascending(s->stack_b, s))
+	// 	rotate(s->stack_b, "");
+	test(s);
 	free_all(s);
 }
 

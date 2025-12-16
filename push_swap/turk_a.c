@@ -90,7 +90,7 @@ int calc_op(t_span *s, int num)
 	}
 	if (is_smallest(s, stack, num))
 	{
-		if (is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
+		if (is_biggest(s, stack, ft_atoi((char *) stack->content, s)) || is_smallest(s, stack, ft_atoi((char *) stack->content, s)))
 			return (0);
 		while (!is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
 			stack = stack->next;
