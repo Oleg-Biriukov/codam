@@ -12,15 +12,15 @@ void	test(t_span *s)
 		a = la_start(a);
 	if (b)
 		b = la_start(b);
-	printf("a | b\n");
+	printf("%-3sa | b\n", " ");
 	while((a || b))
 	{
 		if (a != NULL)
-			printf("%ld | ", ft_atoi((char *) a->content, s));
+			printf("%-5ld| ", ft_atoi((char *) a->content, s));
 		else
-			printf("  | ");
+			printf("%5s| ", " ");
 		if (b != NULL)
-			printf("%ld\n", ft_atoi((char *) b->content, s));
+			printf("%5ld\n", ft_atoi((char *) b->content, s));
 		else
 			printf("\n");	
 		if (a)
@@ -94,23 +94,21 @@ static int	smart_sum(t_span *s, t_stack *cur)
 
 	calc = calc_op(s, ft_atoi((char *) cur->content, s));
 	op = calculation(cur, cur, s);
-	if (calc < 0 && op < 0)
+	if (calc <= 0 && op <= 0)
 	{
-		calc = calc * -1 - op * -1;
-		if (calc < 0)
+		if (calc * -1 >= op * -1)
 			return (calc * -1);
-		return (calc);
+		return (op * -1);
 	}
-	if (calc > 0 && op > 0)
+	if (calc >= 0 && op >= 0)
 	{
-		calc = calc - op;
-		if (calc < 0)
-			return (calc * -1);
-		return (calc);
+		if (calc >= op)
+			return (calc);
+		return (op);
 	}
-	if (calc < 0 && op >= 0)
+	if (calc <= 0 && op >= 0)
 		return (calc * -1 + op);
-	if (op < 0 && calc >= 0)
+	if (op <= 0 && calc >= 0)
 		return (calc + op * -1);
 	return (0);
 }
@@ -140,7 +138,7 @@ static t_span	*sort(t_span *s)
 			cur = cur->next;
 		}
 		
-		do_smart_rotat	ion(s);
+		do_smart_rotation(s);
 		s = push_b(s, "pb\n");
 		cur = s->stack_a;
 	}
@@ -183,11 +181,10 @@ int main(int argc, char **argv)
 	s->stack_a = la_start(s->stack_a);
 	check_valid(s);
 	// test(s);
-	s = sort(s);
 	// printf("=================================\n");
+	s = sort(s);
 	// while (!is_deascending(s->stack_b, s))
 	// 	rotate(s->stack_b, "");
-	// test(s);
+	test(s);
 	free_all(s);
 }
-

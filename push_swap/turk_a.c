@@ -37,8 +37,8 @@ void	do_smart_rotation(t_span *s)
 		{
 			s->rotations[0]++;
 			s->rotations[1]++;
-			rotate(s->stack_a, "");
-			rotate(s->stack_b, "rrr\n");
+			rev_rotate(s->stack_a, "");
+			rev_rotate(s->stack_b, "rrr\n");
 		}
 	while (s->rotations[0] != 0)
 	{
