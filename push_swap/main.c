@@ -140,7 +140,7 @@ static t_span	*sort(t_span *s)
 			cur = cur->next;
 		}
 		
-		do_smart_rotation(s);
+		do_smart_rotat	ion(s);
 		s = push_b(s, "pb\n");
 		cur = s->stack_a;
 	}
@@ -187,7 +187,7 @@ int main(int argc, char **argv)
 	// printf("=================================\n");
 	// while (!is_deascending(s->stack_b, s))
 	// 	rotate(s->stack_b, "");
-	test(s);
+	// test(s);
 	free_all(s);
 }
 
