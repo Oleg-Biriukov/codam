@@ -87,12 +87,15 @@ int	calculation(t_stack *cur, t_stack *pos, t_span *s)
 	return (calc);
 }
 
-static int	smart_sum(t_span *s, t_stack *cur)
+static int	smart_sum(t_span *s, t_stack *cur, t_calc f_calc)
 {
 	int	op;
 	int	calc;
 
-	calc = calc_op(s, s->stack_b, ft_atoi((char *) cur->content, s));
+	if (la_start(cur) == la_start(s->stack_a))
+		calc = f_calc(s, s->stack_b, ft_atoi((char *) cur->content, s));
+	else
+		calc = f_calc(s, s->stack_a, ft_atoi((char *) cur->content, s));
 	op = calculation(cur, cur, s);
 	if (calc <= 0 && op <= 0)
 	{
@@ -113,37 +116,26 @@ static int	smart_sum(t_span *s, t_stack *cur)
 	return (0);
 }
 
-static t_span	*sort(t_span *s)
+static t_span	*sort(t_span *s, t_stack *cur, t_calc f_calc)
 {
 	t_stack			*pos;
-	t_stack			*cur;
 	unsigned int	sum;
 
-	s = push_b(s, "pb\n");
-	s = push_b(s, "pb\n");
-	cur = s->stack_a;
-	while (la_len(la_start(cur)) != 3)
+	sum = UINT_MAX;
+	while (cur)
 	{
-		sum = UINT_MAX;
-		while (cur)
+		if (sum > smart_sum(s, cur, f_calc))
 		{
-			if (sum > smart_sum(s, cur))
-			{
-				sum = smart_sum(s, cur);
-				pos = cur;
-				s->rotations[1] = calc_op(s, s->stack_b, ft_atoi((char *) cur->content, s));
-				s->rotations[0] = calculation(cur, pos, s);
-			}
-			
-			cur = cur->next;
-		}
-		
-		do_smart_rotation(s);
-		s = push_b(s, "pb\n");
-		cur = s->stack_a;
+			sum = smart_sum(s, cur, f_calc);
+			pos = cur;
+			if (la_start(cur) == la_start(s->stack_a))
+				s->rotations[1] = f_calc(s, s->stack_b, ft_atoi((char *) cur->content, s));
+			else
+				s->rotations[1] = f_calc(s, s->stack_a, ft_atoi((char *) cur->content, s));
+			s->rotations[0] = calculation(cur, pos, s);
+		}	
+		cur = cur->next;
 	}
-	sort_three(s);
-	do_smart_rotation(s);
 	return (s);
 }
 
@@ -182,9 +174,18 @@ int main(int argc, char **argv)
 	check_valid(s);
 	// test(s);
 	// printf("=================================\n");
-	s = sort(s);
+	s = push_b(s, "pb\n");
+	s = push_b(s, "pb\n");
+	while (la_len(s->stack_a) != 3)
+	{
+		s = sort(s, s->stack_a, calc_op_b);
+		do_smart_rotation(s);
+		s = push_b(s, "pb\n");
+	}
+	sort_three(s);
+	do_smart_rotation(s);
 	while (!is_deascending(s->stack_b, s))
 		rotate(s->stack_b, "");
-	// test(s);
+	test(s);
 	free_all(s);
 }
