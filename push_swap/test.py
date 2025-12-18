@@ -1,3 +1,3 @@
 import random
-for x in random.sample(range(-50, 101), 100):
+for x in random.sample(range(-25000, 25000), 500):
     print(x, end=' ')

@@ -176,16 +176,18 @@ int main(int argc, char **argv)
 	// printf("=================================\n");
 	s = push_b(s, "pb\n");
 	s = push_b(s, "pb\n");
-	while (la_len(s->stack_a) != 3)
+	while (la_len(s->stack_a) != 0)
 	{
 		s = sort(s, s->stack_a, calc_op_b);
 		do_smart_rotation(s);
 		s = push_b(s, "pb\n");
 	}
-	sort_three(s);
-	do_smart_rotation(s);
+	// sort_three(s);
+	// do_smart_rotation(s);
 	while (!is_deascending(s->stack_b, s))
-		rotate(s->stack_b, "");
-	test(s);
+		rotate(s->stack_b, "rb\n");
+	while (la_len(s->stack_b) != 0)
+		s = push_a(s, "pa\n");
+	// test(s);
 	free_all(s);
 }
