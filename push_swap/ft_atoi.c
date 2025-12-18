@@ -24,8 +24,14 @@ static const char	*skipspace(const char *nptr)
 
 static const char	*skipzero(const char *nptr)
 {
-	while (*nptr == '0')
+	int	cond;
+
+	cond = (*nptr == '0' || *(nptr + 1) != 0 || *(nptr + 1) != ' ');
+	while (!cond)
+	{
+		cond = (*nptr == '0' || *(nptr + 1) != 0 || *(nptr + 1) != ' ');
 		nptr++;
+	}
 	return (nptr);
 }
 

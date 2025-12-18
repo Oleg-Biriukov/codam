@@ -70,12 +70,11 @@ void	do_smart_rotation(t_span *s)
 	s->rotations[1] = 0;
 }
 
-int calc_op(t_span *s, int num)
+int calc_op(t_span *s, t_stack *stack, int num)
 {
 	int		pos;
-	t_stack	*stack;
 
-	stack = la_start(s->stack_b);
+	stack = la_start(stack);
 	if (is_biggest(s, stack, num)) // error
 	{
 		if (is_biggest(s, stack, ft_atoi((char *) stack->content, s)))
