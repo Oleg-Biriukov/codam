@@ -29,7 +29,7 @@ t_stack		*la_append(t_stack *array, void *content);
 t_stack		*la_init(void *content);
 t_span		*push_a(t_span *s, char *mode);
 t_span		*push_b(t_span *s, char *mode);
-size_t		la_len(t_stack *array);
+int		la_len(t_stack *array);
 void 		*la_free(t_stack *array);
 void		rev_rotate(t_stack *stack, char *mode);
 void		ft_putstr(char *s);
@@ -43,5 +43,10 @@ int			calc_op_a(t_span *s, t_stack *stack, int num);
 int			calc_op_b(t_span *s, t_stack *stack, int num);
 int			is_ascending(t_stack *stack, t_span *s);
 int			is_deascending(t_stack *stack, t_span *s);
+int			is_smallest(t_span *s, t_stack *stack, int num);
+int			is_biggest(t_span *s, t_stack *stack, int num);
 int			ft_strlen(char *str);
+
+
+void	test(t_span *s);
 #endif

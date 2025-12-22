@@ -52,7 +52,7 @@ void 	*la_free(t_stack *array)
 	return (NULL);
 }
 
-size_t	la_len(t_stack *array)
+int	la_len(t_stack *array)
 {
 	size_t	len;
 

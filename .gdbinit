@@ -1,8 +1,9 @@
 add-auto-load-safe-path /home/obirukov/Desktop/myproject/codam/.gdbinit
 set confirm off
 define calc
+	b 205
+	r $A
 	b sort
-	r $a
 	n
 	display test(s)
 	display sum
