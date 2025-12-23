@@ -44,3 +44,12 @@ void	ft_putstr(char *s)
 {
 	write(1, s, ft_strlen(s));
 }
+
+void	free_all(t_span *s)
+{
+	la_free(s->stack_a);
+	la_free(s->stack_b);
+	free(s->rotations);
+	free(s);
+	exit(1);
+}

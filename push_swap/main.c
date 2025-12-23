@@ -77,97 +77,32 @@ static t_span	*convert(char *arg, t_span *s)
 	return (s);
 }
 
-int	calculation(t_stack *cur, t_stack *pos, t_span *s)
+static void	sort_to_five(t_span *s)
 {
-	int	calc;
-
-	calc = la_len(la_start(cur)) - (la_len(pos));
-	if (calc > la_len(la_start(cur)) / 2)
-		return (la_len(pos) * -1);
-	return (calc);
+	if (la_len(s->stack_a) == 2)
+		sort_two(s, s->stack_a);
+	else if (la_len(s->stack_a) == 3)
+		sort_three(s);
+	else if (la_len(s->stack_a) == 4)
+		sort_four(s);
+	else if (la_len(s->stack_a) == 5)
+		sort_five(s);
+	do_smart_rotation(s);
+	// test(s);
+	while (!is_ascending(s->stack_a, s))
+		s = s;
+	free_all(s);
 }
 
-static int	smart_sum(t_span *s, t_stack *cur, t_calc f_calc)
+static t_span	*prepatation(t_span *s, char **argv, int argc)
 {
-	int	op;
-	int	calc;
+	int	i;
 
-	if (la_start(cur) == la_start(s->stack_a))
-		calc = f_calc(s, s->stack_b, ft_atoi((char *) cur->content, s));
-	else
-		calc = f_calc(s, s->stack_a, ft_atoi((char *) cur->content, s));
-	op = calculation(cur, cur, s);
-	if (calc <= 0 && op <= 0)
-	{
-		if (calc * -1 >= op * -1)
-			return (calc * -1);
-		return (op * -1);
-	}
-	if (calc >= 0 && op >= 0)
-	{
-		if (calc >= op)
-			return (calc);
-		return (op);
-	}
-	if (calc <= 0 && op >= 0)
-		return (calc * -1 + op);
-	if (op <= 0 && calc >= 0)
-		return (calc + op * -1);
-	return (0);
-}
-
-static t_span	*sort(t_span *s, t_stack *cur, t_calc f_calc)
-{
-	t_stack			*pos;
-	unsigned int	sum;
-
-	sum = UINT_MAX;
-	while (cur)
-	{
-		if (sum > smart_sum(s, cur, f_calc))
-		{
-			sum = smart_sum(s, cur, f_calc);
-			pos = cur;
-			if (la_start(cur) == la_start(s->stack_a))
-			{
-				s->rotations[0] = calculation(cur, pos, s);
-				s->rotations[1] = f_calc(s, s->stack_b, ft_atoi((char *) cur->content, s));
-			}
-			else
-			{
-				s->rotations[0] = f_calc(s, s->stack_a, ft_atoi((char *) cur->content, s));
-				s->rotations[1] = calculation(cur, pos, s);
-			}
-		}	
-		cur = cur->next;
-	}
-	return (s);
-}
-
-void	free_all(t_span *s)
-{
-	la_free(s->stack_a);
-	la_free(s->stack_b);
-	free(s->rotations);
-	free(s);
-	exit(1);
-}
-
-int main(int argc, char **argv)
-{
-	t_span	*s;
-	int		i;
-	int		*rotations;
-
-	s = malloc(sizeof(t_span));
-		s->rotations = (int *) malloc(sizeof(int) * 2);
-	s->rotations[0] = INT_MAX;
-	s->rotations[1] = INT_MAX;
-	if (argc < 2 || !s || !s->rotations)
-		return (0);
-	i = 1;
 	s->stack_b = NULL;
 	s->stack_a = NULL;
+	s->rotations[0] = 0;
+	s->rotations[1] = 0;
+	i = 1;
 	while (i < argc)
 	{
 		if (!is_digit(argv[i]))
@@ -177,8 +112,26 @@ int main(int argc, char **argv)
 	}
 	s->stack_a = la_start(s->stack_a);
 	check_valid(s);
+	if (is_ascending(s->stack_a, s))
+		free_all(s);
+	if (la_len(s->stack_a) <= 5)
+		sort_to_five(s);
 	s = push_b(s, "pb\n");
 	s = push_b(s, "pb\n");
+	return (s);
+}
+
+int main(int argc, char **argv)
+{
+	t_span	*s;
+	int		i;
+	int		*rotations;
+
+	s = malloc(sizeof(t_span));
+	s->rotations = (int *) malloc(sizeof(int) * 2);
+	if (argc < 2 || !s || !s->rotations)
+		return (0);
+	s = prepatation(s, argv, argc);
 	while (la_len(s->stack_a) != 3)
 	{
 		s = sort(s, s->stack_a, calc_op_b);
@@ -223,10 +176,6 @@ int main(int argc, char **argv)
 	else
 		s->rotations[0] = i;
 	do_smart_rotation(s);
-	while (!is_ascending(s->stack_a, s))
-	{
-		i = 0;
-	}
-	// test(s);
+	printf("%s\n", is_ascending(la_start(s->stack_a), s) ? "OK" : "KO");
 	free_all(s);
 }

@@ -3,8 +3,8 @@ from tqdm import tqdm
 from concurrent.futures import ThreadPoolExecutor
 
 global total
-n = 100
-restrict = 5500
+n = 10000
+restrict = 1000
 
 class test:
 	def __init__(self, n, restrict):
@@ -14,7 +14,7 @@ class test:
 		self.max = restrict / 2
 		self.restrict = restrict 
 	def gen_num(self):
-		res = random.sample(range(-1000, 1000), 500)
+		res = random.sample(range(-1000, 1000), 4)
 		rand_num = " ".join(map(str, res))
 		return (rand_num)
 	def test(self):
@@ -38,7 +38,7 @@ class test:
 
 
 
-# num = test(0)
+# num = test(n, restrict)
 # print(num.gen_num())
 first = test(int(n), restrict)
 first.test()
