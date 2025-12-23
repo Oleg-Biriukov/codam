@@ -117,13 +117,14 @@ int calc_op_a(t_span *s, t_stack *stack, int num)
 {
 	int	pos;
 
+	stack = la_start(stack);
 	if (is_smallest(s, stack, num))
 	{
 		if (is_smallest(s, stack, ft_atoi((char *) stack->content, s)))
 			return (0);
 		while (!is_smallest(s, stack, ft_atoi((char *) stack->content, s)))
 			stack = stack->next;
-		pos = la_len(la_start(stack)) - (la_len(stack) - 1);
+		pos = la_len(la_start(stack)) - (la_len(stack));
 		if (pos == 0)
 			return (0);
 		if (pos > la_len(la_start(stack)) / 2)

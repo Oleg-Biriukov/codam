@@ -193,30 +193,40 @@ int main(int argc, char **argv)
 		s->stack_b = s->stack_b->next;
 	}
 	s->stack_b = la_start(s->stack_b);
-	s->rotations[1] = i;
 	if (i > la_len(s->stack_b) / 2)
 		s->rotations[1] = (la_len(s->stack_b) - i) * -1;
+	else
+		s->rotations[1] = i;
 	do_smart_rotation(s);
 	// while (la_len(s->stack_b) != 0)
 	// 	s = push_a(s, "pa\n");
-	s->stack_b = la_start(s->stack_b);
 	while (la_len(la_start(s->stack_b)) != 0)
 	{
+		s->stack_b = la_start(s->stack_b);
+		s->stack_a = la_start(s->stack_a);
 		s = sort(s, s->stack_b, calc_op_a);
 		do_smart_rotation(s);
 		s = push_a(s, "pa\n");
 	}
+	s->stack_a = la_start(s->stack_a);
 	i=0;
-	while (!is_smallest(s, s->stack_a, ft_atoi((char *) s->stack_a->content, s)))
+	while (la_len(s->stack_a) != 0)
 	{
+		if (is_smallest(s, s->stack_a, ft_atoi((char *) s->stack_a->content, s)))
+			break ;
 		i++;
 		s->stack_a = s->stack_a->next;
 	}
 	s->stack_a = la_start(s->stack_a);
-	s->rotations[0] = i * -1;
-	if (i >= la_len(s->stack_a) / 2)
-		s->rotations[0] = la_len(s->stack_a) - i;
+	if (i > la_len(s->stack_a) / 2)
+		s->rotations[0] = (la_len(s->stack_a) - i) * -1;
+	else
+		s->rotations[0] = i;
 	do_smart_rotation(s);
-	test(s);
+	while (!is_ascending(s->stack_a, s))
+	{
+		i = 0;
+	}
+	// test(s);
 	free_all(s);
 }
