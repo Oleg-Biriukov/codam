@@ -6,40 +6,40 @@
 /*   By: obirukov <obirukov@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/25 00:46:09 by obirukov          #+#    #+#             */
-/*   Updated: 2025/12/25 00:46:09 by obirukov         ###   ########.fr       */
+/*   Updated: 2025/12/29 15:51:26 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-void	test(t_span *s)
-{
-	t_stack	*a;
-	t_stack	*b;
+// void	test(t_span *s)
+// {
+// 	t_stack	*a;
+// 	t_stack	*b;
 
-	a = s->stack_a;
-	b = s->stack_b;
-	if (a)
-		a = la_start(a);
-	if (b)
-		b = la_start(b);
-	printf("%-3sa | b\n", " ");
-	while((a || b))
-	{
-		if (a != NULL)
-			printf("%-5ld| ", ft_atoi((char *) a->content, s));
-		else
-			printf("%5s| ", " ");
-		if (b != NULL)
-			printf("%5ld\n", ft_atoi((char *) b->content, s));
-		else
-			printf("\n");	
-		if (a)
-			a = a->next;
-		if (b)
-			b = b->next;
-	}
-}
+// 	a = s->stack_a;
+// 	b = s->stack_b;
+// 	if (a)
+// 		a = la_start(a);
+// 	if (b)
+// 		b = la_start(b);
+// 	printf("%-3sa | b\n", " ");
+// 	while((a || b))
+// 	{
+// 		if (a != NULL)
+// 			printf("%-5ld| ", ft_atoi((char *) a->content, s));
+// 		else
+// 			printf("%5s| ", " ");
+// 		if (b != NULL)
+// 			printf("%5ld\n", ft_atoi((char *) b->content, s));
+// 		else
+// 			printf("\n");	
+// 		if (a)
+// 			a = a->next;
+// 		if (b)
+// 			b = b->next;
+// 	}
+// }
 
 static int	is_digit(char *str)
 {
@@ -58,7 +58,7 @@ static int	is_digit(char *str)
 		}
 		str++;
 	}
-	return(1);
+	return (1);
 }
 
 static t_span	*convert(char *arg, t_span *s)
@@ -81,7 +81,7 @@ static t_span	*convert(char *arg, t_span *s)
 				free_all(s);
 		}
 		if (*arg == '\0')
-			break;
+			break ;
 		offset++;
 		arg++;
 	}
@@ -129,61 +129,18 @@ static t_span	*prepatation(t_span *s, char **argv, int argc)
 	return (s);
 }
 
-int main(int argc, char **argv)
+int	main(int argc, char **argv)
 {
 	t_span	*s;
-	int		i;
-	int		*rotations;
 
 	s = malloc(sizeof(t_span));
 	s->rotations = (int *) malloc(sizeof(int) * 2);
 	if (argc < 2 || !s || !s->rotations)
-		return (0);
+		free_all(s);
 	s = prepatation(s, argv, argc);
-	while (la_len(s->stack_a) != 3)
-	{
-		s = sort(s, s->stack_a, calc_op_b);
-		do_smart_rotation(s);
-		s = push_b(s, "pb\n");
-	}
-	sort_three(s);
-	i=1;
-	while (!is_biggest(s, s->stack_b, ft_atoi((char *) s->stack_b->content, s)))
-	{
-		i++;
-		s->stack_b = s->stack_b->next;
-	}
-	s->stack_b = la_start(s->stack_b);
-	if (i > la_len(s->stack_b) / 2)
-		s->rotations[1] = (la_len(s->stack_b) - i) * -1;
-	else
-		s->rotations[1] = i;
-	do_smart_rotation(s);
-	while (la_len(la_start(s->stack_b)) != 0)
-	{
-		s->stack_b = la_start(s->stack_b);
-		s->stack_a = la_start(s->stack_a);
-		s = sort(s, s->stack_b, calc_op_a);
-		do_smart_rotation(s);
-		s = push_a(s, "pa\n");
-	}
-	s->stack_a = la_start(s->stack_a);
-	i=0;
-	while (la_len(s->stack_a) != 0)
-	{
-		if (is_smallest(s, s->stack_a, ft_atoi((char *) s->stack_a->content, s)))
-			break ;
-		i++;
-		s->stack_a = s->stack_a->next;
-	}
-	s->stack_a = la_start(s->stack_a);
-	if (i > la_len(s->stack_a) / 2)
-		s->rotations[0] = (la_len(s->stack_a) - i) * -1;
-	else
-		s->rotations[0] = i;
-	do_smart_rotation(s);
+	s = sort(s);
 	if (!is_ascending(s->stack_a, s))
-		while(1)
-			s = s;
+		while (1)
+			s = s + 1;
 	free_all(s);
 }

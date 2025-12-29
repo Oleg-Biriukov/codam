@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   estimate_cheapeast.c                               :+:      :+:    :+:   */
+/*   find_out_cheapeast.c                               :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: obirukov <obirukov@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/25 00:45:51 by obirukov          #+#    #+#             */
-/*   Updated: 2025/12/25 00:45:51 by obirukov         ###   ########.fr       */
+/*   Updated: 2025/12/29 13:10:23 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "push_swap.h"
 
-int	calculation(t_stack *cur, t_stack *pos, t_span *s)
+static int	calculation(t_stack *cur, t_stack *pos)
 {
 	int	calc;
 
@@ -22,7 +22,7 @@ int	calculation(t_stack *cur, t_stack *pos, t_span *s)
 	return (calc);
 }
 
-int	smart_sum(t_span *s, t_stack *cur, t_calc f_calc)
+static unsigned int	smart_sum(t_span *s, t_stack *cur, t_calc f_calc)
 {
 	int	op;
 	int	calc;
@@ -31,7 +31,7 @@ int	smart_sum(t_span *s, t_stack *cur, t_calc f_calc)
 		calc = f_calc(s, s->stack_b, ft_atoi((char *) cur->content, s));
 	else
 		calc = f_calc(s, s->stack_a, ft_atoi((char *) cur->content, s));
-	op = calculation(cur, cur, s);
+	op = calculation(cur, cur);
 	if (calc <= 0 && op <= 0)
 	{
 		if (calc * -1 >= op * -1)
@@ -58,17 +58,17 @@ static void	set_rot(t_span *s, t_stack *c, t_stack *p, t_calc f_calc)
 	num = ft_atoi((char *) c->content, s);
 	if (la_start(c) == la_start(s->stack_a))
 	{
-		s->rotations[0] = calculation(c, p, s);
+		s->rotations[0] = calculation(c, p);
 		s->rotations[1] = f_calc(s, s->stack_b, num);
 	}
 	else
 	{
 		s->rotations[0] = f_calc(s, s->stack_a, num);
-		s->rotations[1] = calculation(c, p, s);
+		s->rotations[1] = calculation(c, p);
 	}
 }
 
-t_span	*sort(t_span *s, t_stack *cur, t_calc f_calc)
+t_span	*set_pos(t_span *s, t_stack *cur, t_calc f_calc)
 {
 	t_stack			*pos;
 	unsigned int	sum;

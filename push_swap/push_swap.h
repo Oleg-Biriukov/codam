@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/25 00:46:25 by obirukov          #+#    #+#             */
-/*   Updated: 2025/12/25 00:46:25 by obirukov         ###   ########.fr       */
+/*   Updated: 2025/12/29 13:07:41 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,8 @@ t_stack		*la_init(void *content);
 t_stack		*get_elem(t_stack *stack, int num);
 t_span		*push_a(t_span *s, char *mode);
 t_span		*push_b(t_span *s, char *mode);
-t_span		*sort(t_span *s, t_stack *cur, t_calc f_calc);
+t_span		*set_pos(t_span *s, t_stack *cur, t_calc f_calc);
+t_span		*sort(t_span *s);
 void		*la_free(t_stack *array);
 void		rev_rotate(t_stack *stack, char *mode);
 void		ft_putstr(char *s);
@@ -62,6 +63,5 @@ int			is_deascending(t_stack *stack, t_span *s);
 int			is_smallest(t_span *s, t_stack *stack, int num);
 int			is_biggest(t_span *s, t_stack *stack, int num);
 int			ft_strlen(char *str);
-int			calculation(t_stack *cur, t_stack *pos, t_span *s);
 
 #endif

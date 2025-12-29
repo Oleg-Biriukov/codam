@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/25 00:46:30 by obirukov          #+#    #+#             */
-/*   Updated: 2025/12/25 00:46:30 by obirukov         ###   ########.fr       */
+/*   Updated: 2025/12/29 12:40:59 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void	sort_four(t_span *s)
 	i = 0;
 	s = push_b(s, "pb\n");
 	sort_three(s);
-	s = sort(s, s->stack_b, calc_op_a);
+	s = set_pos(s, s->stack_b, calc_op_a);
 	do_smart_rotation(s);
 	s = push_a(s, "pa\n");
 	if (!is_ascending(s->stack_a, s))
@@ -110,10 +110,10 @@ void	sort_five(t_span *s)
 	s = push_b(s, "pb\n");
 	s = push_b(s, "pb\n");
 	sort_three(s);
-	s = sort(s, s->stack_b, calc_op_a);
+	s = set_pos(s, s->stack_b, calc_op_a);
 	do_smart_rotation(s);
 	s = push_a(s, "pa\n");
-	s = sort(s, s->stack_b, calc_op_a);
+	s = set_pos(s, s->stack_b, calc_op_a);
 	do_smart_rotation(s);
 	s = push_a(s, "pa\n");
 	if (!is_ascending(s->stack_a, s))

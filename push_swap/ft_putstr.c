@@ -12,7 +12,7 @@
 
 #include "push_swap.h"
 
-static int	go_array(t_span *s, t_stack *array, t_stack *elem)
+static void	go_array(t_span *s, t_stack *array, t_stack *elem)
 {
 	int	n;
 
