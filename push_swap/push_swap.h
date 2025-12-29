@@ -17,8 +17,7 @@
 # include <unistd.h>
 # include <limits.h>
 
-
-typedef struct	t_stack
+typedef struct t_stack
 {
 	struct t_stack	*next;
 	struct t_stack	*prev;
@@ -26,23 +25,24 @@ typedef struct	t_stack
 	int				pos;
 }				t_stack;
 
-typedef struct	t_span
+typedef struct t_span
 {
 	t_stack	*stack_a;
 	t_stack	*stack_b;
 	int		*rotations;
 }				t_span;
 
-typedef int (*t_calc)(t_span *, t_stack *, int);
+typedef int	(*t_calc)(t_span *, t_stack *, int);
 
 long int	ft_atoi(const char *nptr, t_span *s);
 t_stack		*la_start(t_stack *array);
 t_stack		*la_append(t_stack *array, void *content);
 t_stack		*la_init(void *content);
+t_stack		*get_elem(t_stack *stack, int num);
 t_span		*push_a(t_span *s, char *mode);
 t_span		*push_b(t_span *s, char *mode);
 t_span		*sort(t_span *s, t_stack *cur, t_calc f_calc);
-void 		*la_free(t_stack *array);
+void		*la_free(t_stack *array);
 void		rev_rotate(t_stack *stack, char *mode);
 void		ft_putstr(char *s);
 void		do_smart_rotation(t_span *s);

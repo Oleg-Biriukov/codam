@@ -12,6 +12,22 @@
 
 #include "push_swap.h"
 
+static int	go_array(t_span *s, t_stack *array, t_stack *elem)
+{
+	int	n;
+
+	while (array)
+	{
+		n = ft_atoi((char *) elem->content, s);
+		if (ft_atoi((char *) array->content, s) == n && array != elem)
+		{
+			ft_putstr("Error\n");
+			free_all(s);
+		}
+		array = array->next;
+	}
+}
+
 void	check_valid(t_span *s)
 {
 	t_stack	*elem;
@@ -28,15 +44,7 @@ void	check_valid(t_span *s)
 			ft_putstr("Error\n");
 			free_all(s);
 		}
-		while (array)
-		{
-			if (ft_atoi((char *) array->content, s) == n && array != elem)
-			{
-				ft_putstr("Error\n");
-				free_all(s);
-			}
-			array = array->next;
-		}
+		go_array(s, array, elem);
 		array = s->stack_a;
 		elem = elem->next;
 	}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_array.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: obirukov <obirukov@student.codam.nl>       +#+  +:+       +#+        */
+/*   By: obirukov <obirukov@student.codam.nl>       #+#  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/12/25 00:45:56 by obirukov          #+#    #+#             */
-/*   Updated: 2025/12/25 00:45:56 by obirukov         ###   ########.fr       */
+/*   Created: 2025-12-29 09:58:14 by obirukov          #+#    #+#             */
+/*   Updated: 2025-12-29 09:58:14 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,16 +41,17 @@ t_stack	*la_append(t_stack *array, void *content)
 	if (!array)
 		return (la_init(content));
 	next_array = la_init(content);
-	if(!next_array)
+	if (!next_array)
 		return (la_free(array));
 	array->next = next_array;
 	next_array->prev = array;
 	return (next_array);
 }
 
-void 	*la_free(t_stack *array)
+void	*la_free(t_stack *array)
 {
 	t_stack	*next_array;
+
 	if (array == NULL)
 		return (NULL);
 	array = la_start(array);

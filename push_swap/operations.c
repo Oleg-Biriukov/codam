@@ -12,14 +12,6 @@
 
 #include "push_swap.h"
 
-static t_stack	*get_elem(t_stack *stack, int num)
-{
-	stack = la_start(stack);
-	while (num-- && stack)
-		stack = stack->next;
-	return (stack);
-}
-
 void	swap(t_stack *stack, char *mode)
 {
 	void	*buf;
@@ -35,7 +27,7 @@ void	swap(t_stack *stack, char *mode)
 
 t_span	*push_a(t_span *s, char *mode)
 {
-	t_stack *push;
+	t_stack	*push;
 	t_stack	*next;
 
 	if (la_len(la_start(s->stack_b)) < 1)
@@ -63,7 +55,7 @@ t_span	*push_a(t_span *s, char *mode)
 
 t_span	*push_b(t_span *s, char *mode)
 {
-	t_stack *push;
+	t_stack	*push;
 	t_stack	*next;
 
 	if (la_len(la_start(s->stack_a)) < 1)
@@ -88,7 +80,6 @@ t_span	*push_b(t_span *s, char *mode)
 	s->stack_a = next;
 	return (s);
 }
-
 
 void	rotate(t_stack *stack, char *mode)
 {

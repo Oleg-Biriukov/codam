@@ -99,9 +99,6 @@ static void	sort_to_five(t_span *s)
 	else if (la_len(s->stack_a) == 5)
 		sort_five(s);
 	do_smart_rotation(s);
-	// test(s);
-	while (!is_ascending(s->stack_a, s))
-		s = s;
 	free_all(s);
 }
 
@@ -162,8 +159,6 @@ int main(int argc, char **argv)
 	else
 		s->rotations[1] = i;
 	do_smart_rotation(s);
-	// while (la_len(s->stack_b) != 0)
-	// 	s = push_a(s, "pa\n");
 	while (la_len(la_start(s->stack_b)) != 0)
 	{
 		s->stack_b = la_start(s->stack_b);
@@ -187,6 +182,8 @@ int main(int argc, char **argv)
 	else
 		s->rotations[0] = i;
 	do_smart_rotation(s);
-	printf("%s\n", is_ascending(la_start(s->stack_a), s) ? "OK" : "KO");
+	if (!is_ascending(s->stack_a, s))
+		while(1)
+			s = s;
 	free_all(s);
 }

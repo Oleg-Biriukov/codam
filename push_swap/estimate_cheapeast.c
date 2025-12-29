@@ -51,6 +51,23 @@ int	smart_sum(t_span *s, t_stack *cur, t_calc f_calc)
 	return (0);
 }
 
+static void	set_rot(t_span *s, t_stack *c, t_stack *p, t_calc f_calc)
+{
+	int	num;
+
+	num = ft_atoi((char *) c->content, s);
+	if (la_start(c) == la_start(s->stack_a))
+	{
+		s->rotations[0] = calculation(c, p, s);
+		s->rotations[1] = f_calc(s, s->stack_b, num);
+	}
+	else
+	{
+		s->rotations[0] = f_calc(s, s->stack_a, num);
+		s->rotations[1] = calculation(c, p, s);
+	}
+}
+
 t_span	*sort(t_span *s, t_stack *cur, t_calc f_calc)
 {
 	t_stack			*pos;
@@ -63,17 +80,8 @@ t_span	*sort(t_span *s, t_stack *cur, t_calc f_calc)
 		{
 			sum = smart_sum(s, cur, f_calc);
 			pos = cur;
-			if (la_start(cur) == la_start(s->stack_a))
-			{
-				s->rotations[0] = calculation(cur, pos, s);
-				s->rotations[1] = f_calc(s, s->stack_b, ft_atoi((char *) cur->content, s));
-			}
-			else
-			{
-				s->rotations[0] = f_calc(s, s->stack_a, ft_atoi((char *) cur->content, s));
-				s->rotations[1] = calculation(cur, pos, s);
-			}
-		}	
+			set_rot(s, cur, pos, f_calc);
+		}
 		cur = cur->next;
 	}
 	return (s);
