@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.codam.nl>       +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/12/25 00:45:18 by obirukov          #+#    #+#             */
-/*   Updated: 2025/12/25 00:45:18 by obirukov         ###   ########.fr       */
+/*   Updated: 2025/12/30 12:19:52 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,8 +39,7 @@ void	check_valid(t_span *s)
 	while (elem)
 	{
 		n = ft_atoi((char *) elem->content, s);
-		if (n > INT_MAX || n < INT_MIN
-			|| ft_strlen((char *) elem->content) > 10)
+		if (n > INT_MAX || n < INT_MIN)
 		{
 			ft_putstr("Error\n");
 			free_all(s);

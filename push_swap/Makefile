@@ -26,7 +26,7 @@ clean:
 	$(QUIET)rm -f $(OBJ)
 
 test: $(NAME) clean check-deps
-	@ python3 $(HELP_KIT)test.py
+	@ python3 $(HELP_KIT)test.py >/dev/null 2>&1
 
 fclean: clean
 	$(QUIET)rm -f $(NAME)
