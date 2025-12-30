@@ -8,4 +8,3 @@ def ft_seed_inventory(seed_type: str, quantity: int, unit: str):
     else:
         message = "Unknown unit type"
     print(f"{seed_type.title()} seeds: {message}")
-        
