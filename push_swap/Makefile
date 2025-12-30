@@ -1,7 +1,7 @@
 NAME = push_swap
 CC = cc
 DEP = tqdm
-CFLAGS = -Wall -Werror -Wextra
+CFLAGS = -Wall -Werror -Wextra -g
 HELP_KIT = help_kit/
 SRC = calculation_stacks.c do_smart_rot.c find_out_cheapeast.c ft_array.c \
       main.c ft_atoi.c ft_putstr.c helper_func.c operations.c sort.c sort_n.c

@@ -120,7 +120,7 @@ static t_span	*prepatation(t_span *s, char **argv, int argc)
 	}
 	s->stack_a = la_start(s->stack_a);
 	check_valid(s);
-	if (is_ascending(s->stack_a, s))
+	if (is_ascending(s->stack_a, s) || la_len(s->stack_a) < 2)
 		free_all(s);
 	if (la_len(s->stack_a) <= 5)
 		sort_to_five(s);
@@ -135,7 +135,7 @@ int	main(int argc, char **argv)
 
 	s = malloc(sizeof(t_span));
 	s->rotations = (int *) malloc(sizeof(int) * 2);
-	if (argc < 2 || !s || !s->rotations)
+	if (argc == 1 || !s || !s->rotations)
 		free_all(s);
 	s = prepatation(s, argv, argc);
 	s = sort(s);

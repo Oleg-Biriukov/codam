@@ -30,16 +30,17 @@ static void	go_array(t_span *s, t_stack *array, t_stack *elem)
 
 void	check_valid(t_span *s)
 {
-	t_stack	*elem;
-	t_stack	*array;
-	int		n;
+	t_stack				*elem;
+	t_stack				*array;
+	long long int		n;
 
 	array = s->stack_a;
 	elem = s->stack_a;
 	while (elem)
 	{
 		n = ft_atoi((char *) elem->content, s);
-		if (n > INT_MAX || ft_atoi((char *) elem->content, s) < INT_MIN)
+		if (n > INT_MAX || n < INT_MIN
+			|| ft_strlen((char *) elem->content) > 10)
 		{
 			ft_putstr("Error\n");
 			free_all(s);
