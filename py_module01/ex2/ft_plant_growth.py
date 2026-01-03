@@ -4,12 +4,15 @@ class Plant():
         self.height = height
         self.ages = ages
         self.days = 1
+
     def age(self):
         self.ages += 6
         self.days += 6
+
     def grow(self):
         self.age()
         self.height += 6
+
     def get_status(self):
         print(f"=== Day {self.days} ===")
         print(f"{self.name}: {self.height}cm, {self.ages} days old")

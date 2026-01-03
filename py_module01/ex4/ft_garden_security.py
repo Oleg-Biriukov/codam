@@ -4,6 +4,7 @@ class SecurePlant():
         self.age = 0
         self.height = 0
         print("Plant created:", name)
+
     def set_height(self, height: int):
         if height < 0:
             print(f"Invalid operation attempted: height {height}cm [REJECTED]")
@@ -13,6 +14,7 @@ class SecurePlant():
             return
         print(f"Age updated: {height}cm [OK]")
         self.height = height
+
     def set_age(self, age: int):
         if age < 0:
             print(f"Invalid operation attempted: age {age} days [REJECTED]")
@@ -22,10 +24,13 @@ class SecurePlant():
             return
         print(f"Age updated: {age} days [OK]")
         self.age = age
+
     def get_height(self):
         return self.height
+
     def get_age(self):
         return self.age
+
 
 if __name__ == "__main__":
     rose = SecurePlant("rose")

@@ -5,7 +5,8 @@ class Plant():
         self.exect_age = starting_age
         self.starting_height = starting_height
         self.starting_age = starting_age
-        print(f"Created: {self.name} ({self.exect_height}cm, {self.exect_age} days)")
+        print(f"Created: {name} ({starting_height}cm, {starting_age} days)")
+
 
 if __name__ == "__main__":
     factory_in = {
