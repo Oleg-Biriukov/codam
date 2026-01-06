@@ -32,6 +32,10 @@ class GardenManager:
         try:
             if name == "":
                 raise PlantError("Plant name cannot be empty!")
+            elif age < 0 or height < 0:
+                raise PlantError("your plant age or height is negetive!")
+            if name is self.plants:
+                raise PlantError("plant has already exist in garden data!")
         except PlantError as pe:
             print("Error adding plant:", pe)
             return
