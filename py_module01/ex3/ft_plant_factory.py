@@ -1,8 +1,8 @@
 class Plant():
     def __init__(self, name: str, starting_height: int, starting_age: int):
         self.name = name
-        self.exect_height = starting_height
-        self.exect_age = starting_age
+        self.current_height = starting_height
+        self.current_age = starting_age
         self.starting_height = starting_height
         self.starting_age = starting_age
         print(f"Created: {name} ({starting_height}cm, {starting_age} days)")
@@ -21,5 +21,4 @@ if __name__ == "__main__":
     print("=== Plant Factory Output ===")
     for pln in factory_in:
         factory_out[pln] = Plant(pln, factory_in[pln][0], factory_in[pln][1])
-    print()
-    print("Total plants created:", 6)
+    print("\nTotal plants created:", 6)

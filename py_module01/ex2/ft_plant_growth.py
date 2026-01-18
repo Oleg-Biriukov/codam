@@ -5,15 +5,15 @@ class Plant():
         self.ages = ages
         self.days = 1
 
-    def age(self):
+    def age(self) -> None:
         self.ages += 6
         self.days += 6
 
-    def grow(self):
+    def grow(self) -> None:
         self.age()
         self.height += 6
 
-    def get_status(self):
+    def get_info(self) -> None:
         print(f"=== Day {self.days} ===")
         print(f"{self.name}: {self.height}cm, {self.ages} days old")
         if self.days > 1:
@@ -22,9 +22,10 @@ class Plant():
 
 
 if __name__ == "__main__":
-    rose = Plant("Rose", 25, 30)
-    rose.get_status()
-    rose.get_status()
-    rose.get_status()
-    rose.get_status()
-    rose.get_status()
+    plants = ["Rose", "Sunflower", "Cactus"]
+    print("=== Garden Plant Registry ===")
+    for i in range(0, 3):
+        plants[i] = Plant(plants[i], 25 + i, 30 + i)
+    for time in range(2):
+        for plant in plants:
+            plant.get_info()

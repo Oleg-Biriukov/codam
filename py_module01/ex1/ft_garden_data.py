@@ -7,7 +7,7 @@ class Plant():
 
 
 if __name__ == "__main__":
+    plants = ["Rose", "Sunflower", "Cactus"]
     print("=== Garden Plant Registry ===")
-    rose = Plant("Rose", 25, 30)
-    sunflower = Plant("Sunflower", 80, 45)
-    cactus = Plant("Cactus", 15, 120)
+    for i in range(0, 3):
+        plants[i] = Plant(plants[i], 25 + i, 30 + i)

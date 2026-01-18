@@ -1,5 +1,4 @@
 def ft_count_harvest_recursive():
-    global left
     left = int(input("Days until harvest: "))
 
     def do_recursive(day):

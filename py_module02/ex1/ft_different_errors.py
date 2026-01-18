@@ -1,9 +1,10 @@
 def garden_operations():
-    count_garden = {'seeds': input()}
+    count_garden = {'seeds': input("Write amount of seeds -> ")}
     count = int(count_garden['seeds'])
-    open("g_scores.txt")
+    scores = open("g_scores.txt")
     print(f"{count} {list(count_garden)[0]} left in warehouse")
     count = 200 / count
+    close(scores)
 
 
 def test_error_types():
@@ -22,9 +23,11 @@ def test_error_types():
             print("Caught ZeroDivisionError: division by zero\n")
         try:
             print("Testing FileNotFoundError...")
-            open("none")
+            n = open("none")
+            close(n)
         except FileNotFoundError as f:
             print(f"Caught FileNotFoundError: No such file '{f.filename}'\n")
+            close(n)
         try:
             print("Testing KeyError...")
             print(temp_d['3'])

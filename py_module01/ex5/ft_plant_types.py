@@ -11,7 +11,7 @@ class Flower(Plant):
         self.color = color
         print(f"{name} (Flower), {height}cm, {age} days, {color} color")
 
-    def bloom(self):
+    def bloom(self) -> None:
         print(self.name + " is blooming beautifully!")
 
 
@@ -22,13 +22,23 @@ class Tree(Plant):
         print(f"{name} (Tree), {height}cm,", end=' ')
         print(f"{age} days, {trunk_diameter}cm diameter")
 
-    def produce_shade(self):
+    def produce_shade(self) -> None:
+        """
+        To calculate the shadow_square I used the formule:
+        diameter I took out from trunk_diameter
+        Area=πr2
+        """
         diameter = self.trunk_diameter * 20 / 100
         shadow_square = int(3.1416 * (diameter / 2) ** 2)
         print(f"{self.name} provides {shadow_square} square meters of shade")
 
 
 class Vegetable(Plant):
+    """
+    Estimate which vitamine is the most valuable in vagegable by RDI.
+    RDI is the table of recommend daily intake.
+    Formula: nutritional value / rdi * 100
+    """
     def __init__(self, name: str, height: int, age: int,
                  harvest_season: str, nutritional_value: dict):
         super().__init__(name, height, age)
@@ -47,7 +57,7 @@ class Vegetable(Plant):
         print(f"{self.name} (Flower), {self.height}cm,", end=' ')
         print(f"{self.age} days, {harvest_season} harvest")
         for v in nutritional_value:
-            daily_value = int(nutritional_value[v] / RDI[v] * 100)
+            daily_value = nutritional_value[v] / RDI[v] * 100
             if daily_value > highest:
                 highest = daily_value
                 vitamine = v
