@@ -4,7 +4,7 @@ def garden_operations():
     scores = open("g_scores.txt")
     print(f"{count} {list(count_garden)[0]} left in warehouse")
     count = 200 / count
-    close(scores)
+    scores.close()
 
 
 def test_error_types():
@@ -24,10 +24,9 @@ def test_error_types():
         try:
             print("Testing FileNotFoundError...")
             n = open("none")
-            close(n)
+            n.close()
         except FileNotFoundError as f:
             print(f"Caught FileNotFoundError: No such file '{f.filename}'\n")
-            close(n)
         try:
             print("Testing KeyError...")
             print(temp_d['3'])

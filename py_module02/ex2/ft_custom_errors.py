@@ -13,14 +13,19 @@ class WaterError(GardenError):
         super().__init__(message)
 
 
+class Garden():
+    def __init__(self, name: str, owner: str):
+        if name == owner:
+            raise GardenError("The name of garden cannot be same as owner`s name")
+        self.name = name
+        self.owner = owner
+        print(f"The {name} garden was created by {owner}.")
+
+
 class Plant():
     def __init__(self, name: str, height: int, age: int):
-        try:
-            if height < 0:
-                raise PlantError("height cannot be negetive")
-        except PlantError:
-            print("Height cannot be negetive")
-            return
+        if height < 0:
+            raise PlantError("height cannot be negetive")
         self.name = name
         self.height = height
         self.age = age
@@ -29,41 +34,33 @@ class Plant():
 
 class Conteyner():
     def __init__(self, name: str, capicity: int):
-        try:
-            if capicity < 0:
-                raise WaterError("bad value, cannot be negetive")
-        except WaterError:
-            print("Capicity of water conteyner cannot be negetive")
-            return
+        if capicity < 0:
+            raise WaterError("bad value, cannot be negetive")
         self.name = name
         self.capicity = capicity
-        
+
+      
 def test_custom_errors():
-    tomato = Plant("Tomato", 5, 100000)
     print("Testing PlantError...")
     try:
-        if tomato.age > 10:
-            raise PlantError("The tomato plant is wilting!\n")
+        tomato = Plant("Tomato", -5, 100000)
     except PlantError as p:
         print("Caught PlantError:", p)
     print("\nTesting WaterError...")
     try:
-        tank = Conteyner("tank", 10000)
-        if tank.capicity > 1000:
-            raise WaterError("Not enough water in the tank!\n")
+        tank = Conteyner("tank", -1)
     except WaterError as w:
         print("Caught WaterError:", w)
+    print("\nTesting catching garden errors...")
+    try:
+        oleg_g = Garden("Oleh", "Oleh")
+    except GardenError as g:
+            print(f"Caught a garden error:", g)
     print("\nTesting catching all garden errors...")
     try:
-        if tomato.age > 10:
-            raise PlantError("The tomato plant is wilting!")
+        tank = Conteyner("Water Tank", -1)
+        oleg_g = Garden("Oleh", "Oleh")
+        tomato = Plant("Tomato", -5, 100000)
     except GardenError as g:
-            print(f"Caught a garden error:", g)
-    try:
-        if tank.capicity > 1000:
-            raise WaterError("Too much water in the tank!")
-    except GardenError as g:
-            print(f"Caught a garden error:", g)
-    print("All custom error types work correctly!")
-test_custom_errors()
-
+            print(f"Caught a garden type error({type(g).__name__}):", g)
+    print("\nAll custom error types work correctly!")

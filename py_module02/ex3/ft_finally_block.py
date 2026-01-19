@@ -1,16 +1,19 @@
 def water_plants(plant_list):
     plants = ['tomato', 'lettuce', 'carrots']
-    print("Opening watering system")
-    try:
-        for plant in plant_list:
-            if plant is not plants:
-                raise ValueError(plant)
-            print(f"Watering {plant}")
-    except ValueError as e:
-        print(f"Error: Cannot water {e} - invalid plant!")
-        return
-    finally:
+    for plant in plant_list:
+        if plant is not plants:
+            raise ValueError(plant)
+        print(f"Watering {plant}")
+    print(f"Error: Cannot water {e} - invalid plant!")
+    return
         print("Closing watering system (cleanup)")
     print("Watering completed successfully!")
-water_plants(['None', 'tomato', 'lettuce', 'carrots'])
+
+def test_watering_system():
+    print("Opening watering system")
+    print("Testing normal watering...")
+    try:
+        water_plants(['tomato', 'lettuce', 'carrots'])
+    except ValueError as v:
+        p
 
