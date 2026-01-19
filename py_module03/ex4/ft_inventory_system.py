@@ -1,37 +1,29 @@
-types_data = ["weapon","consumable","armor"]
-alice_inv = {
-    "sword": dict(quent = 1, t = ("weapon", "rare"), val = 500),
-    "potion": dict(quent = 5, t = ("consumable", "common"), val = 50),
-    "shield": dict(quent = 1, t = ("armor", "uncommon"), val = 200)
-}
-bob_inv = {
-    "dagger": dict(quent = 1, t = ("weapon", "rare"), val = 300),
-    "bread": dict(quent = 5, t = ("consumable", "common"), val = 25),
-    "gloves": dict(quent = 1, t = ("armor", "uncommon"), val = 150)
-}
-anal_table = {0:}
-print("=== Player Inventory System ===")
-print("\n=== Alice's Inventory ===")
-sum_val = 0
-count = 0
+import sys
 
-for item in alice_inv.keys():
-    quent = alice_inv[item]['quent']
-    val = alice_inv[item]['val']
-    print(f"{item}", end=" ")
-    print(f"({alice_inv[item]['t'][0]}, {alice_inv[item]['t'][1]}):", end=' ')
-    print(f"{quent}x @ {val}", end=' ')
-    print(f"gold each = {quent * val} gold")
-    sum_val += quent * val
-    count += 1 * quent
-print(f"\nInventory value: {sum_val} gold")
-print(f"Item count: {count} items")
-print(f"Categories: ", end='')
-for t_d in types_data:
-    counter = 0
-    for stats in alice_inv.values():
-        if stats['t'][0] == t_d:
-            counter += 1 * stats['quent']
-    if counter != 0:
-        print(f"{t_d} ({counter})", end = ' ')
+def extract_arg() -> dict:
+    args = sys.argv[1::]
+    arg_d = {}
+    sum = 0
+    for arg in args:
+        arg = arg.split(':')
+        arg_d[arg[1]] = int(arg[0])
+        sum += int(arg[0])
+    return arg_d
 
+
+def invertory_anal(inv: dict) -> None:
+    print("=== Inventory System Analysis ===")
+    print("Total items in inventory:", sum(inv.keys()))
+    print("Unique item types:", len(inv.values()))
+
+
+def current_inventory(inv: dict) -> None:
+    one_p = float(100 / sum(inv.keys()))
+    print("=== Current Inventory ===")
+    for item in inv.values():
+        print(f"{item}: {inv[item]}", end='')
+        print(f"units ({inv[item] * one_p}%)")
+    print()
+
+
+current_inventory(extract_arg())
