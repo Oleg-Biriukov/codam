@@ -16,7 +16,7 @@ class WaterError(GardenError):
 class Garden():
     def __init__(self, name: str, owner: str):
         if name == owner:
-            raise GardenError("The name of garden cannot be same as owner`s name")
+            raise GardenError("The name of garden cannot be same as owner`s")
         self.name = name
         self.owner = owner
         print(f"The {name} garden was created by {owner}.")
@@ -39,28 +39,28 @@ class Conteyner():
         self.name = name
         self.capicity = capicity
 
-      
+
 def test_custom_errors():
     print("Testing PlantError...")
     try:
-        tomato = Plant("Tomato", -5, 100000)
+        Plant("Tomato", -5, 100000)
     except PlantError as p:
         print("Caught PlantError:", p)
     print("\nTesting WaterError...")
     try:
-        tank = Conteyner("tank", -1)
+        Conteyner("tank", -1)
     except WaterError as w:
         print("Caught WaterError:", w)
     print("\nTesting catching garden errors...")
     try:
-        oleg_g = Garden("Oleh", "Oleh")
+        Garden("Oleh", "Oleh")
     except GardenError as g:
-            print(f"Caught a garden error:", g)
+        print("Caught a garden error:", g)
     print("\nTesting catching all garden errors...")
     try:
-        tank = Conteyner("Water Tank", -1)
-        oleg_g = Garden("Oleh", "Oleh")
-        tomato = Plant("Tomato", -5, 100000)
+        Conteyner("Water Tank", -1)
+        Garden("Oleh", "Oleh")
+        Plant("Tomato", -5, 100000)
     except GardenError as g:
-            print(f"Caught a garden type error({type(g).__name__}):", g)
+        print(f"Caught a garden type error({type(g).__name__}):", g)
     print("\nAll custom error types work correctly!")
