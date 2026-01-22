@@ -17,7 +17,6 @@ def data_stream(itr: iter, len: int) -> None:
             break
         if data['data']['level'] > 10:
             stats['h_level'] += 1
-    
         if data['event_type'] == 'item_found':
             msg = "found treasure"
             stats['t_event'] += 1
@@ -47,6 +46,8 @@ Processing time: 0.045 seconds
 
 
 def fibonacci_sequence(count: int):
+    """The function that help you
+to find fibonacci sequence"""
     prev = 0
     cur = 1
     yield 0
@@ -57,6 +58,12 @@ def fibonacci_sequence(count: int):
 
 
 def prime_num():
+    """
+    Prime_num return next prime num
+
+    :return: next prime number via iterator
+    :rtype: Generator[int, Any, NoReturn]
+    """
     start = 2
     while True:
         for num in range(2, start + 1):
@@ -68,6 +75,7 @@ def prime_num():
 
 
 def get_demonstr() -> None:
+    """Function to demostrate the yield command"""
     f_seq = fibonacci_sequence(10)
     print('''=== Generator Demonstration ===
 Fibonacci sequence (first 10):''', end=' ')

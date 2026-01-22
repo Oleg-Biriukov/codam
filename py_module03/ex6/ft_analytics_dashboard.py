@@ -1,15 +1,76 @@
-def list_compr(data: dict):
+def list_compr(data: dict) -> None:
+    """Function to demonstrate the functionality of lists tools
+    and way to interact with it"""
+    print("\n=== List Comprehension Examples ===")
     scores = [
-        scr['score']
+        data['players'][scr]['total_score']
         for scr in data['players']
     ]
     h_scorers = [
-        plr
-        for plr in data["players"]
-        if data["players"][plr]["total_score"] > 2000
+        session["player"]
+        for session in data["sessions"]
+        if session["duration_minutes"] > 60
     ]
-    
-    print(h_scorers)
+    print(f'''High scorers (>2000): {scores}
+Scores doubled: {[s * 2 for s in scores]}
+Active players: {h_scorers}''')
+
+
+def dict_compr(data: dict) -> None:
+    """Function to demonstrate the functionality of dict tools
+    and way to interact with it"""
+    print("\n=== Dict Comprehension Examples ===")
+    p_score = {
+        'p_scr': {p: s['total_score'] for p, s in data['players'].items()},
+        'cat_sct': dict(
+            high=len([p for p in data['players']
+                      if data['players'][p]['total_score'] > 8000]),
+            medium=len([p for p in data['players']
+                        if data['players'][p]['total_score'] > 4000 and
+                        data['players'][p]['total_score'] < 8000]),
+            low=len([p for p in data['players']
+                    if data['players'][p]['total_score'] < 4000])
+        ),
+        'acvm_c': {p: len(s['achvm']) for p, s in data['players'].items()}
+    }
+    print(f'''Player scores: {p_score['p_scr']}
+Score categories: {p_score['cat_sct']}
+Achievement counts: {p_score['acvm_c']}''')
+
+
+def set_compr(data: dict) -> int:
+    """Function to demonstrate the functionality of set tools
+    and way to interact with it"""
+    print("\n=== Set Comprehension Examples ===")
+    pl = [p for p in data['players']]
+    pl_achv = set()
+    compl = [b['mode'] for b in data['sessions']]
+    a_modes = set(compl)
+    for p in pl:
+        pl_achv = pl_achv.union(data["players"][p]["achvm"])
+    print(f'''Unique players: {set(pl)}
+Unique achievements: {pl_achv}
+Active modes of game: {a_modes}
+''')
+    return len(pl_achv)
+
+
+def combined_anal(data: dict) -> None:
+    """Function to print out the summary of expressed through argument data"""
+    t_achv = set_compr(data)
+    scores = {}
+    for p in data['players']:
+        scores[p] = data['players'][p]['total_score']
+    for p in scores:
+        if scores[p] == max(scores.values()):
+            name = p
+    print(f'''=== Combined Analysis ===
+Total players: {len(scores)}
+Total unique achievements: {t_achv}
+Average score: {sum(scores.values()) / len(scores)}
+Top performer: {name} ({max(scores.values())} \
+points, {len(data['players'][name]['achvm'])} \
+achievements)''')
 
 
 if __name__ == "__main__":
@@ -21,20 +82,27 @@ if __name__ == "__main__":
                 "sessions_played": 13,
                 "favorite_mode": "ranked",
                 "achievements_count": 5,
+                "achvm":
+                {'level_10', 'treasure_hunter',
+                 'boss_slayer', 'speed_demon', 'perfectionist'}
             },
             "bob": {
                 "level": 16,
                 "total_score": 4657,
                 "sessions_played": 27,
                 "favorite_mode": "ranked",
-                "achievements_count": 2,
+                "achievements_count": 4,
+                "achvm":
+                {'first_kill', 'level_10', 'boss_slayer', 'collector'}
             },
             "charlie": {
                 "level": 44,
                 "total_score": 9935,
                 "sessions_played": 21,
                 "favorite_mode": "ranked",
-                "achievements_count": 7,
+                "achievements_count": 4,
+                "achvm":
+                {'first_kill', 'level_10', 'treasure_hunter', 'speed_demon'}
             },
             "diana": {
                 "level": 3,
@@ -42,20 +110,26 @@ if __name__ == "__main__":
                 "sessions_played": 21,
                 "favorite_mode": "casual",
                 "achievements_count": 4,
+                "achvm":
+                {'first_kill', 'level_10', 'treasure_hunter', 'speed_demon'}
             },
             "eve": {
                 "level": 33,
                 "total_score": 1434,
                 "sessions_played": 81,
                 "favorite_mode": "casual",
-                "achievements_count": 7,
+                "achievements_count": 4,
+                "achvm":
+                {'first_kill', 'level_10', 'treasure_hunter', 'speed_demon'}
             },
             "frank": {
                 "level": 15,
                 "total_score": 8359,
                 "sessions_played": 85,
                 "favorite_mode": "competitive",
-                "achievements_count": 1,
+                "achievements_count": 4,
+                "achvm":
+                {'first_kill', 'level_10', 'treasure_hunter', 'speed_demon'}
             },
         },
         "sessions": [
@@ -272,15 +346,16 @@ if __name__ == "__main__":
         ],
         "game_modes": ["casual", "competitive", "ranked"],
         "achievements": [
-            "first_blood",
-            "level_master",
-            "speed_runner",
-            "treasure_seeker",
-            "boss_hunter",
+            "first_kill",
+            "level_10",
+            "speed_demon",
+            "treasure_hunter",
+            "boss_slayer",
             "pixel_perfect",
-            "combo_king",
+            "perfectionist",
             "explorer",
         ],
     }
     list_compr(pl_data)
-    
+    dict_compr(pl_data)
+    combined_anal(pl_data)

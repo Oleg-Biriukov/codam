@@ -2,7 +2,10 @@ import sys
 
 
 def extract_arg() -> dict:
+    """The function for extracting arguments"""
     args = sys.argv[1::]
+    if len(args) == 0:
+        raise ZeroDivisionError()
     arg_d = {}
     sum = 0
     for arg in args:
@@ -13,6 +16,7 @@ def extract_arg() -> dict:
 
 
 def invertory_anal(inv: dict) -> None:
+    """Print out the inventory analysis"""
     print("=== Inventory System Analysis ===")
     print("Total items in inventory:", sum(inv.values()))
     print("Unique item types:", len(inv.keys()))
@@ -75,8 +79,16 @@ we can use it in condition without raising KeyError"""
 
 
 if __name__ == "__main__":
-    inv = extract_arg()
-    invertory_anal(inv)
-    stats_inventory(inv)
-    it_categories_sugg(inv)
-    d_properties(inv, 'sword')
+    try:
+        inv = extract_arg()
+        invertory_anal(inv)
+        stats_inventory(inv)
+        it_categories_sugg(inv)
+        d_properties(inv, 'sword')
+    except Exception as e:
+        if type(e).__name__ == 'ZeroDivisionError':
+            print("You cannot point quantity of items as 0!")
+        else:
+            print("Wrong data was provided !")
+            print("Usage: python3 ft_score_analytics.py \
+<item1>:<quantity> <item2>:<quantity> ...")
