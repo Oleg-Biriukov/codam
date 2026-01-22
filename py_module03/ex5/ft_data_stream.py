@@ -56,15 +56,29 @@ def fibonacci_sequence(count: int):
         prev, cur = cur, prev + cur
 
 
-def prime_num(count: int):
+def prime_num():
     start = 2
-    for i in range(count):
+    while True:
         for num in range(2, start + 1):
             if start == num:
                 yield start
             if start % num == 0:
                 break
         start += 1
+
+
+def get_demonstr() -> None:
+    f_seq = fibonacci_sequence(10)
+    print('''=== Generator Demonstration ===
+Fibonacci sequence (first 10):''', end=' ')
+    for i in range(9):
+        print(next(f_seq), end=', ')
+    print(next(f_seq))
+    next_p = prime_num()
+    print("Prime numbers (first 5):", end=' ')
+    for i in range(4):
+        print(next(next_p), end=', ')
+    print(next(next_p))
 
 
 if __name__ == "__main__":
@@ -420,18 +434,7 @@ if __name__ == "__main__":
             "data": {"level": 7, "score_delta": -25, "zone": "pixel_zone_5"},
         },
     ]
-    len = len(player_data)
+    len_d = len(player_data)
     player_data = iter(player_data)
-    data_stream(player_data, len)
-    f_seq = fibonacci_sequence(10)
-    print('''\n=== Generator Demonstration ===
-Fibonacci sequence (first 10):''', end=' ')
-    for i in range(9):
-        print(next(f_seq), end=', ')
-    print(next(f_seq))
-    s = prime_num(5)
-    print(next(s))
-    print(next(s))
-    print(next(s))
-    print(next(s))
-    print(next(s))
+    data_stream(player_data, len_d)
+    get_demonstr()
