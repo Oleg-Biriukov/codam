@@ -1,10 +1,13 @@
 import sys
 
 if __name__ == "__main__":
+    '''Try to take data from stdin channel and writing in strerror and stdout
+    channels'''
     print("=== CYBER ARCHIVES - COMMUNICATION SYSTEM ===\n")
     id = input("Input Stream active. Enter archivist ID: ")
     status = input("Input Stream active. Enter status report: ")
     print(f"[STANDARD] Archive status from {id}: {status}")
-    sys.stderr.write("[ALERT] System diagnostic: Communication channels verified\n")
+    sys.stderr.write("[ALERT] System diagnostic: Communication channels\
+ verified\n")
     sys.stdout.write("[STANDARD] Data transmission complete")
     print("\nThree-channel communication test successful.")

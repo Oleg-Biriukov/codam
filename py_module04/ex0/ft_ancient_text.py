@@ -1,4 +1,5 @@
 if __name__ == "__main__":
+    '''Trying to open file via open() and read data for there.'''
     name = "ancient_fragment.txt"
     print("=== CYBER ARCHIVES - DATA RECOVERY SYSTEM ===\n")
     try:

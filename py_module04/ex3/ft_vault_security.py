@@ -1,15 +1,20 @@
-text = "\n[CLASSIFIED] New security protocols archived"
-print('''Initiating secure vault access...
+if __name__ == "__main__":
+    '''Trying to interact with file using protocol "with".
+    which opens and closes files inside'''
+    text = "\n[CLASSIFIED] New security protocols archived"
+    print('''Initiating secure vault access...
 Vault connection established with failsafe protocols\n''')
-try:
-    with open("classified_data.txt", "r") as data:
-        print(data.read())
-    print("SECURE PRESERVATION:")
-    with open("classified_data.txt", "a") as data:
-        data.write(text)
-        print(text)
-    print('''Vault automatically sealed upon completion
+    try:
+        with open("classified_data.txt", "r") as data:
+            print(data.read())
+    except Exception:
+        print("ERROR:Storage vault not found.")
+    try:
+        print("SECURE PRESERVATION:")
+        with open("classified_data.txt", "a") as data:
+            data.write(text)
+            print(text)
+        print('''Vault automatically sealed upon completion
 All vault operations completed with maximum security.''')
-except Exception:
-    print("ERROR:Storage vault not found.")
-
+    except Exception:
+        print("ERROR:Storage vault not found.")

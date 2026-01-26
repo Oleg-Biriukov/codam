@@ -1,4 +1,5 @@
 if __name__ == "__main__":
+    '''opening the file and try to write the data.'''
     name = "new_discovery.txt"
     text = '''[ENTRY 001] New quantum algorithm discovered
 [ENTRY 002] Efficiency increased by 347%
