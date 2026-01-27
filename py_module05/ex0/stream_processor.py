@@ -54,7 +54,7 @@ class TextProcessor(DataProcessor):
 
 
 class LogProcessor(DataProcessor):
-    @classmethod
+    @staticmethod
     def process(cls, data) -> str:
         return data
 
@@ -102,3 +102,6 @@ if __name__ == "__main__":
         print(result)
     else:
         print("Error: Log data unverified")
+    
+
+
