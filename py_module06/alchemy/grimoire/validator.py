@@ -1,6 +1,6 @@
 def validate_ingredients(ingredients: str) -> str:
     valid = ["fire", "water", "earth", "air"]
-    if ingredients in valid:
-        return f"{ingredients} - VALID"
-    else:
-        return f"{ingredients} - INVALID"
+    for el in valid:
+        if el in ingredients:
+            return f"{ingredients} - VALID"
+    return f"{ingredients} - INVALID"

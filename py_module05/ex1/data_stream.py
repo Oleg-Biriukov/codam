@@ -65,9 +65,9 @@ class TransactionStream(DataStream):
             buy = sum([i for i in data_batch if i > 0])
             sells = sum([i * -1 for i in data_batch if i < 0])
             self.lst_data.append(data_batch)
-            return f'''Buy: {buy}
-Sells: {sells}
-Net flow: {sum(data_batch)}'''
+            return f'''Buy: {buy}\
+ | Sells: {sells}\
+ | Net flow: {sum(data_batch)}'''
         except Exception:
             return None
 
@@ -126,9 +126,104 @@ class EventStream(DataStream):
         return stats
 
 
-class StreamProcessor(DataStream):
-    pass
+class StreamProcessor():
+    @staticmethod
+    def polym_process(btch_obj: list[DataStream]) -> None:
+        for obj in btch_obj:
+            if isinstance(obj, SensorStream):
+                print(f'- Sensor data: {obj.get_stats()['Data processed']}\
+ readings processed')
+
+            elif isinstance(obj, TransactionStream):
+                print(f'- Transaction data: \
+{obj.get_stats()['Data processed']} operations processed')
+
+            elif isinstance(obj, EventStream):
+                print(f'- Event data: \
+{obj.get_stats()['Data processed']} Event processed')
+
+    @staticmethod
+    def filter_data(data_batch: List[DataStream],
+                    criteria: Optional[str] = None) -> Dict:
+        rtnr = dict(temputare=[],
+                    errors=[],
+                    transiction=[])
+
+        for obj in data_batch:    
+            if criteria == 'high-priority':
+                if isinstance(obj, SensorStream):
+                    for data in obj.lst_data:
+                        for tmpr in data:
+                            if tmpr > 30:
+                                rtnr['temputare'].append(tmpr)
+                elif isinstance(obj, TransactionStream):
+                    for data in obj.lst_data:
+                        for transct in data:
+                            if transct > 1000000:
+                                rtnr['transiction'].append(transct)
+                elif isinstance(obj, EventStream):
+                    for data in obj.lst_data:
+                        for event in data:
+                            if 'fatal' in event or 'critical' in event:
+                                rtnr['errors'].append(event)
+
+            elif criteria == 'low-priority':
+                if isinstance(obj, SensorStream):
+                    for data in obj.lst_data:
+                        for tmpr in data:
+                            if tmpr < 30:
+                                rtnr['temputare'].append(tmpr)
+                elif isinstance(obj, TransactionStream):
+                    for data in obj.lst_data:
+                        for transct in data:
+                            if transct < 1000000:
+                                rtnr['transiction'].append(transct)
+                elif isinstance(obj, EventStream):
+                    for data in obj.lst_data:
+                        for event in data:
+                            if 'fatal' in event or 'critical' in event:
+                                continue
+                            rtnr['errors'].append(event)
+
+        return rtnr
 
 
 if __name__ == "__main__":
-    pass
+    obj = []
+    data = [[20, 0, 3, 1, -1],
+            [100, -100, 3000, -32],
+            ['login', 'error', 'logout', 'alert', 'fatal_error']]
+    criteria = 'high-priority'
+
+    print('=== CODE NEXUS - POLYMORPHIC STREAM SYSTEM ===')
+
+    print('\nInitializing Sensor Stream...')
+    obj.append(SensorStream('SENSOR_001'))
+    print('Processing sensor batch:', obj[0].process_batch(data[0]))
+    print('Sensor analysis:', obj[0].get_stats())
+
+    print('\nInitializing Transaction Stream...')
+    obj.append(TransactionStream('TRANS_001'))
+    print('Processing sensor batch:', obj[1].process_batch(data[1]))
+    print('Sensor analysis:', obj[1].get_stats())
+
+    print('\nInitializing Event Stream...')
+    obj.append(EventStream('EVENT_001'))
+    print('Processing sensor batch:', obj[2].process_batch(data[2]))
+    print('Sensor analysis:', obj[2].get_stats())
+
+    print('''\n=== Polymorphic Stream Processing ===
+Processing mixed stream types through unified interface...\n''')
+
+    print('Batch 1 Results:')
+    StreamProcessor.polym_process(obj)
+
+    print("\nStream filtering active:", criteria)
+    res = StreamProcessor.filter_data(obj, criteria)
+    print(f'''Filtered results:
+{len(res['errors'])} critical sensor alerts
+{len(res['transiction'])} large transaction
+{len(res['temputare'])} anomaly temperature
+''')
+
+    print('All streams processed successfully. Nexus throughput optimal')
