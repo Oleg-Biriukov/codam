@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any
+from typing import Any, List
 
 
 class DataProcessor(ABC):
@@ -11,13 +11,12 @@ class DataProcessor(ABC):
     def validate(self, data: Any) -> bool:
         pass
 
-    @abstractmethod
     def format_output(self, result: str) -> str:
         return f"Output: {result}"
 
 
 class NumericProcessor(DataProcessor):
-    def process(self, data) -> str:
+    def process(self, data: Any) -> str:
         try:
             return f"Processed {len(data)} numeric values,\
  sum={sum(data)}, avg={sum(data)/len(data)}"
@@ -34,34 +33,37 @@ class NumericProcessor(DataProcessor):
         else:
             return False
 
-    def format_output(self, result) -> str:
+    def format_output(self, result: str) -> str:
         out = super().format_output(result)
         return out + "\nNumericProcessor done successfully"
 
 
 class TextProcessor(DataProcessor):
-    def process(self, data) -> str:
+    def process(self, data: Any) -> str:
         try:
             return f"{len(data)} characters, {len(data.split(' '))} words"
         except Exception:
             return "ERROR: Connection timeout"
 
-    def validate(self, data) -> bool:
+    def validate(self, data: Any) -> bool:
         if type(data) is str:
             return True
         else:
             return False
 
-    def format_output(self, result) -> str:
+    def format_output(self, result: str) -> str:
         out = super().format_output(result)
         return out + "\nTextProcessor done successfully"
 
 
 class LogProcessor(DataProcessor):
-    def process(self, data) -> str:
-        return data
+    def process(self, data: Any) -> str:
+        try:
+            return f'The error conclude {len(data)} characters'
+        except:
+            return ''
 
-    def validate(self, data) -> bool:
+    def validate(self, data: Any) -> bool:
         log_headers = ['[ERROR]', '[STATUS]', '[INFO]']
         if type(data) is str:
             for log_h in log_headers:
@@ -69,11 +71,11 @@ class LogProcessor(DataProcessor):
                     return True
             return False
 
-    def format_output(self, result) -> str:
+    def format_output(self, result: str) -> str:
         return f"Error was catched => {result}"
 
 
-def polymorphic_way(btch_d: list[any], btch_obj: list[DataProcessor]) -> None:
+def polymorphic_way(btch_d: List[any], btch_obj: List[DataProcessor]) -> None:
     for i in range(0, len(btch_d)):
         print(f'Result {i+1}:', end=' ')
         for obj in btch_obj:

@@ -25,7 +25,7 @@ class DataStream(ABC):
 
 
 class SensorStream(DataStream):
-    def __init__(self, stream_id):
+    def __init__(self, stream_id: str):
         self.id = stream_id
         self.lst_data = []
         print(f"Stream ID: {stream_id}, Type: Environmental Data")
@@ -55,12 +55,12 @@ class SensorStream(DataStream):
 
 
 class TransactionStream(DataStream):
-    def __init__(self, stream_id):
+    def __init__(self, stream_id: str):
         self.id = stream_id
         self.lst_data = []
         print(f"Stream ID: {stream_id}, Type: Financial Data")
 
-    def process_batch(self, data_batch):
+    def process_batch(self, data_batch: List[Any]) -> str:
         try:
             buy = sum([i for i in data_batch if i > 0])
             sells = sum([i * -1 for i in data_batch if i < 0])
@@ -91,7 +91,7 @@ class TransactionStream(DataStream):
 
 
 class EventStream(DataStream):
-    def __init__(self, stream_id):
+    def __init__(self, stream_id: str):
         self.lst_data = []
         self.id = stream_id
         print(f"Stream ID: {stream_id}, Type: System Events")
@@ -149,7 +149,7 @@ class StreamProcessor():
                     errors=[],
                     transiction=[])
 
-        for obj in data_batch:    
+        for obj in data_batch:
             if criteria == 'high-priority':
                 if isinstance(obj, SensorStream):
                     for data in obj.lst_data:
