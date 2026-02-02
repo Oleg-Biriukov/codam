@@ -59,8 +59,8 @@ class TextProcessor(DataProcessor):
 class LogProcessor(DataProcessor):
     def process(self, data: Any) -> str:
         try:
-            return f'The error conclude {len(data)} characters'
-        except:
+            return f'The error contain {len(data)} characters'
+        except Exception:
             return ''
 
     def validate(self, data: Any) -> bool:

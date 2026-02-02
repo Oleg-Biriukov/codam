@@ -71,7 +71,7 @@ class TransactionStream(DataStream):
         except Exception:
             return None
 
-    def get_stats(self):
+    def get_stats(self) -> Dict[str, Union[str, int, float]]:
         stats = super().get_stats()
         try:
             buys_t = 0
@@ -108,7 +108,7 @@ class EventStream(DataStream):
             pass
         return None
 
-    def get_stats(self):
+    def get_stats(self) -> Dict[str, Union[str, int, float]]:
         stats = super().get_stats()
         try:
             t_events = 0
@@ -190,7 +190,7 @@ class StreamProcessor():
 
 if __name__ == "__main__":
     obj = []
-    data = [[20, 0, 3, 1, -1],
+    data = [[220, 0, 3, 1, -1],
             [100, -100, 3000, -32],
             ['login', 'error', 'logout', 'alert', 'fatal_error']]
     criteria = 'high-priority'
