@@ -1,4 +1,15 @@
-from ex0.Card import Card
+from ex0 import Card, Enum
+
+
+class EffectType(Enum):
+    damage = ('damage', 'Deal 3 damage to target')
+    heal = ('heal', 'Deal 3 heal to target')
+    buff = ('buff', 'Permanent: +1 mana per turn')
+    debuf = ('debuf', 'Permanent: -1 mana per turn')
+
+    def __init__(self, effect: str, description: str):
+        self.effect = effect
+        self.description = description
 
 
 class CreatureCard(Card):
@@ -7,25 +18,23 @@ class CreatureCard(Card):
         if attack < 1 or health < 1:
             raise ValueError('health or attack have to be more then 0')
         super().__init__(name, cost, rarity)
-        self.card.update({
-            'type': 'Creature',
-            'attack': attack,
-            'health': health
-            })
+        self.type = 'Creature'
+        self.attack = attack
+        self.health = health
 
     def play(self, game_state: dict) -> dict:
         p_state = dict(
-            card_played=self.card['name'],
-            mana_used=self.card['cost']
+            card_played=self.name,
+            mana_used=self.cost
         )
         p_state.update(game_state)
         return p_state
 
     def attack_target(self, target) -> dict:
         a_state = dict(
-            attacker=self.card['name'],
+            attacker=self.name,
             target=target,
-            damage_dealt=self.card['attack'],
+            damage_dealt=self.attack,
             combat_resolved=True
         )
         return a_state
