@@ -54,6 +54,21 @@ class FantasyCardFactory(CardFactory):
         card = SpellCard(name, cost, rart, effect)
         return card
 
+    def create_themed_deck(self, size: int) -> dict:
+        deck = []
+        if size >= 1:
+            cards = [self.create_artifact, self.create_creatures,
+                     self.create_spells]
+            for t in range(1, size):
+                card = random.choice(cards)()
+                deck.append(card)
+            result = dict(
+                spells=[x for x in deck if deck.name == 'Spell'],
+                artifact=[x for x in deck if deck.name == 'Artifact'],
+                creatures=[x for x in deck if deck.name == 'Creature']
+            )
+            return result
+
     def get_supported_types(self) -> dict:
         return self.av_types
 
