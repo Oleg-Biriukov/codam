@@ -1,4 +1,4 @@
-from ex2 import ABC, abstractmethod
+from abc import ABC, abstractmethod
 
 
 class Magical(ABC):

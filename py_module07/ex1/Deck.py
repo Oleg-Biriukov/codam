@@ -1,4 +1,7 @@
-from ex1 import Card, shuffle, SpellCard, ArtifactCard, CreatureCard
+from ex1.SpellCard import SpellCard
+from ex1.ArtifactCard import ArtifactCard
+from ex0 import Card, CreatureCard
+from random import shuffle
 
 
 class Deck:

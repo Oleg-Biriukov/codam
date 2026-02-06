@@ -1,4 +1,7 @@
-from ex1 import SpellCard, CreatureCard, ArtifactCard, Deck
+from ex1.ArtifactCard import ArtifactCard
+from ex1.SpellCard import SpellCard
+from ex1.Deck import Deck
+from ex0 import CreatureCard
 
 
 def main():

@@ -1,4 +1,4 @@
-from ex3 import ABC, abstractmethod
+from abc import ABC, abstractmethod
 
 
 class GameStrategy(ABC):

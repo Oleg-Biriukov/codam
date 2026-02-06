@@ -1,4 +1,5 @@
-from ex0 import Enum, ABC, abstractmethod
+from enum import Enum
+from abc import ABC, abstractmethod
 
 
 class EffectType(Enum):

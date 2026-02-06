@@ -1,4 +1,5 @@
-from ex3 import ABC, abstractmethod, Card
+from abc import ABC, abstractmethod
+from ex0 import Card
 
 
 class CardFactory(ABC):

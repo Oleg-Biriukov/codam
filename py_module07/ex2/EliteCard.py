@@ -1,4 +1,6 @@
-from ex2 import Card, Combatable, Magical
+from ex0 import Card
+from ex2.Combatable import Combatable
+from ex2.Magical import Magical
 from random import choice
 
 

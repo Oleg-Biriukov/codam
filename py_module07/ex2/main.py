@@ -1,4 +1,4 @@
-from ex2 import EliteCard
+from ex2.EliteCard import EliteCard
 
 
 def main() -> None:

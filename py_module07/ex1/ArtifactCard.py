@@ -1,4 +1,4 @@
-from ex1 import Card, EffectType
+from ex0 import Card, EffectType
 
 
 class ArtifactCard(Card):

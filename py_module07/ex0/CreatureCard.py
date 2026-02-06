@@ -1,4 +1,5 @@
-from ex0 import Card, Enum
+from enum import Enum
+from ex0.Card import Card
 
 
 class EffectType(Enum):
@@ -15,7 +16,7 @@ class EffectType(Enum):
 class CreatureCard(Card):
     def __init__(self, name: str, cost: int, rarity: str, attack: int,
                  health: int) -> None:
-        if attack > 1 or health > 1:
+        if attack < 1 or health < 1:
             raise ValueError('health or attack have to be more then 0')
         super().__init__(name, cost, rarity)
         self.type = 'Creature'

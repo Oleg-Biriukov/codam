@@ -1,5 +1,7 @@
 import random
-from ex3 import Card, CreatureCard, SpellCard, EffectType, CardFactory
+from ex0 import Card, CreatureCard, EffectType
+from ex1 import SpellCard
+from ex3.CardFactory import CardFactory
 
 
 class FantasyCardFactory(CardFactory):
@@ -11,7 +13,7 @@ class FantasyCardFactory(CardFactory):
         )
         self.av_rarity = ['rare', 'common', 'ellite', 'legendary']
 
-    def create_creatures(self, name_or_power: str | int | None = None) -> Card:
+    def create_creature(self, name_or_power: str | int | None = None) -> Card:
         if isinstance(name_or_power, int):
             cost = name_or_power
         else:
@@ -26,7 +28,7 @@ class FantasyCardFactory(CardFactory):
         card = CreatureCard(name, cost, rart, attck, hlth)
         return card
 
-    def create_spells(self, name_or_power: str | int | None = None) -> Card:
+    def create_spell(self, name_or_power: str | int | None = None) -> Card:
         if isinstance(name_or_power, int):
             cost = name_or_power
         else:
@@ -36,8 +38,8 @@ class FantasyCardFactory(CardFactory):
         else:
             name = random.choice(self.av_types['spells'])
         rart = random.choice(self.av_rarity)
-        effect = random.choice(EffectType.__members__)
-        card = SpellCard(name, cost, rart, effect)
+        effect = random.choice(list(EffectType))
+        card = SpellCard(name, cost, rart, effect.effect)
         return card
 
     def create_artifact(self, name_or_power: str | int | None = None) -> Card:
@@ -50,22 +52,22 @@ class FantasyCardFactory(CardFactory):
         else:
             name = random.choice(self.av_types['artifacts'])
         rart = random.choice(self.av_rarity)
-        effect = random.choice(EffectType.__members__)
-        card = SpellCard(name, cost, rart, effect)
+        effect = random.choice(list(EffectType))
+        card = SpellCard(name, cost, rart, effect.effect)
         return card
 
     def create_themed_deck(self, size: int) -> dict:
         deck = []
         if size >= 1:
-            cards = [self.create_artifact, self.create_creatures,
-                     self.create_spells]
+            cards = [self.create_artifact, self.create_creature,
+                     self.create_spell]
             for t in range(1, size):
                 card = random.choice(cards)()
                 deck.append(card)
             result = dict(
-                spells=[x for x in deck if deck.name == 'Spell'],
-                artifact=[x for x in deck if deck.name == 'Artifact'],
-                creatures=[x for x in deck if deck.name == 'Creature']
+                spells=[x for x in deck if x.type == 'Spell'],
+                artifact=[x for x in deck if x.type == 'Artifact'],
+                creatures=[x for x in deck if x.type == 'Creature']
             )
             return result
 
