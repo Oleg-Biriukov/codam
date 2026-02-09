@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 
 
 class Rankable(ABC):
+    '''
+    Blueprint for Rankable cards
+    '''
     @abstractmethod
     def calculate_rating(self) -> int:
         pass

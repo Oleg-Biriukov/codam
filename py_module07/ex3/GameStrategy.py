@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 
 
 class GameStrategy(ABC):
+    '''
+    Blueprint for strategy
+    '''
     @abstractmethod
     def execute_turn(self, hand: list, battlefield: list) -> dict:
         pass

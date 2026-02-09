@@ -5,6 +5,10 @@ import random
 
 
 class TournamentCard(Card, Combatable, Rankable):
+    '''
+    TournamentCard is class for combatable and rankable cards.
+    It is implement calcute rank for card.
+    '''
     def __init__(self, id: str, name: str, cost: int, rarity: str,
                  attck: int) -> None:
         if attck >= 1:

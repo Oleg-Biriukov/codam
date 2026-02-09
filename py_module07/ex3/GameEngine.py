@@ -5,6 +5,10 @@ from typing import Generator
 
 
 class GameEngine:
+    '''
+    Game engine that configure GameStrategy and CardFactory
+    reqeiments, then simulate turn base on strategy.
+    '''
     def __init__(self):
         self.report = dict(
             turns_simulated=0,

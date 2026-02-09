@@ -1,6 +1,7 @@
 from ex0 import CreatureCard
 
-if __name__ == "__main__":
+
+def main():
     print('''=== DataDeck Card Foundation ===\n
 Testing Abstract Base Class Design:\n''')
     dragon = CreatureCard('Fire Dragon', 5, 'Legendary', 7, 5)
@@ -14,3 +15,7 @@ battlefield'}))
     print('\nTesting insufficient mana (3 available):')
     print("Playable:", dragon.is_playable(3))
     print("\nAbstract pattern successfully demonstrated!")
+
+
+if __name__ == "__main__":
+    main()

@@ -3,6 +3,10 @@ import random
 
 
 class TournamentPlatform:
+    '''
+    TournamentPlatform is platform for performing matches and getting info
+    and store it in statistic or in leaderboard.
+    '''
     def __init__(self):
         self.list_p = {}
         self.status = 'active'

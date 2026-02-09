@@ -4,6 +4,10 @@ from typing import Generator
 
 
 class AggressiveStrategy(GameStrategy):
+    '''
+    AggressiveStrategy based on GameStrategy that executes all
+    inherits methods via iteration implementation
+    '''
     def execute_turn(self, hand: list, battlefield: list) -> Generator[dict, None, str]:  # noqa
         for card in hand:
             if card.type == 'Creature':

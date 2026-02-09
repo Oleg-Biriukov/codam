@@ -3,6 +3,9 @@ from ex0 import Card
 
 
 class CardFactory(ABC):
+    '''
+    Blueprint for Card creation class
+    '''
     @abstractmethod
     def create_creature(self, name_or_power: str | int | None = None) -> Card:
         pass

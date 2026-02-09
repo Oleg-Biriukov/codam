@@ -5,6 +5,9 @@ from ex3.CardFactory import CardFactory
 
 
 class FantasyCardFactory(CardFactory):
+    '''
+    Factory for all previous card, that creates each of them.
+    '''
     def __init__(self):
         self.av_types = dict(
             Creatures=['dragon', 'goblin'],

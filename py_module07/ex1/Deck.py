@@ -5,6 +5,11 @@ from random import shuffle
 
 
 class Deck:
+    '''
+    Deck contain all class and their methods to combine them in
+    one body. Deck class have all methods that interact with all previous
+    classes directly
+    '''
     def __init__(self, name: str):
         self.name = name
         self.deck = []

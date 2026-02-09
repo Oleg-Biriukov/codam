@@ -2,6 +2,10 @@ from ex0 import Card, EffectType
 
 
 class SpellCard(Card):
+    '''
+    Spellcard was based on Card class, but with changed abilities
+    and attributes
+    '''
     def __init__(self, name: str, cost: int, rarity: str, effect_type: str):
         if effect_type in EffectType.__members__:
             super().__init__(name, cost, rarity)

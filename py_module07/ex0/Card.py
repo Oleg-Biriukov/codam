@@ -3,6 +3,11 @@ from abc import ABC, abstractmethod
 
 
 class EffectType(Enum):
+    '''
+    All supported effect types in deck.
+    For each class var it goes throw init and devide it into variables as
+    effect and description
+    '''
     damage = ('damage', 'Deal 3 damage to target')
     heal = ('heal', 'Deal 3 heal to target')
     buff = ('buff', 'Permanent: +1 mana per turn')
@@ -14,6 +19,9 @@ class EffectType(Enum):
 
 
 class Card(ABC):
+    '''
+    It main blueprint of all cards
+    '''
     def __init__(self, name: str, cost: int, rarity: str) -> None:
         self.name = name
         self.cost = cost

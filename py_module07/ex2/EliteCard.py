@@ -5,6 +5,10 @@ from random import choice
 
 
 class EliteCard(Card, Combatable, Magical):
+    '''
+    EliteCard demonstrate multiple inherits that combile all
+    method and attributes into one body.
+    '''
     def __init__(self, name: str, cost: int, rarity: str, attck: int,
                  health: int, t_mana: int) -> None:
         if (attck > 1 or health > 1 or t_mana > 1):
@@ -37,9 +41,10 @@ class EliteCard(Card, Combatable, Magical):
         r_dam = choice(range(0, incoming_damage))
         if r_dam >= self.health:
             live = False
+            self.health = 0
         else:
             live = True
-        self.health = self.health - r_dam
+            self.health = self.health - r_dam
         self.defent_s = dict(
             defender=self.name,
             damage_taken=r_dam,

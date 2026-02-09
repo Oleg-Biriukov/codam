@@ -2,6 +2,9 @@ from abc import ABC, abstractmethod
 
 
 class Combatable(ABC):
+    '''
+    Abstract class for all combatable cards.
+    '''
     @abstractmethod
     def attack(self, target: str) -> dict:
         pass

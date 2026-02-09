@@ -1,19 +1,10 @@
-from enum import Enum
 from ex0.Card import Card
 
 
-class EffectType(Enum):
-    damage = ('damage', 'Deal 3 damage to target')
-    heal = ('heal', 'Deal 3 heal to target')
-    buff = ('buff', 'Permanent: +1 mana per turn')
-    debuf = ('debuf', 'Permanent: -1 mana per turn')
-
-    def __init__(self, effect: str, description: str):
-        self.effect = effect
-        self.description = description
-
-
 class CreatureCard(Card):
+    '''
+    Creature card based on Card template
+    '''
     def __init__(self, name: str, cost: int, rarity: str, attack: int,
                  health: int) -> None:
         if attack < 1 or health < 1:
