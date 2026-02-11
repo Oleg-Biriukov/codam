@@ -3,7 +3,8 @@ import sys
 
 modules = {'requests': 'Network access ready',
            'pandas': 'Data manipulation ready',
-           'matplotlib': 'Visualization ready'}
+           'matplotlib': 'Visualization ready',
+           'numpy': 'Matrix ready'}
 
 
 def main():
@@ -19,7 +20,9 @@ def main():
                 status = False
         if status is False:
             sys.exit()
-        data = {"x": [1, 2, 3], "y": [4, 5, 6]}
+        data = {"x": modules['numpy'].array([1, 2, 3]), "y": modules['numpy'].array([4, 5, 6])}
+        data['x'] *= 2
+        data['y'] *= 2
         out = modules['pandas'].DataFrame(data)
         out.plot(x='x', y='y', kind='line')
         modules['matplotlib'].pyplot.savefig("plot.png", dpi=300)
