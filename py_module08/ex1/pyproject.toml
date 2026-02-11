@@ -1,0 +1,11 @@
+[tool.poetry]
+name = "ex1"
+version = "1.0.0"
+description = "Cool thing"
+authors = ['obirukov <obirukov@student.codam.nl>']
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31"
+pandas = "^2.1.0"
+matplotlib = "^3.7.2"

@@ -3,7 +3,7 @@ import os
 import site
 
 no_in_venv = f'''MATRIX STATUS: You're still plugged in\n
-Current Python: {sys.base_prefix}
+Current Python: {sys.executable}
 Virtual Environment: None detected
 \nWARNING: You're in the global environment!
 The machines can see everything you install.
@@ -15,8 +15,8 @@ Scripts
 activate # On Windows'''
 
 in_venv = f'''MATRIX STATUS: Welcome to the construct
-\nCurrent Python: {sys.base_prefix}
-Virtual Environment: {os.environ.get("VIRTUAL_ENV")}
+\nCurrent Python: {sys.executable}
+Virtual Environment: {os.path.basename(sys.prefix)}
 Environment Path: {sys.prefix}
 \nSUCCESS: You're in an isolated environment!
 Safe to install packages without affecting
