@@ -33,7 +33,23 @@ def memoized_fibonacci(n: int) -> int:
 
 
 def spell_dispatcher() -> callable:
-    pass
+    @functools.singledispatch
+    def spell_system(value):
+        return f'Error: wrong arg({value})'
+
+    @spell_system.register
+    def _(value: int):
+        return f'The damage was dealt in amount {value}'
+
+    @spell_system.register
+    def _(value: str):
+        return f'The {value} was cast to a target'
+
+    @spell_system.register
+    def _(value: list):
+        return f'The {value} spells was cast to a target'
+
+    return spell_system
 
 
 def main():
