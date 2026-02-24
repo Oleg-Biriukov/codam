@@ -2,10 +2,6 @@ import functools
 import operator
 
 
-def base_enchantment(power: int, element: str, target: str) -> str:
-    return f'{element} enchant to {target} ({power} power)'
-
-
 def spell_reducer(spells: list[int], operation: str) -> int:
     if operation == 'sum':
         return functools.reduce(operator.add, spells)
@@ -18,6 +14,9 @@ def spell_reducer(spells: list[int], operation: str) -> int:
 
 
 def partial_enchanter(base_enchantment: callable) -> dict[str, callable]:
+    def base_enchantment(power: int, element: str, target: str) -> str:
+        return f'{element} enchant to {target} ({power} power)'
+
     part_encht = functools.partial(base_enchantment, power=50)
     return {
         'fire_enchant': part_encht('fire', 'sword'),
@@ -26,8 +25,11 @@ def partial_enchanter(base_enchantment: callable) -> dict[str, callable]:
     }
 
 
+@functools.lru_cache
 def memoized_fibonacci(n: int) -> int:
-    pass
+    if n < 2:
+        return n
+    return memoized_fibonacci(n-1) + memoized_fibonacci(n-2)
 
 
 def spell_dispatcher() -> callable:

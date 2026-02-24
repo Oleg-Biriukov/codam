@@ -19,7 +19,20 @@ def spell_accumulator(initial_power: int) -> callable:
 
 
 def memory_vault() -> dict[str, callable]:
-    pass
+    storage = {}
+
+    def store_data(key: int, value: any) -> None:
+        nonlocal storage
+        storage[key] = value
+
+    def recall(key: int) -> str | any:
+        if storage.get(key):
+            return storage[key]
+        else:
+            return 'Memory not found'
+
+    return {'store': lambda key, value: store_data(key, value),
+            'recall': lambda key: recall(key)}
 
 
 def main():
@@ -27,6 +40,8 @@ def main():
     power = spell_accumulator(10)
     enchantment_factory = lambda enchantment_type: lambda enchantment_name: enchantment_type + ' ' + enchantment_name # noqa
     item = enchantment_factory('Flaming')
+
+    print(count(), count(), count)
     print(item('sword'))
     print(power(3))
     print(power(3))
