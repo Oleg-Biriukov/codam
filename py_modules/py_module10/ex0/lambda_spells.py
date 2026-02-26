@@ -5,8 +5,8 @@ def main():
     artifact_sorter = lambda artifacts: sorted([a['power'] for a in artifacts], # noqa
                                                reverse=True)
     power_filter = lambda mages, min_power: filter(lambda mages: mages['power'] >= min_power, mages) # noqa
-    spell_transformer = lambda spells: map(lambda spell: '*' + spell + '*', # noqa
-                                           spells)
+    spell_transformer = lambda spells: list(map(lambda spell: '*' + spell + '*', # noqa
+                                                spells))
     mage_stats = lambda mages: {'max_power': max(mages), # noqa
                                 'min_power': min(mages),
                                 'avg_power': float(round(sum(mages) /
@@ -15,7 +15,7 @@ def main():
     power_filter(gen_mages, 3)
 
     gen_spells = gen.generate_spells()
-    spell_transformer(gen_spells)
+    gen_spells = spell_transformer(gen_spells)
     print(f'''artifact_sorter: {artifact_sorter(gen.generate_artifacts())}
 power_filter: {gen_mages}
 spell_transformer: {gen_spells}
