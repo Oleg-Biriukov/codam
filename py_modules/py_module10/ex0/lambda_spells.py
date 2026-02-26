@@ -15,9 +15,10 @@ def spell_transformer(spells: list[str]) -> list[str]:
 
 
 def mage_stats(mages: list[dict]) -> dict:
-    return {'max_power': max(mages, lambda i: i['power']),
-            'min_power': min(mages, lambda i: i['power']),
-            'avg_power': float(round(sum(mages)/len(mages), 3))}
+    return {'max_power': max(mages, key=lambda i: i['power']),
+            'min_power': min(mages, key=lambda i: i['power']),
+            'avg_power': float(round(sum(map(lambda m: m['power'], mages)) /
+                                     len(mages), 3))}
 
 
 def main():
@@ -29,7 +30,7 @@ def main():
     print(f'''artifact_sorter: {artifact_sorter(gen.generate_artifacts())}
 power_filter: {gen_mages}
 spell_transformer: {gen_spells}
-mage_stats: {mage_stats(gen.generate_spell_powers())}
+mage_stats: {mage_stats(gen.generate_artifacts())}
 ''')
 
 

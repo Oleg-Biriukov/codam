@@ -31,10 +31,13 @@ def memory_vault() -> dict[str, callable]:
             'recall': lambda key: recall(key)}
 
 
+def enchantment_factory(enchantment_type: str) -> callable:
+    return lambda enchantment_name: enchantment_type + ' ' + enchantment_name
+
+
 def main():
     count = mage_counter()
     power = spell_accumulator(10)
-    enchantment_factory = lambda enchantment_type: lambda enchantment_name: enchantment_type + ' ' + enchantment_name # noqa
     item = enchantment_factory('Flaming')
 
     print(count(), count(), count())
