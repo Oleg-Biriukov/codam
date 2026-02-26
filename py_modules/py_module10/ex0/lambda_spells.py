@@ -1,16 +1,26 @@
 from data_generator import FuncMageDataGenerator as gen
 
 
+def artifact_sorter(artifacts: list[dict]) -> list[dict]:
+    return sorted(artifacts, reverse=True,
+                  key=lambda power: power['power'])
+
+
+def power_filter(mages: list[dict], min_power: int) -> list[dict]:
+    return filter(lambda mage: mage['power'] >= min_power, mages)
+
+
+def spell_transformer(spells: list[str]) -> list[str]:
+    return list(map(lambda spell: '*' + spell + '*', spells))
+
+
+def mage_stats(mages: list[dict]) -> dict:
+    return {'max_power': max(mages, lambda i: i['power']),
+            'min_power': min(mages, lambda i: i['power']),
+            'avg_power': float(round(sum(mages)/len(mages), 3))}
+
+
 def main():
-    artifact_sorter = lambda artifacts: sorted([a['power'] for a in artifacts], # noqa
-                                               reverse=True)
-    power_filter = lambda mages, min_power: filter(lambda mages: mages['power'] >= min_power, mages) # noqa
-    spell_transformer = lambda spells: list(map(lambda spell: '*' + spell + '*', # noqa
-                                                spells))
-    mage_stats = lambda mages: {'max_power': max(mages), # noqa
-                                'min_power': min(mages),
-                                'avg_power': float(round(sum(mages) /
-                                                         len(mages), 3))}
     gen_mages = gen.generate_mages()
     power_filter(gen_mages, 3)
 
