@@ -25,7 +25,8 @@ def memory_vault() -> dict[str, callable]:
         nonlocal storage
         storage[key] = value
 
-    def recall(key: int) -> str | any:
+    def recall(key: int) -> any:
+        nonlocal storage
         if storage.get(key):
             return storage[key]
         else:
@@ -45,6 +46,8 @@ def main():
     print(item('sword'))
     print(power(3))
     print(power(3))
+    print(memory_vault()['store'](1, 'item'))
+    print(memory_vault()['recall'](1))
 
 
 if __name__ == "__main__":

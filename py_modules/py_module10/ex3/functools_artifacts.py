@@ -13,15 +13,16 @@ def spell_reducer(spells: list[int], operation: str) -> int:
         return functools.reduce(operator.mul, spells)
 
 
-def partial_enchanter(base_enchantment: callable) -> dict[str, callable]:
-    def base_enchantment(power: int, element: str, target: str) -> str:
-        return f'{element} enchant to {target} ({power} power)'
+def base_enchantment(power: int, element: str, target: str) -> str:
+    return f'{element} enchant to {target} ({power} power)'
 
+
+def partial_enchanter(base_enchantment: callable) -> dict[str, callable]:
     part_encht = functools.partial(base_enchantment, power=50)
     return {
-        'fire_enchant': part_encht('fire', 'sword'),
-        'ice_enchant': part_encht('ice', 'dagger'),
-        'lightning_enchant': part_encht('lightning', 'stick')
+        'fire_enchant': part_encht(element='fire', target='sword'),
+        'ice_enchant': part_encht(element='ice', target='dagger'),
+        'lightning_enchant': part_encht(element='lightning', target='stick')
     }
 
 
@@ -53,7 +54,11 @@ def spell_dispatcher() -> callable:
 
 
 def main():
-    print(spell_reducer([1, 2, 3, 4, 5], 'multiply'))
+    lst = [1, 2, 3, 4, 5]
+    print(spell_reducer(lst, 'multiply'))
+    print(partial_enchanter(base_enchantment))
+    print(memoized_fibonacci(9))
+    print(spell_dispatcher()(10))
 
 
 if __name__ == '__main__':
