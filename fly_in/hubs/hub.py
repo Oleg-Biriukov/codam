@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, PositiveInt
 from enum import Enum
+from typing import Self
 from connections import Connection
 
 
@@ -23,3 +24,6 @@ class Hub(Connection, BaseModel):
     zone: Zone = Zone.NORMAL
     color: Color = Color.NONE
     max_drones: int = Field(ge=1, le=50, default=1)
+    max_link_capacity: int = Field(gt=0, le=50, default=1)
+    next: Self | None = None
+    prev: Self | None = None
