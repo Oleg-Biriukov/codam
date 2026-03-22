@@ -2,14 +2,8 @@ from pydantic import BaseModel
 from typing import TypedDict, List, ClassVar, cast
 from hubs.hub import Hub, Zone, Color
 from drons.dron import Dron
-from ConfigCompiler.ErrorPrompts import HubError, ConfError
-
-
-class DataConf(TypedDict):
-    dron: List[Dron]
-    start_hub: Hub | None
-    end_hub: Hub | None
-    hubs: List[Hub | None]
+from .ErrorPrompts import HubError, ConfError
+from fly_in import DataConf
 
 
 class Meta(TypedDict):
@@ -123,7 +117,7 @@ class ConfigCompiler(BaseModel):
                             continue
                         elif name_arg[0] == 'nb_drones' and data['dron'] == []:
                             for d in range(int(name_arg[1])):
-                                data['dron'].append(Dron(id=d, pos=(0, 0)))
+                                data['dron'].append(Dron(id=d))
                         else:
                             raise ConfError(f'not appropriate type of \
 variable({name_arg[0]})')
