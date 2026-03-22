@@ -1,7 +1,15 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, PrivateAttr
-from typing import ClassVar, Generator, List
-from fly_in import Dron, DataConf
+from typing import ClassVar, Generator, List, TypedDict
+from hubs.hub import Hub
+from drons.dron import Dron
+
+
+class DataConf(TypedDict):
+    dron: List[Dron]
+    start_hub: Hub | None
+    end_hub: Hub | None
+    hubs: List[Hub | None]
 
 
 class Strategy(ABC, BaseModel):

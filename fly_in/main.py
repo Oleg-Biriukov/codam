@@ -1,5 +1,15 @@
-from ConfigCompiler.ConfigCompiler import ConfigCompiler, DataConf
+from ConfigCompiler.ConfigCompiler import ConfigCompiler
 import argparse as a
+from hubs.hub import Hub
+from drons.dron import Dron
+from typing import TypedDict, List
+
+
+class DataConf(TypedDict):
+    dron: List[Dron]
+    start_hub: Hub | None
+    end_hub: Hub | None
+    hubs: List[Hub | None]
 
 
 def main() -> None:

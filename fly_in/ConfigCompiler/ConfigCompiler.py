@@ -3,7 +3,13 @@ from typing import TypedDict, List, ClassVar, cast
 from hubs.hub import Hub, Zone, Color
 from drons.dron import Dron
 from .ErrorPrompts import HubError, ConfError
-from fly_in import DataConf
+
+
+class DataConf(TypedDict):
+    dron: List[Dron]
+    start_hub: Hub | None
+    end_hub: Hub | None
+    hubs: List[Hub | None]
 
 
 class Meta(TypedDict):
