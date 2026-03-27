@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 from enum import Enum
 from typing import Self, List
 
@@ -30,3 +30,10 @@ class Hub(BaseModel):
     max_link_capacity: str = Field(pattern="^[0-9]{5,15}$", default='1')
     next: List[Self] = Field(repr=False, default=[])
     prev: List[Self] = Field(repr=False, default=[])
+    g: float = PrivateAttr(float('inf'))
+    h: float = PrivateAttr(0.0)
+    parent: Self = PrivateAttr()
+
+    @property
+    def f(self) -> float:
+        return self.g + self.h

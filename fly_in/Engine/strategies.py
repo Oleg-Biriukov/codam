@@ -3,6 +3,7 @@ from pydantic import BaseModel, PrivateAttr
 from typing import ClassVar, Generator, List, TypedDict
 from hubs.hub import Hub
 from drons.dron import Dron
+import heapq
 
 
 class DataConf(TypedDict):
@@ -30,21 +31,40 @@ class Strategy(ABC, BaseModel):
 
 
 class Astar(Strategy):
-    # class Tools:
-    #     @staticmethod
-    #     def euclidean_distance(data: DataConf) -> float:
-    #         import math as m
-    #         return m.sqrt((x2-x1)**2 + (y2-y1)**2)
-
-    g: float = PrivateAttr(float('inf'))
+    g: float = PrivateAttr(0.0)
     h: float = PrivateAttr(0.0)
 
-    @property
-    def f(self) -> float:
-        return self.g + self.h
+    def perform_turn(self, data: DataConf) -> Generator[Hub, List[Dron],
+                                                        None]:
+        dron: Dron = data['dron'][0]
+        pos: Hub
+        open_list: List[tuple[float, Hub]] = []
+        close_list: set[Hub] = set()
+        heapq.heappush(open_list, (dron._pos.f, dron._pos))
+        while open_list:
+            _, pos = heapq.heappop(open_list)
+            if pos in close_list:
+                continue
+            close_list.add(pos)
+            if pos == data['start_hub']:
+                pos.g = 0
+                pos.h = Astar.euclidean_distance(pos, data['end_hub'])
+            for n in pos.next:
+                if n == data['end_hub']:
+                    return
+                if n.zone == 'restricted':
+                    n.g = pos.g + 2
+                else:
+                    n.g = pos.g + 1
+                n.h = Astar.euclidean_distance(n, data['end_hub'])
+                n.parent = pos
+                heapq.heappush(open_list, (n.f, n))
 
-    def perform_turn(self, drons: List[Dron]) -> Generator[None, List[Dron],
-                                                           None]:
-        dron: Dron = drons[0]
-        
         yield
+
+    @staticmethod
+    def euclidean_distance(src: Hub, dst: Hub) -> float:
+        import math as m
+        x1, y1 = src.pos
+        x2, y2 = dst.pos
+        return m.sqrt((x2-x1)**2 + (y2-y1)**2)
