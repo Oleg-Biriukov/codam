@@ -30,10 +30,14 @@ class Hub(BaseModel):
     max_link_capacity: str = Field(pattern="^[0-9]{5,15}$", default='1')
     next: List[Self] = Field(repr=False, default=[])
     prev: List[Self] = Field(repr=False, default=[])
-    g: float = PrivateAttr(float('inf'))
-    h: float = PrivateAttr(0.0)
-    parent: Self = PrivateAttr()
+    _g: float = PrivateAttr(float('inf'))
+    _h: float = PrivateAttr(float('inf'))
+    parent: Self = None
+
+    def model_post_init(self, context):
+        self.max_drones = int(self.max_drones)
+        self.max_link_capacity = int(self.max_link_capacity)
 
     @property
-    def f(self) -> float:
-        return self.g + self.h
+    def _f(self) -> float:
+        return self._g + self._h

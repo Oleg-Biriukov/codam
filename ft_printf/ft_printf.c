@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                         ::::::::           */
-/*   ft_printf.c                                         :+:    :+:           */
-/*                                                      +:+                   */
-/*   By: obirukov <obirukov@student.codam.nl>          +#+                    */
-/*                                                    +#+                     */
-/*   Created: 2025/11/20 18:55:05 by obirukov       #+#    #+#                */
-/*   Updated: 2025/11/20 18:55:08 by obirukov       ########   odam.nl        */
+/*                                                        :::      ::::::::   */
+/*   ft_printf.c                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/20 18:55:05 by obirukov          #+#    #+#             */
+/*   Updated: 2026/03/28 15:46:30 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,11 +74,7 @@ int	ft_printf(const char *format, ...)
 // {
 // 	int i, b;
 // 	// char s2[20] = "hiiiii\0";
-// 	i = printf(" %u %u", INT_MAX, INT_MIN);
-// 	printf("\n=========================\n");
-// 	b = ft_printf(" %u %u", INT_MAX, INT_MIN);
-// 	ft_printf("\n=========================\n");
-// 	ft_printf("%d %d", i, b);
+// 	ft_printf("\n%=%\n");
 // 	// ft_printf("\n=========================\n");
 // 	// b = ft_printf("%d%%%%%%\n", INT_MAX, INT_MIN);
 // 	// printf("%d\n", b);

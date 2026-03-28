@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
-/*                                                         ::::::::           */
-/*   ft_printf.h                                         :+:    :+:           */
-/*                                                      +:+                   */
-/*   By: obirukov <obirukov@student.codam.nl>          +#+                    */
-/*                                                    +#+                     */
-/*   Created: 2025/11/20 18:54:48 by obirukov       #+#    #+#                */
-/*   Updated: 2025/11/20 18:54:50 by obirukov       ########   odam.nl        */
+/*                                                        :::      ::::::::   */
+/*   ft_printf.h                                        :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/11/20 18:54:48 by obirukov          #+#    #+#             */
+/*   Updated: 2026/03/28 15:44:52 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 # define FT_PRINTF_H
 # include <stdarg.h>
 # include <stdint.h>
-# include <limits->h>
+# include <limits.h>
 # include <unistd.h>
 # include <stdlib.h>
 # include <stdio.h>
