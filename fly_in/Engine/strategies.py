@@ -35,36 +35,21 @@ class Astar(Strategy):
         pos: Hub
         open_list: List[tuple[float, Hub]] = []
         close_list: List[Hub] = []
-        heapq.heapify(open_list)
-        heapq.heappush(open_list, (dron._pos._f, dron._pos))
+        dron._pos._g = 0
+        heapq.heappush(open_list, dron._pos)
         while open_list:
-            _, pos = heapq.heappop(open_list)
+            pos = heapq.heappop(open_list)
             if pos == data['end_hub']:
                 return
-            if pos in close_list:
-                continue
-            if pos == data['start_hub']:
-                pos._g = 0
-                pos._h = Astar.euclidean_distance(pos, data['end_hub'])
             close_list.append(pos)
             for n in pos.next:
-                if n == data['end_hub']:
-                    n.parent = pos
-                    return
-                if n.zone == 'restricted':
-                    n._g = pos._g + 2
+                if n in close_list:
+                    continue
+                if n.zone.value == 'restricted':
+                    new_g = pos._g + 2
                 else:
-                    n._g = pos._g + 1
-                new_f: float = Astar.euclidean_distance(n, data['end_hub']) + n._g
-                if n not in open_list or n._f >= new_f:
+                    new_g = pos._g + 1
+                if n not in open_list and n._g > new_g:
                     n.parent = pos
-                    n._h = Astar.euclidean_distance(n, data['end_hub'])
-                    heapq.heappush(open_list, (n._f, n))
-                    break
-
-    @staticmethod
-    def euclidean_distance(src: Hub, dst: Hub) -> float:
-        import math as m
-        x1, y1 = src.pos
-        x2, y2 = dst.pos
-        return m.sqrt((x2-x1)**2 + (y2-y1)**2)
+                    n._g = new_g
+                    heapq.heappush(open_list, n)
