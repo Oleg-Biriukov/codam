@@ -3,6 +3,7 @@ from ConfigCompiler.ConfigCompiler import DataConf, ConfigCompiler
 from typing import List
 from Engine.strategies import Strategy
 from hubs.hub import Hub
+from drons.dron import Dron
 
 
 class Engine(BaseModel):
@@ -12,8 +13,7 @@ class Engine(BaseModel):
     def configure(self, filename: str) -> None:
         ConfigCompiler.modify_path(filename)
         self._data = ConfigCompiler.get_values()
-        for d in self._data['dron']:
-            d.move_to(self._data['start_hub'])
+        
 #         for h in self._data['hubs']:
 #             print(f'''Name: {h.name}
 # Position: {h.pos}
@@ -39,11 +39,33 @@ class Engine(BaseModel):
 # ''')
 
     def make_turn(self) -> None:
-        self.stg.perform_turn(self._data)
-        route: List = []
-        pos: Hub = self._data['end_hub']
-        while pos != self._data['start_hub']:
-            route.append((pos.name, pos._g))
-            pos = pos.parent
-        for n in route[::-1]: print(n, '-> ', end='')
-        print(self._data['end_hub']._g)
+        route: List
+        
+        def set_to_null() -> None:
+            for hub in self._data['hubs']:
+                hub.parent = None
+            self._data['end_hub'].parent = None
+
+        def get_route(dron: Dron) -> List[Hub]:
+            route: List[Hub] = []
+            pos: Hub = self._data['end_hub']
+            while pos != self._data['start_hub']:
+                route.append((pos.name, pos._g))
+                pos = pos.parent
+
+            route = route[::-1]
+            for turn in range(len(route)):
+                dron.occupation.update({turn+1: route[turn]})
+            return route
+
+        def is_valid_path() -> bool:
+            
+
+        while True:
+            for d in self._data['dron']:
+                set_to_null()
+                self.stg.perform_turn(d, self._data)
+                route = get_route(d)
+                if not d.move_to(route[0]):
+                    continue
+        self.stg.perform_turn(self._data['dron'][0], self._data)

@@ -1,6 +1,7 @@
 from pydantic import BaseModel, Field, PrivateAttr
 from enum import Enum
 from typing import Self, List
+from drons.dron import Dron
 
 
 class Zone(Enum):
@@ -31,12 +32,12 @@ class Hub(BaseModel):
     next: List[Self] = Field(repr=False, default=[])
     prev: List[Self] = Field(repr=False, default=[])
     _g: float = float('inf')
-    parent: Self = None
+    parent: Self | None = None
+    is_possible: bool = True
 
     def model_post_init(self, context):
         self.max_drones = int(self.max_drones)
         self.max_link_capacity = int(self.max_link_capacity)
-
 
     def __lt__(self, other) -> bool:
         return self._g < other._g

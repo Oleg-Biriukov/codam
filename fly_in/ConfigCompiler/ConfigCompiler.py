@@ -45,6 +45,7 @@ class ConfigCompiler(BaseModel):
         arg: List[str]
         br: str
         meta: Meta
+        count_drons: int
         try:
             with open(cls.path, 'r') as conf:
                 for line in conf:
@@ -115,6 +116,7 @@ class ConfigCompiler(BaseModel):
                                 if br:
                                     mx_c: str = br.split('=')[1]
                                     connection[0].max_link_capacity = mx_c
+                                    connection[1].max_link_capacity = mx_c
                                 connection[0].next.append(connection[1])
                                 connection[1].prev.append(connection[0])
                             else:
@@ -122,13 +124,16 @@ class ConfigCompiler(BaseModel):
                         elif name_arg[0] == '':
                             continue
                         elif name_arg[0] == 'nb_drones' and data['dron'] == []:
-                            for d in range(int(name_arg[1])):
-                                data['dron'].append(Dron(id=d))
+                            count_drons = int(name_arg[1])
                         else:
                             raise ConfError(f'not appropriate type of \
 variable({name_arg[0]})')
 
         except Exception as e:
             print(f'{type(e).__name__}: {e}')
+
+        for d in range(count_drons):
+            data['dron'].append(Dron(id=d,
+                                     pos=data['start_hub']))
 
         return data

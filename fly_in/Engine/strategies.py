@@ -4,6 +4,7 @@ from typing import ClassVar, Generator, List, TypedDict
 from hubs.hub import Hub
 from drons.dron import Dron
 import heapq
+import functools
 
 
 class DataConf(TypedDict):
@@ -17,7 +18,7 @@ class Strategy(ABC, BaseModel):
     total_turns: ClassVar[int]
 
     @abstractmethod
-    def perform_turn(self, data: DataConf) -> None:
+    def perform_turn(self, dron: Dron, data: DataConf) -> None:
         pass
 
     @classmethod
@@ -30,20 +31,21 @@ class Strategy(ABC, BaseModel):
 
 
 class Astar(Strategy):
-    def perform_turn(self, data: DataConf) -> None:
-        dron: Dron = data['dron'][0]
+    @functools.lru_cache()
+    def perform_turn(self, dron: Dron, data: DataConf) -> None:
         pos: Hub
-        open_list: List[tuple[float, Hub]] = []
+        open_list: List[Hub] = []
         close_list: List[Hub] = []
-        dron._pos._g = 0
-        heapq.heappush(open_list, dron._pos)
+        dron.pos._g = 0
+        heapq.heappush(open_list, dron.pos)
         while open_list:
             pos = heapq.heappop(open_list)
             if pos == data['end_hub']:
                 return
             close_list.append(pos)
             for n in pos.next:
-                if n in close_list:
+                if (n in close_list or pos.max_drones < 1 or
+                        n.is_possible is False):
                     continue
                 if n.zone.value == 'restricted':
                     new_g = pos._g + 2
