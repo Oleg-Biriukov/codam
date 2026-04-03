@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, PrivateAttr
 from typing import ClassVar, Generator, List, TypedDict
-from hubs.hub import Hub
-from drons.dron import Dron
+from hubs.hub import Hub, Dron
 import heapq
 import functools
 
@@ -31,7 +30,7 @@ class Strategy(ABC, BaseModel):
 
 
 class Astar(Strategy):
-    @functools.lru_cache()
+    # @functools.lru_cache()
     def perform_turn(self, dron: Dron, data: DataConf) -> None:
         pos: Hub
         open_list: List[Hub] = []

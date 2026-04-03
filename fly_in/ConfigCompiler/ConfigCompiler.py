@@ -1,7 +1,6 @@
 from pydantic import BaseModel
 from typing import TypedDict, List, ClassVar, cast
-from hubs.hub import Hub, Zone, Color
-from drons.dron import Dron
+from hubs.hub import Hub, Zone, Color, Dron
 from .ErrorPrompts import HubError, ConfError
 
 

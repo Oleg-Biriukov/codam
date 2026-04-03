@@ -1,7 +1,6 @@
 from ConfigCompiler.ConfigCompiler import ConfigCompiler
 import argparse as a
-from hubs.hub import Hub
-from drons.dron import Dron
+from hubs.hub import Hub, Dron
 from typing import TypedDict, List
 from Engine.engine import Engine
 from Engine.strategies import Astar

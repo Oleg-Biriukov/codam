@@ -1,7 +1,6 @@
-from pydantic import BaseModel, Field, PrivateAttr
+from pydantic import BaseModel, Field
 from enum import Enum
-from typing import Self, List
-from drons.dron import Dron
+from typing import Self, List, cast
 
 
 class Zone(Enum):
@@ -36,8 +35,24 @@ class Hub(BaseModel):
     is_possible: bool = True
 
     def model_post_init(self, context):
-        self.max_drones = int(self.max_drones)
-        self.max_link_capacity = int(self.max_link_capacity)
+        self.max_drones = cast(int, int(self.max_drones))
+        self.max_link_capacity = cast(int, int(self.max_link_capacity))
 
     def __lt__(self, other) -> bool:
         return self._g < other._g
+
+
+class Dron(BaseModel):
+    id: int = Field(ge=0, le=10000)
+    pos: Hub
+    route: list[tuple[int, Hub]] = []
+
+    def move_to(self, hub: Hub) -> bool:
+        if (hub.max_drones > 0 and hub.zone != 'blocked' and
+                hub.max_link_capacity > 0):
+            self.pos.max_drones += 1
+            hub.max_drones -= 1
+            hub.max_link_capacity -= 1
+            self.pos = hub
+            return True
+        return False

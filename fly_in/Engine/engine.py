@@ -2,8 +2,7 @@ from pydantic import BaseModel, PrivateAttr
 from ConfigCompiler.ConfigCompiler import DataConf, ConfigCompiler
 from typing import List
 from Engine.strategies import Strategy
-from hubs.hub import Hub
-from drons.dron import Dron
+from hubs.hub import Hub, Dron
 
 
 class Engine(BaseModel):
@@ -39,33 +38,57 @@ class Engine(BaseModel):
 # ''')
 
     def make_turn(self) -> None:
-        route: List
+        route: List = []
+        turns: int = 0
         
         def set_to_null() -> None:
             for hub in self._data['hubs']:
                 hub.parent = None
+                hub.is_possible = True
             self._data['end_hub'].parent = None
+            self._data['start_hub'].parent = None
+            self._data['end_hub'].is_possible = True
 
-        def get_route(dron: Dron) -> List[Hub]:
+        def get_route(dron: Dron):
             route: List[Hub] = []
             pos: Hub = self._data['end_hub']
             while pos != self._data['start_hub']:
-                route.append((pos.name, pos._g))
+                route.append(pos)
                 pos = pos.parent
 
             route = route[::-1]
             for turn in range(len(route)):
-                dron.occupation.update({turn+1: route[turn]})
+                dron.route.append((turn+1, route[turn]))
             return route
 
-        def is_valid_path() -> bool:
-            
-
-        while True:
-            for d in self._data['dron']:
-                set_to_null()
-                self.stg.perform_turn(d, self._data)
-                route = get_route(d)
-                if not d.move_to(route[0]):
+        def is_valid_paths(dron: Dron) -> bool:
+            for turn, hub in dron.route:
+                if (hub == self._data['end_hub']
+                    or hub == self._data['start_hub']):
                     continue
-        self.stg.perform_turn(self._data['dron'][0], self._data)
+                for d in self._data['dron']:
+                    for t, h in d.route:
+                        if t == turn and h == hub:
+                            hub.is_possible = False
+                            return False
+            return True
+
+        while len(self._data['dron']) != 0:
+            for d in range(len(self._data['dron'])):
+                while True:
+                    set_to_null()
+                    self.stg.perform_turn(self._data['dron'][d], self._data)
+                    get_route(self._data['dron'][d])
+                    for t, h in self._data['dron'][d].route: print(t, h.name)
+                    print(is_valid_paths(self._data['dron'][d]))
+                    if is_valid_paths(self._data['dron'][d]):
+                        break
+                    
+                print(1)
+                if route == []:
+                    del self._data['dron'][d]
+                    continue
+                print(route[0])
+                if not self._data['dron'][d].move_to(route[0]):
+                    continue
+            turns += 1
