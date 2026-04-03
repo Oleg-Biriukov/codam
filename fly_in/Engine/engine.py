@@ -67,6 +67,8 @@ class Engine(BaseModel):
                     or hub == self._data['start_hub']):
                     continue
                 for d in self._data['dron']:
+                    if d == dron:
+                        continue
                     for t, h in d.route:
                         if t == turn and h == hub:
                             hub.is_possible = False
@@ -83,8 +85,7 @@ class Engine(BaseModel):
                     print(is_valid_paths(self._data['dron'][d]))
                     if is_valid_paths(self._data['dron'][d]):
                         break
-                    
-                print(1)
+
                 if route == []:
                     del self._data['dron'][d]
                     continue
