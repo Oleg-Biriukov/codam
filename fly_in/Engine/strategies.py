@@ -17,7 +17,7 @@ class Strategy(ABC, BaseModel):
     total_turns: ClassVar[int]
 
     @abstractmethod
-    def perform_turn(self, dron: Dron, data: DataConf) -> None:
+    def perform_turn(self, dron: Dron, data: DataConf, turns: int) -> None:
         pass
 
     @classmethod
@@ -31,11 +31,33 @@ class Strategy(ABC, BaseModel):
 
 class Astar(Strategy):
     # @functools.lru_cache()
-    def perform_turn(self, dron: Dron, data: DataConf) -> None:
+
+    def perform_turn(self, dron: Dron, data: DataConf, turns: int) -> None:
+        def is_valid_paths(dron: Dron) -> bool:
+            for turn, hub in dron.route:
+                if (hub == data['end_hub']
+                        or hub == data['start_hub']):
+                    continue
+                for d in data['dron']:
+                    if d == dron:
+                        continue
+                    for t, h in d.route:
+                        if t == turn and h == hub:
+                            return False
+            return True
+
+        def get_value(n: Hub) -> int:
+            t_hub: list[int] = [t for d in data['dron']
+                                for t, h in d.route
+                                if h == n]
+            if t_hub:
+                return min(t_hub)
+            return 0
+
         pos: Hub
         open_list: List[Hub] = []
         close_list: List[Hub] = []
-        dron.pos._g = 0
+        dron.pos._g = turns
         heapq.heappush(open_list, dron.pos)
         while open_list:
             pos = heapq.heappop(open_list)
@@ -43,13 +65,13 @@ class Astar(Strategy):
                 return
             close_list.append(pos)
             for n in pos.next:
-                if (n in close_list or pos.max_drones < 1 or
-                        n.is_possible is False):
+                if (n in close_list or
+                        not is_valid_paths(dron)):
                     continue
                 if n.zone.value == 'restricted':
-                    new_g = pos._g + 2
+                    new_g = pos._g + 2 + get_value(n)
                 else:
-                    new_g = pos._g + 1
+                    new_g = pos._g + 1 + get_value(n)
                 if n not in open_list and n._g > new_g:
                     n.parent = pos
                     n._g = new_g

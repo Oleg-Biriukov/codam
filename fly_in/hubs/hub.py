@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from enum import Enum
-from typing import Self, List, cast
+from typing import Self, List
+import re
 
 
 class Zone(Enum):
@@ -26,17 +27,30 @@ class Hub(BaseModel):
     pos: tuple[int, int]
     zone: Zone = Zone.NORMAL
     color: Color = Color.NONE
-    max_drones: str = Field(pattern="^[0-9]{0,10}$", default='1')
-    max_link_capacity: str = Field(pattern="^[0-9]{5,15}$", default='1')
+    max_drones: int = Field(default=1)
+    max_link_capacity: int = Field(default=1)
     next: List[Self] = Field(repr=False, default=[])
     prev: List[Self] = Field(repr=False, default=[])
     _g: float = float('inf')
     parent: Self | None = None
     is_possible: bool = True
 
-    def model_post_init(self, context):
-        self.max_drones = cast(int, int(self.max_drones))
-        self.max_link_capacity = cast(int, int(self.max_link_capacity))
+    @field_validator('max_drones', 'max_link_capacity', mode='before')
+    @classmethod
+    def auto_conversion(cls, v, info):
+        if isinstance(v, str):
+            if v == 'endless':
+                return 10000000
+            if info.field_name == 'max_drones':
+                pattern = "^[0-9]{0,10}$"
+            elif info.field_name == 'max_link_capacity':
+                pattern = "^[0-9]{0,10}$"
+            else:
+                return v
+            if not re.fullmatch(pattern, v):
+                raise ValueError(f'{info.field_name} has invalid format.')
+            return int(v)
+        return v
 
     def __lt__(self, other) -> bool:
         return self._g < other._g
@@ -47,12 +61,12 @@ class Dron(BaseModel):
     pos: Hub
     route: list[tuple[int, Hub]] = []
 
-    def move_to(self, hub: Hub) -> bool:
-        if (hub.max_drones > 0 and hub.zone != 'blocked' and
-                hub.max_link_capacity > 0):
+    def move_to(self) -> bool:
+        _, hub = self.route.pop(0)
+        if (hub.max_drones > 0 and hub.zone != 'blocked'):
             self.pos.max_drones += 1
             hub.max_drones -= 1
-            hub.max_link_capacity -= 1
+            # hub.max_link_capacity -= 1
             self.pos = hub
             return True
         return False
