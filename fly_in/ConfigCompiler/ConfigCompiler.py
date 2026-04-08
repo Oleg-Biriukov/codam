@@ -49,6 +49,8 @@ class ConfigCompiler(BaseModel):
             with open(cls.path, 'r') as conf:
                 for line in conf:
                     line = line.strip()
+                    if line == '':
+                        continue
                     if line[0] != '#':
                         name_arg: List[str] = line.split(': ')
 
@@ -122,8 +124,6 @@ class ConfigCompiler(BaseModel):
                                 connection[1].prev.append(connection[0])
                             else:
                                 raise HubError('wrong name for connection')
-                        elif name_arg[0] == '':
-                            continue
                         elif name_arg[0] == 'nb_drones' and data['dron'] == []:
                             count_drons = int(name_arg[1])
                         else:
@@ -131,6 +131,8 @@ class ConfigCompiler(BaseModel):
 variable({name_arg[0]})')
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print(f'{type(e).__name__}: {e}')
 
         for d in range(count_drons):

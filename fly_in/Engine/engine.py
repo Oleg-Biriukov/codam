@@ -72,7 +72,7 @@ class Engine(BaseModel):
                 # for t, h in d.route: print(t, h.name)
                 if get_route(d) and d.pos != self._data['end_hub']:
                     if not d.move_to():
-                        print(f'd{d.id} -> {d.pos.name}1')
+                        print(f'd{d.id} -> {d.pos.name}')
                         continue
                 print(f'd{d.id} -> {d.pos.name}')
             turns += 1

@@ -23,7 +23,7 @@ class Color(Enum):
 # patteln ^ - all values;
 # [some filter, if ^ we use this as exception]<size>(it could be +)$-end of str
 class Hub(BaseModel):
-    name: str = Field(pattern="^[a-zA-Z0-9]{2,15}$")
+    name: str = Field(pattern="^[a-zA-Z0-9]{2,30}$")
     pos: tuple[int, int]
     zone: Zone = Zone.NORMAL
     color: Color = Color.NONE

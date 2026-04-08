@@ -33,7 +33,7 @@ class Astar(Strategy):
     # @functools.lru_cache()
 
     def perform_turn(self, dron: Dron, data: DataConf, turns: int) -> None:
-        def is_valid_paths(dron: Dron) -> bool:
+        def is_valid_paths(dron: Dron, next: Hub) -> bool:
             for turn, hub in dron.route:
                 if (hub == data['end_hub']
                         or hub == data['start_hub']):
@@ -42,7 +42,7 @@ class Astar(Strategy):
                     if d == dron:
                         continue
                     for t, h in d.route:
-                        if t == turn and h == hub:
+                        if t == turn and h == hub and next in d.pos.next:
                             return False
             return True
 
@@ -66,7 +66,7 @@ class Astar(Strategy):
             close_list.append(pos)
             for n in pos.next:
                 if (n in close_list or
-                        not is_valid_paths(dron)):
+                        not is_valid_paths(dron, n)):
                     continue
                 if n.zone.value == 'restricted':
                     new_g = pos._g + 2 + get_value(n)
