@@ -62,8 +62,9 @@ class Dron(BaseModel):
     route: list[tuple[int, Hub]] = []
 
     def move_to(self) -> bool:
-        _, hub = self.route.pop(0)
+        _, hub = self.route[::-1][0]
         if (hub.max_drones > 0 and hub.zone != 'blocked'):
+            _, hub = self.route.pop(0)
             self.pos.max_drones += 1
             hub.max_drones -= 1
             # hub.max_link_capacity -= 1

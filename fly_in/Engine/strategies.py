@@ -34,16 +34,22 @@ class Astar(Strategy):
 
     def perform_turn(self, dron: Dron, data: DataConf, turns: int) -> None:
         def is_valid_paths(dron: Dron, next: Hub) -> bool:
+            count_drons = 0
             for turn, hub in dron.route:
                 if (hub == data['end_hub']
                         or hub == data['start_hub']):
                     continue
                 for d in data['dron']:
                     if d == dron:
+                        if next in d.pos.next:
+                            count_drons += 1
                         continue
                     for t, h in d.route:
                         if t == turn and h == hub and next in d.pos.next:
-                            return False
+                            count_drons += 1
+            # print(count_drons)
+            if next.max_drones < count_drons:
+                return False
             return True
 
         def get_value(n: Hub) -> int:
@@ -66,7 +72,8 @@ class Astar(Strategy):
             close_list.append(pos)
             for n in pos.next:
                 if (n in close_list or
-                        not is_valid_paths(dron, n)):
+                        not is_valid_paths(dron, n) or n.max_drones < 1):
+                    print(n.max_drones < 1)
                     continue
                 if n.zone.value == 'restricted':
                     new_g = pos._g + 2 + get_value(n)
