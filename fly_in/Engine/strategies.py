@@ -48,7 +48,7 @@ class Astar(Strategy):
                         if t == turn and h == hub and next in d.pos.next:
                             count_drons += 1
             # print(count_drons)
-            if next.max_drones < count_drons:
+            if next.max_drones < count_drons and next in d.pos.next:
                 return False
             return True
 
@@ -72,8 +72,8 @@ class Astar(Strategy):
             close_list.append(pos)
             for n in pos.next:
                 if (n in close_list or
-                        not is_valid_paths(dron, n) or n.max_drones < 1):
-                    print(n.max_drones < 1)
+                        not is_valid_paths(dron, n) or
+                        (n.max_drones < 1 and n in dron.pos.next)):
                     continue
                 if n.zone.value == 'restricted':
                     new_g = pos._g + 2 + get_value(n)

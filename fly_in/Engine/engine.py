@@ -70,12 +70,12 @@ class Engine(BaseModel):
                 set_to_null()
                 self.stg.perform_turn(d, self._data, turns)
                 # for t, h in d.route: print(t, h.name)
-                if s := get_route(d) and d.pos != self._data['end_hub']:
+                if get_route(d) and d.pos != self._data['end_hub']:
                     if not d.move_to():
                         # print(s+1)
                         print(f'd{d.id} -> {d.pos.name}')
                         continue
                 # print(s)
                 print(f'd{d.id} -> {d.pos.name}')
-                for t, h in d.route: print(d.id, t, h.name)
+                # for t, h in d.route: print(d.id, t, h.name)
             turns += 1
