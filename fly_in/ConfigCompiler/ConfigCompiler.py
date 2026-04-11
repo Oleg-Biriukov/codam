@@ -64,11 +64,12 @@ class ConfigCompiler(BaseModel):
                             meta = cast(Meta, dict(var.split('=')
                                         for var in br.split()))
 
+                            meta['max_drones'] = 'endless'
+
                             data['start_hub'] = Hub(name=arg[0],
                                                     pos=(int(arg[1]),
                                                          int(arg[2])),
-                                                    **meta,
-                                                    max_drones='endless')
+                                                    **meta)
 
                             data['hubs'].append(data['start_hub'])
 
@@ -82,11 +83,12 @@ class ConfigCompiler(BaseModel):
                             meta = cast(Meta, dict(var.split('=')
                                         for var in br.split()))
 
+                            meta['max_drones'] = 'endless'
+
                             data['end_hub'] = Hub(name=arg[0],
                                                   pos=(int(arg[1]),
                                                        int(arg[2])),
-                                                  **meta,
-                                                  max_drones='endless')
+                                                  **meta)
 
                             data['hubs'].append(data['end_hub'])
 

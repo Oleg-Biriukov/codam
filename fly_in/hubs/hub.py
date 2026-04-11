@@ -18,12 +18,19 @@ class Color(Enum):
     BLUE = 'blue'
     GRAY = 'gray'
     GREEN = 'green'
+    ORANGE = 'orange'
+    CYAN = 'cyan'
+    PURPLE = 'purple'
+    BROWN = 'brown'
+    LIME = 'lime'
+    MEGENTA = 'magenta'
+    GOLD = 'gold'
 
 
 # patteln ^ - all values;
 # [some filter, if ^ we use this as exception]<size>(it could be +)$-end of str
 class Hub(BaseModel):
-    name: str = Field(pattern="^[a-zA-Z0-9]{2,30}$")
+    name: str = Field(pattern="^[a-zA-Z0-9_]{2,30}$")
     pos: tuple[int, int]
     zone: Zone = Zone.NORMAL
     color: Color = Color.NONE

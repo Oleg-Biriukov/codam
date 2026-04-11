@@ -41,14 +41,12 @@ class Astar(Strategy):
                     continue
                 for d in data['dron']:
                     if d == dron:
-                        if next in d.pos.next:
-                            count_drons += 1
                         continue
                     for t, h in d.route:
                         if t == turn and h == hub and next in d.pos.next:
                             count_drons += 1
             # print(count_drons)
-            if next.max_drones < count_drons and next in d.pos.next:
+            if next.max_drones < count_drons and next in dron.pos.next:
                 return False
             return True
 
