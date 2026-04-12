@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, field_validator
 from enum import Enum
-from typing import Self, List
+from typing import Self, List, Any
 import re
 
 
@@ -46,7 +46,7 @@ class Hub(BaseModel):
     _g: float = float('inf')
     parent: Self | None = None
     is_possible: bool = True
-
+    
     @field_validator('max_drones', 'max_link_capacity', mode='before')
     @classmethod
     def auto_conversion(cls, v, info):
@@ -64,9 +64,18 @@ class Hub(BaseModel):
             return int(v)
         return v
 
-    def add_next(self, h: Self) -> None:
-        if h not in self.next:
-            self.next.append(h)
+    def add_next(self, item: Any) -> bool:
+        if isinstance(item, dict):
+            if item:
+                h, c = item.items()
+                if re.fullmatch("^[0-9]{0,10}$", c):
+                    self.max_link_capacity.update({h, int(c)})
+                    return True
+        else:
+            if item not in self.next:
+                self.next.append(item)
+                return True
+        return False
 
     def __lt__(self, other) -> bool:
         return self._g < other._g
@@ -79,10 +88,11 @@ class Dron(BaseModel):
 
     def move_to(self) -> bool:
         _, hub = self.route[0]
-        if (hub.max_drones > 0 and hub.zone != 'blocked'):
+        if (hub.max_drones > 0 and hub.zone != 'blocked' and
+                self.pos.max_link_capacity[hub.name] > 0):
             _, hub = self.route.pop(0)
             self.pos.max_drones += 1
-            self.pos.max_link_capacity[hub] -= 1
+            self.pos.max_link_capacity[hub.name] -= 1
             hub.max_drones -= 1
             # hub.max_link_capacity -= 1
             self.pos = hub

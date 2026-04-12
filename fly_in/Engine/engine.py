@@ -12,27 +12,29 @@ class Engine(BaseModel):
     def configure(self, filename: str) -> None:
         ConfigCompiler.modify_path(filename)
         self._data = ConfigCompiler.get_values()
-        
-#         for h in self._data['hubs']:
-#             print(f'''Name: {h.name}
-# Position: {h.pos}
-# Zone: {h.zone}
-# Color: {h.color}
-# Maxium drones: {h.max_drones}
-# Maxium links capacity: {h.max_link_capacity}''')
-#             for n in h.next:
-#                 print(f'''Next of {h.name}`s\n\tName: {n.name}
-# \tPosition: {n.pos}
-# \tZone: {n.zone}
-# \tColor: {n.color}
-# \tMaxium drones: {n.max_drones}
-# \tMaxium links capacity: {n.max_link_capacity}
-# ''')
+
+        for h in self._data['hubs']:
+            print(f'''Name: {h.name}
+Position: {h.pos}
+Link Capisity: {h.max_link_capacity[h.name]}
+Zone: {h.zone}
+Color: {h.color}
+Maxium drones: {h.max_drones}
+Maxium links capacity: {h.max_link_capacity}''')
+            for n in h.next:
+                print(f'''Next of {h.name}`s\n\tName: {n.name}
+\tPosition: {n.pos}
+\tLink Capisity: {n.max_link_capacity[n.name]}
+\tZone: {n.zone}
+\tColor: {n.color}
+\tMaxium drones: {n.max_drones}
+\tMaxium links capacity: {n.max_link_capacity}
+''')
 
     def make_turn(self) -> None:
         turns: int = 0
-        sv_con_cap: dict[Hub, dict[Hub, int]]
-        sv_con_cap = {h:h.max_link_capacity for h in self._data['hubs']}
+        sv_con_cap: dict[Hub, dict[Hub, int]] = {h.name: h.max_link_capacity
+                                                 for h in self._data['hubs']}
 
         def set_to_null() -> None:
             for hub in self._data['hubs']:
@@ -57,9 +59,12 @@ class Engine(BaseModel):
                 dron.route.append((turn+1, route[turn]))
             return True
 
-        while len(list(filter(lambda x: x.pos != self._data['end_hub'],
+        while len(list(filter(lambda x: x.pos == self._data['end_hub'],
                               self._data['dron']))) != 0:
             print(f'================={turns+1}==================')
+            for h in self._data['hubs']:
+                h.max_link_capacity[h.name] = sv_con_cap[h.name]
+
             for d in self._data['dron']:
                 set_to_null()
                 self.stg.perform_turn(d, self._data, turns)
