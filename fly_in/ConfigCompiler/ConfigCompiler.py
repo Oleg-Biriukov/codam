@@ -44,7 +44,7 @@ class ConfigCompiler(BaseModel):
         arg: List[str]
         br: str
         meta: Meta
-        count_drons: int
+        count_drons: int = 0
         try:
             with open(cls.path, 'r') as conf:
                 for line in conf:

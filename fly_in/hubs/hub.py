@@ -25,6 +25,12 @@ class Color(Enum):
     LIME = 'lime'
     MEGENTA = 'magenta'
     GOLD = 'gold'
+    BLACK = 'black'
+    MAROON = 'maroon'
+    DARKRED = 'darkred'
+    VIOLET = 'violet'
+    CRIMSON = 'crimson'
+    RAINBOW = 'rainbow'
 
 
 # patteln ^ - all values;
