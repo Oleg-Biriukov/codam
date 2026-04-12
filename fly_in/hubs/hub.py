@@ -41,9 +41,8 @@ class Hub(BaseModel):
     zone: Zone = Zone.NORMAL
     color: Color = Color.NONE
     max_drones: int = Field(default=1)
-    max_link_capacity: int = Field(default=1)
+    max_link_capacity: dict = Field(default={})
     next: List[Self] = Field(repr=False, default=[])
-    prev: List[Self] = Field(repr=False, default=[])
     _g: float = float('inf')
     parent: Self | None = None
     is_possible: bool = True
@@ -65,6 +64,10 @@ class Hub(BaseModel):
             return int(v)
         return v
 
+    def add_next(self, h: Self) -> None:
+        if h not in self.next:
+            self.next.append(h)
+
     def __lt__(self, other) -> bool:
         return self._g < other._g
 
@@ -75,10 +78,11 @@ class Dron(BaseModel):
     route: list[tuple[int, Hub]] = []
 
     def move_to(self) -> bool:
-        _, hub = self.route[::-1][0]
+        _, hub = self.route[0]
         if (hub.max_drones > 0 and hub.zone != 'blocked'):
             _, hub = self.route.pop(0)
             self.pos.max_drones += 1
+            self.pos.max_link_capacity[hub] -= 1
             hub.max_drones -= 1
             # hub.max_link_capacity -= 1
             self.pos = hub

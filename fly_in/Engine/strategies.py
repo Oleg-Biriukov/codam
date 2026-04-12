@@ -50,14 +50,6 @@ class Astar(Strategy):
                 return False
             return True
 
-        def get_value(n: Hub) -> int:
-            t_hub: list[int] = [t for d in data['dron']
-                                for t, h in d.route
-                                if h == n]
-            if t_hub:
-                return min(t_hub)
-            return 0
-
         pos: Hub
         open_list: List[Hub] = []
         close_list: List[Hub] = []
@@ -74,9 +66,9 @@ class Astar(Strategy):
                         (n.max_drones < 1 and n in dron.pos.next)):
                     continue
                 if n.zone.value == 'restricted':
-                    new_g = pos._g + 2 + get_value(n)
+                    new_g = pos._g + 2
                 else:
-                    new_g = pos._g + 1 + get_value(n)
+                    new_g = pos._g + 1
                 if n not in open_list and n._g > new_g:
                     n.parent = pos
                     n._g = new_g

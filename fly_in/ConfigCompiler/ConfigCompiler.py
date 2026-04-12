@@ -116,14 +116,16 @@ class ConfigCompiler(BaseModel):
                                      data['hubs']))
                                                          for c in con]
                             if None not in hub_con:
-                                connection: List[Hub] = cast(List[Hub],
-                                                             hub_con)
+                                conct: List[Hub] = cast(List[Hub],
+                                                        hub_con)
                                 if br:
                                     mx_c: str = br.split('=')[1]
-                                    # connection[0].max_link_capacity = mx_c
-                                    # connection[1].max_link_capacity = mx_c
-                                connection[0].next.append(connection[1])
-                                connection[1].prev.append(connection[0])
+                                    conct[0].max_link_capacity.update(
+                                        {conct[1]: mx_c})
+                                    conct[1].max_link_capacity.update(
+                                        {conct[0]: mx_c})
+                                conct[0].add_next(conct[1])
+                                conct[1].add_next(conct[0])
                             else:
                                 raise HubError('wrong name for connection')
                         elif name_arg[0] == 'nb_drones' and data['dron'] == []:
