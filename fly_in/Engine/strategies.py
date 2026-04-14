@@ -60,7 +60,6 @@ class Astar(Strategy):
                 return
             close_list.append(pos)
             for n, c in pos.next:
-                print(pos.max_link_capacity[n.name])
                 if (n in close_list or
                         not is_valid_paths(dron, n) or
                         (n.max_drones < 1 and n in dron.pos.next) or

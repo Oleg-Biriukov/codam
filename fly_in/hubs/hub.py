@@ -80,15 +80,20 @@ class Dron(BaseModel):
     route: list[tuple[int, Hub]] = []
 
     def move_to(self) -> bool:
-        def search_tuple_hub(l: tuple[Hub, int], hub: Hub) -> int:
-            for 
+        def search_hub(lst: list[tuple[Hub, int]]) -> int:
+            for i in range(len(lst)):
+                h, _ = lst[i]
+                if h == self.pos:
+                    return i
 
         _, hub = self.route[0]
+        index: int = search_hub(hub.next)
+        nxt, m_x = hub.next[index]
         if (hub.max_drones > 0 and hub.zone != 'blocked' and
-                self.pos.max_link_capacity[hub.name] > 0):
+                m_x > 0):
             _, hub = self.route.pop(0)
             self.pos.max_drones += 1
-            hub.next[search_tuple_hub(hub.next, self.pos)][1] -= 1
+            hub.next[index] = (nxt, m_x - 1)
             hub.max_drones -= 1
             self.pos = hub
             return True

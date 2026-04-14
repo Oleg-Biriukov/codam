@@ -13,25 +13,25 @@ class Engine(BaseModel):
         ConfigCompiler.modify_path(filename)
         self._data = ConfigCompiler.get_values()
 
-        for h in self._data['hubs']:
-            print(f'''Name: {h.name}
-Position: {h.pos}
-Zone: {h.zone}
-Color: {h.color}
-Maxium drones: {h.max_drones}''')
-            for n, c in h.next:
-                print(f'''Next of {h.name}`s\n\tName: {n.name}
-\tPosition: {n.pos}
-\tZone: {n.zone}
-\tColor: {n.color}
-\tMaxium drones: {n.max_drones}
-\tMaxium connection capicity to {h.name}: {c}
-''')
+#         for h in self._data['hubs']:
+#             print(f'''Name: {h.name}
+# Position: {h.pos}
+# Zone: {h.zone}
+# Color: {h.color}
+# Maxium drones: {h.max_drones}''')
+#             for n, c in h.next:
+#                 print(f'''Next of {h.name}`s\n\tName: {n.name}
+# \tPosition: {n.pos}
+# \tZone: {n.zone}
+# \tColor: {n.color}
+# \tMaxium drones: {n.max_drones}
+# \tMaxium connection capicity to {h.name}: {c}
+# ''')
 
     def make_turn(self) -> None:
         turns: int = 0
-        sv_con_cap: dict[Hub, dict[Hub, int]] = {h.name: h.max_link_capacity
-                                                 for h in self._data['hubs']}
+        sv_con_cap: List[list[int]] = [[n for n in hub.next]
+                                       for hub in self._data['hubs']]
 
         def set_to_null() -> None:
             for hub in self._data['hubs']:
@@ -56,11 +56,12 @@ Maxium drones: {h.max_drones}''')
                 dron.route.append((turn+1, route[turn]))
             return True
 
-        while len(list(filter(lambda x: x.pos == self._data['end_hub'],
+        while len(list(filter(lambda x: x.pos != self._data['end_hub'],
                               self._data['dron']))) != 0:
             print(f'================={turns+1}==================')
-            for h in self._data['hubs']:
-                h.max_link_capacity[h.name] = sv_con_cap[h.name]
+            for h in range(len(self._data['hubs'])):
+                for n in range(len(self._data['hubs'][h].next)):
+                    self._data['hubs'][h].next[n] = sv_con_cap[h][n]
 
             for d in self._data['dron']:
                 set_to_null()
