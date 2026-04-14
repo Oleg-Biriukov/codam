@@ -50,12 +50,14 @@ class Astar(Strategy):
             return True
 
         pos: Hub
+        priority: int
+        new_g: int
         open_list: List[Hub] = []
         close_list: List[Hub] = []
         dron.pos._g = turns
-        heapq.heappush(open_list, dron.pos)
+        heapq.heappush(open_list, (1, dron.pos))
         while open_list:
-            pos = heapq.heappop(open_list)
+            _, pos = heapq.heappop(open_list)
             if pos == data['end_hub']:
                 return
             close_list.append(pos)
@@ -66,13 +68,14 @@ class Astar(Strategy):
                         (c < 1 and
                          n in dron.pos.next)):
                     continue
+                priority = 1
                 if n.zone.value == 'restricted':
                     new_g = float(pos._g) + 2
-                elif n.zone.value == 'priority':
-                    new_g = float(pos._g) - 0.1
                 else:
+                    if n.zone.value == 'priority':
+                        priority = 0
                     new_g = float(pos._g) + 1
                 if n not in open_list and n._g > new_g:
                     n.parent = pos
                     n._g = new_g
-                    heapq.heappush(open_list, n)
+                    heapq.heappush(open_list, (priority, n))
