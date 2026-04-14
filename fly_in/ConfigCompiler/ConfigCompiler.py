@@ -120,12 +120,10 @@ class ConfigCompiler(BaseModel):
                                                         hub_con)
                                 if br:
                                     mx_c: str = br.split('=')[1]
-                                    conct[0].add_next(
-                                        {conct[1].name: mx_c})
-                                    conct[1].add_next(
-                                        {conct[0].name: mx_c})
-                                conct[0].add_next(conct[1])
-                                conct[1].add_next(conct[0])
+                                else:
+                                    mx_c: str = '1'
+                                conct[0].add_next((conct[1], mx_c))
+                                conct[1].add_next((conct[0], mx_c))
                             else:
                                 raise HubError('wrong name for connection')
                         elif name_arg[0] == 'nb_drones' and data['dron'] == []:

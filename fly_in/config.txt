@@ -11,7 +11,7 @@ hub: s3 6 7 [zone=normal color=red]
 hub: s4 8 7 [zone=normal color=red]
 hub: p1 4 8 [zone=normal color=red]
 hub: p2 6 8 [zone=normal color=red]
-connection: hub-roof1 [max_link_capacity=1]
+connection: hub-roof1 [max_link_capacity=2]
 connection: hub-s1
 connection: roof1-roof2
 connection: roof2-roof3

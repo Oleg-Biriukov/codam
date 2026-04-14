@@ -16,19 +16,16 @@ class Engine(BaseModel):
         for h in self._data['hubs']:
             print(f'''Name: {h.name}
 Position: {h.pos}
-Link Capisity: {h.max_link_capacity[h.name]}
 Zone: {h.zone}
 Color: {h.color}
-Maxium drones: {h.max_drones}
-Maxium links capacity: {h.max_link_capacity}''')
-            for n in h.next:
+Maxium drones: {h.max_drones}''')
+            for n, c in h.next:
                 print(f'''Next of {h.name}`s\n\tName: {n.name}
 \tPosition: {n.pos}
-\tLink Capisity: {n.max_link_capacity[n.name]}
 \tZone: {n.zone}
 \tColor: {n.color}
 \tMaxium drones: {n.max_drones}
-\tMaxium links capacity: {n.max_link_capacity}
+\tMaxium connection capicity to {h.name}: {c}
 ''')
 
     def make_turn(self) -> None:

@@ -41,21 +41,18 @@ class Hub(BaseModel):
     zone: Zone = Zone.NORMAL
     color: Color = Color.NONE
     max_drones: int = Field(default=1)
-    max_link_capacity: dict = Field(default={})
-    next: List[Self] = Field(repr=False, default=[])
+    next: List[tuple[Self, int]] = Field(repr=False, default=[])
     _g: float = float('inf')
     parent: Self | None = None
     is_possible: bool = True
     
-    @field_validator('max_drones', 'max_link_capacity', mode='before')
+    @field_validator('max_drones', mode='before')
     @classmethod
     def auto_conversion(cls, v, info):
         if isinstance(v, str):
             if v == 'endless':
                 return 10000000
             if info.field_name == 'max_drones':
-                pattern = "^[0-9]{0,10}$"
-            elif info.field_name == 'max_link_capacity':
                 pattern = "^[0-9]{0,10}$"
             else:
                 return v
@@ -64,18 +61,14 @@ class Hub(BaseModel):
             return int(v)
         return v
 
-    def add_next(self, item: Any) -> bool:
-        if isinstance(item, dict):
-            if item:
-                h, c = item.items()
-                if re.fullmatch("^[0-9]{0,10}$", c):
-                    self.max_link_capacity.update({h, int(c)})
-                    return True
-        else:
-            if item not in self.next:
-                self.next.append(item)
+    def add_next(self, item: tuple) -> bool:
+        if item:
+            h, c = item
+            if re.fullmatch("^[0-9]{0,10}$", c):
+                if h not in self.next:
+                    self.next.append((h, int(c)))
                 return True
-        return False
+            return False
 
     def __lt__(self, other) -> bool:
         return self._g < other._g
@@ -87,14 +80,16 @@ class Dron(BaseModel):
     route: list[tuple[int, Hub]] = []
 
     def move_to(self) -> bool:
+        def search_tuple_hub(l: tuple[Hub, int], hub: Hub) -> int:
+            for 
+
         _, hub = self.route[0]
         if (hub.max_drones > 0 and hub.zone != 'blocked' and
                 self.pos.max_link_capacity[hub.name] > 0):
             _, hub = self.route.pop(0)
             self.pos.max_drones += 1
-            self.pos.max_link_capacity[hub.name] -= 1
+            hub.next[search_tuple_hub(hub.next, self.pos)][1] -= 1
             hub.max_drones -= 1
-            # hub.max_link_capacity -= 1
             self.pos = hub
             return True
         return False
