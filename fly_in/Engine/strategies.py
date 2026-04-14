@@ -67,9 +67,11 @@ class Astar(Strategy):
                          n in dron.pos.next)):
                     continue
                 if n.zone.value == 'restricted':
-                    new_g = pos._g + 2
+                    new_g = float(pos._g) + 2
+                elif n.zone.value == 'priority':
+                    new_g = float(pos._g) - 0.1
                 else:
-                    new_g = pos._g + 1
+                    new_g = float(pos._g) + 1
                 if n not in open_list and n._g > new_g:
                     n.parent = pos
                     n._g = new_g
