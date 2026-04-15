@@ -30,9 +30,8 @@ class Strategy(ABC, BaseModel):
 
 
 class Astar(Strategy):
-    # @functools.lru_cache()
-
     def perform_turn(self, dron: Dron, data: DataConf, turns: int) -> None:
+        # @functools.lru_cache(maxsize=1000)
         def is_valid_paths(dron: Dron, next: Hub) -> bool:
             count_drons = 0
             for turn, hub in dron.route:
@@ -64,17 +63,17 @@ class Astar(Strategy):
             for n, c in pos.next:
                 if (n in close_list or
                         not is_valid_paths(dron, n) or
-                        (n.max_drones < 1 and n in dron.pos.next) or
+                        (n.max_drones < 1 and (n, c) in dron.pos.next) or
                         (c < 1 and
-                         n in dron.pos.next)):
+                         (n, c) in dron.pos.next)):
                     continue
                 priority = 1
                 if n.zone.value == 'restricted':
-                    new_g = float(pos._g) + 2
+                    new_g = pos._g + 2
                 else:
                     if n.zone.value == 'priority':
                         priority = 0
-                    new_g = float(pos._g) + 1
+                    new_g = pos._g + 1
                 if n not in open_list and n._g > new_g:
                     n.parent = pos
                     n._g = new_g

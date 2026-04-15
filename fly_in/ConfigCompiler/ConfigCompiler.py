@@ -105,6 +105,7 @@ class ConfigCompiler(BaseModel):
                                                          int(arg[2])),
                                                     **meta))
                         elif name_arg[0] == 'connection':
+                            mx_c: str
                             arg = name_arg[1].strip().split(' ')
 
                             br = ' '.join(arg[1::]).strip('[]')
@@ -115,15 +116,16 @@ class ConfigCompiler(BaseModel):
                                 cast(List[Hub],
                                      data['hubs']))
                                                          for c in con]
-                            if None not in hub_con:
+                            if None not in hub_con or len(set(con)) < 2:
                                 conct: List[Hub] = cast(List[Hub],
                                                         hub_con)
                                 if br:
-                                    mx_c: str = br.split('=')[1]
+                                    mx_c = br.split('=')[1]
                                 else:
-                                    mx_c: str = '1'
-                                conct[0].add_next((conct[1], mx_c))
-                                conct[1].add_next((conct[0], mx_c))
+                                    mx_c = '1'
+                                if (conct[0].add_next((conct[1], mx_c)) or
+                                        conct[1].add_next((conct[0], mx_c))):
+                                    raise ConnectionError('Wrong meta-data')
                             else:
                                 raise HubError('wrong name for connection')
                         elif name_arg[0] == 'nb_drones' and data['dron'] == []:
@@ -140,5 +142,8 @@ variable({name_arg[0]})')
         for d in range(count_drons):
             data['dron'].append(Dron(id=d,
                                      pos=data['start_hub']))
+        
+        all_connection: set[Hub] = {n for h in data['hubs']
+                                    for n in h.next}
 
         return data

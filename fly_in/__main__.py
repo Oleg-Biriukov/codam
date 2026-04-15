@@ -24,7 +24,7 @@ between two points throw hubs',
     args = parser.parse_args()
     eng = Engine(stg=Astar())
     eng.configure(args.filename)
-    eng.make_turn()
+    # eng.make_turn()
 
 
 if __name__ == '__main__':
