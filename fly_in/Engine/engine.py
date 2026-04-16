@@ -3,15 +3,31 @@ from ConfigCompiler.ConfigCompiler import DataConf, ConfigCompiler
 from typing import List
 from Engine.strategies import Strategy
 from hubs.hub import Hub, Dron
+import pygame as p
 
 
 class Engine(BaseModel):
     _data: DataConf = PrivateAttr()
+    _screen: p.display = PrivateAttr()
+    _clock: p.time = PrivateAttr()
     stg: Strategy
 
     def configure(self, filename: str) -> None:
+        
+        assets = {
+            'hub': (193, 17, 368, 308),
+            'start_end': (661, 17, 408, 308),
+            'dron': (1169, 115, 220, 155)
+            }
         ConfigCompiler.modify_path(filename)
         self._data = ConfigCompiler.get_values()
+        p.init()
+
+        
+        self._screen = p.display.set_mode((500, 500))
+        self._clock = p.time.Clock()
+        
+
 
 #         for h in self._data['hubs']:
 #             print(f'''Name: {h.name}
