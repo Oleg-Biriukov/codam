@@ -143,7 +143,7 @@ variable({name_arg[0]})')
             data['dron'].append(Dron(id=d,
                                      pos=data['start_hub']))
         
-        all_connection: set[Hub] = {n for h in data['hubs']
-                                    for n in h.next}
+        # all_connection: set[Hub] = {n for h in data['hubs']
+        #                             for n in h.next}
 
         return data
