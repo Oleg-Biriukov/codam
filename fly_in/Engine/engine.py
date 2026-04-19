@@ -1,6 +1,6 @@
 from pydantic import BaseModel, PrivateAttr
 from ConfigCompiler.ConfigCompiler import DataConf, ConfigCompiler
-from typing import List
+from typing import List, ClassVar
 from Engine.strategies import Strategy
 from hubs.hub import Hub, Dron
 import pygame as p
@@ -17,33 +17,40 @@ class Engine(BaseModel):
             'start_end': (661, 17, 408, 308),
             'dron': (1169, 115, 220, 155)
             })
+    WIDTH: ClassVar[int] = 1000
+    HEIGHT: ClassVar[int] = 1000
 
     stg: Strategy
 
+    @property
+    def is_done(self) -> bool:
+        return len(list(filter(lambda x: x.pos != self._data['end_hub'],
+                        self._data['dron']))) != 0
+
     def configure(self, filename: str) -> None:
         ConfigCompiler.modify_path(filename)
-        print(f'[{dt.datetime.now()}] Reading data from {filename}...', end=' ')
-        self._data = ConfigCompiler.get_values()
         print(f'\n[{dt.datetime.now()}] Initialization pygame module')
         p.init()
         print(f'[{dt.datetime.now()}] Loading assets...', end=' ')
         try:
             asset = p.image.load('assets/hubs_dron.png')
+            print('OK')
+            print(f'[{dt.datetime.now()}] Reading data from {filename}...',
+                  end=' ')
+            self._data = ConfigCompiler.get_values()
+            print('OK')
         except Exception:
             print('KO')
             print('Shutting down ...')
             sys.exit()
-        print('OK')
         hub_p = asset.subsurface(self._assets['hub']).copy()
         start_end = asset.subsurface(self._assets['start_end']).copy()
         dron_p = asset.subsurface(self._assets['dron']).copy()
         self._assets['hub'] = p.transform.scale(hub_p, (100, 100))
         self._assets['start_end'] = p.transform.scale(start_end, (100, 100))
         self._assets['dron'] = p.transform.scale(dron_p, (30, 30))
-        self._screen = p.display.set_mode((2000, 2000))
+        self._screen = p.display.set_mode((Engine.WIDTH, Engine.HEIGHT))
         self._clock = p.time.Clock()
-        
-
 
 #         for h in self._data['hubs']:
 #             print(f'''Name: {h.name}
@@ -87,35 +94,35 @@ class Engine(BaseModel):
             for turn in range(len(route)):
                 dron.route.append((turn+1, route[turn]))
             return True
-        while True:
-        # while len(list(filter(lambda x: x.pos != self._data['end_hub'],
-        #                       self._data['dron']))) != 0:
-            for event in p.event.get():
-                if event == p.QUIT:
-                    sys.exit()
 
-            print(f'================={turns+1}==================')
-            for h in range(len(self._data['hubs'])):
-                for n in range(len(self._data['hubs'][h].next)):
-                    self._data['hubs'][h].next[n] = sv_con_cap[h][n]
+        while True:
+            for event in p.event.get():
+                if event.type == p.QUIT:
+                    break
 
             self._screen.fill((0, 0, 0))
 
             for hb in self._data['hubs']:
                 x, y = hb.pos
+                x = (Engine.WIDTH / 2) + (x * 200)
+                y = (Engine.HEIGHT / 2) + (y * 200)
                 if hb == self._data['end_hub'] or hb == self._data['start_hub']:
-                    self._screen.blit(self._assets['start_end'], (x*4000, y*4000))
+                    self._screen.blit(self._assets['start_end'], (x, y))
                 else:
-                    self._screen.blit(self._assets['hub'], (x*400, y*400))
-
-            for d in self._data['dron']:
-                set_to_null()
-                self.stg.perform_turn(d, self._data, turns)
-                if get_route(d) and d.pos != self._data['end_hub']:
-                    if not d.move_to():
-                        print(f'd{d.id} -> {d.pos.name}')
-                        continue
-                print(f'd{d.id} -> {d.pos.name}')
+                    self._screen.blit(self._assets['hub'], (x, y))
+            if self.is_done:
+                print(f'================={turns+1}==================')
+                for h in range(len(self._data['hubs'])):
+                    for n in range(len(self._data['hubs'][h].next)):
+                        self._data['hubs'][h].next[n] = sv_con_cap[h][n]
+                for d in self._data['dron']:
+                    set_to_null()
+                    self.stg.perform_turn(d, self._data, turns)
+                    if get_route(d) and d.pos != self._data['end_hub']:
+                        if not d.move_to():
+                            print(f'd{d.id} -> {d.pos.name}')
+                            continue
+                    print(f'd{d.id} -> {d.pos.name}')
             p.display.flip()
             turns += 1
         return True
