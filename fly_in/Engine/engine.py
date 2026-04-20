@@ -4,13 +4,15 @@ from typing import List, ClassVar, Self
 from Engine.strategies import Strategy
 from hubs.hub import Hub, Dron
 import pygame as p
+import webcolors as w
 import sys
 import datetime as dt
 
 
 class Camera(BaseModel):
-        pos: tuple[int, int] = (0, 0)
-        zoom: float = 1.0
+    pos: tuple[float, float] = (0, 0)
+    speed: tuple[float, float] = (0.0, 0.0)
+    zoom: float = 1.0
 
 
 class Engine(BaseModel):
@@ -25,6 +27,7 @@ class Engine(BaseModel):
     _cmr: Camera = PrivateAttr()
     WIDTH: ClassVar[int] = 1000
     HEIGHT: ClassVar[int] = 1000
+    WORLD_R: ClassVar[int] = 10000
 
     stg: Strategy
 
@@ -39,6 +42,7 @@ class Engine(BaseModel):
         ConfigCompiler.modify_path(filename)
         print(f'\n[{dt.datetime.now()}] Initialization pygame module')
         p.init()
+        p.display.set_caption('fly_in')
         print(f'[{dt.datetime.now()}] Loading assets...', end=' ')
 
         try:
@@ -71,6 +75,9 @@ class Engine(BaseModel):
                                        for hub in self._data['hubs']]
         is_running: bool = True
         zoom: float
+        dt: float
+        keys: dict
+        speed: float
 
         def set_to_null() -> None:
             for hub in self._data['hubs']:
@@ -97,6 +104,11 @@ class Engine(BaseModel):
 
         while is_running:
             zoom = self._cmr.zoom
+            c_x, c_y = self._cmr.pos
+            dt = self._clock.tick(180) / 1000
+            keys = p.key.get_pressed()
+            speed = 600 / zoom
+
             for event in p.event.get():
                 if event.type == p.QUIT:
                     is_running = False
@@ -107,17 +119,40 @@ class Engine(BaseModel):
                     zoom = max(0.2, min(zoom, 5))
                     self._cmr.zoom = zoom
 
-            self._screen.fill((0, 0, 0))
+            if keys[p.K_w]:
+                c_y -= dt * speed
+            if keys[p.K_s]:
+                c_y += dt * speed
+            if keys[p.K_d]:
+                c_x += dt * speed
+            if keys[p.K_a]:
+                c_x -= dt * speed
 
+
+# generating grid as background
+            self._screen.fill(w.name_to_rgb('white'))
+            s_x: float
+            s_y: float
+            for x in range(-Engine.WORLD_R, Engine.WORLD_R, 100):
+                s_x = (x - c_x) * zoom + Engine.WIDTH // 2
+                p.draw.line(self._screen, w.name_to_rgb('black'),
+                            (s_x, 0), (s_x, Engine.HEIGHT))
+            for y in range(-Engine.WORLD_R, Engine.WORLD_R, 100):
+                s_y = (y - c_y) * zoom + Engine.HEIGHT // 2
+                p.draw.line(self._screen, w.name_to_rgb('black'),
+                            (0, s_y), (Engine.WIDTH, s_y))
+
+# generating hubs
             for hb in self._data['hubs']:
                 img: p.Surface
                 r_img: p.Rect
+                closed_con: list[tuple[Hub, Hub]] = []
 
                 x, y = hb.pos
                 if hb == self._data['end_hub'] or hb == self._data['start_hub']:
                     self._assets['start_end'] = p.transform.scale(
                         self._assets['start_end'],
-                        (int(100 * zoom), int(100 * zoom))
+                        (int(100), int(100))
                         )
 
                     img = self._assets['start_end']
@@ -130,9 +165,28 @@ class Engine(BaseModel):
                     img = self._assets['hub']
 
                 r_img = img.get_rect()
-                r_img.center = ((Engine.WIDTH // 2) + (x * int(200 * zoom)),
-                                (Engine.HEIGHT // 2) + (y * int(200 * zoom)))
+
+                x, y = (int(((Engine.WIDTH // 2) + int(x * zoom) - c_x)
+                            * zoom),
+                        int(((Engine.HEIGHT // 2) + int(y * zoom) - c_y)
+                            * zoom))
+
+# drawing connection to hubs
+                for n, _ in hb.next:
+                    n_x, n_y = n.pos
+                    n_x, n_y = (int(((Engine.WIDTH // 2) + int(n_x * zoom)
+                                     - c_x) * zoom),
+                                int(((Engine.HEIGHT // 2) + int(n_y * zoom)
+                                     - c_y) * zoom))
+                    if 
+                    p.draw.line(self._screen, w.name_to_rgb('yellow'),
+                                (x, y), (n_x, n_y), int(20 * zoom))
+
+# putting our hub in center of the world, but take into account location of
+# camera and value zoom.
+                r_img.center = (x, y)
                 self._screen.blit(img, r_img)
+
             if self.is_done:
                 print(f'================={turns+1}==================')
                 for h in range(len(self._data['hubs'])):
@@ -147,5 +201,7 @@ class Engine(BaseModel):
                             continue
                     print(f'd{d.id} -> {d.pos.name}')
                 turns += 1
+
+            self._cmr.pos = (c_x, c_y)
             p.display.flip()
         p.quit()

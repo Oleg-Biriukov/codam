@@ -67,8 +67,8 @@ class ConfigCompiler(BaseModel):
                             meta['max_drones'] = 'endless'
 
                             data['start_hub'] = Hub(name=arg[0],
-                                                    pos=(int(arg[1]),
-                                                         int(arg[2])),
+                                                    pos=(int(arg[1]) * 400,
+                                                         int(arg[2]) * 400),
                                                     **meta)
 
                             data['hubs'].append(data['start_hub'])
@@ -86,8 +86,8 @@ class ConfigCompiler(BaseModel):
                             meta['max_drones'] = 'endless'
 
                             data['end_hub'] = Hub(name=arg[0],
-                                                  pos=(int(arg[1]),
-                                                       int(arg[2])),
+                                                  pos=(int(arg[1]) * 400,
+                                                       int(arg[2]) * 400),
                                                   **meta)
 
                             data['hubs'].append(data['end_hub'])
@@ -101,8 +101,8 @@ class ConfigCompiler(BaseModel):
                                         for var in br.split()))
 
                             data['hubs'].append(Hub(name=arg[0],
-                                                    pos=(int(arg[1]),
-                                                         int(arg[2])),
+                                                    pos=(int(arg[1]) * 400,
+                                                         int(arg[2]) * 400),
                                                     **meta))
                         elif name_arg[0] == 'connection':
                             mx_c: str
