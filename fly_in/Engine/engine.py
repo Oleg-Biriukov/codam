@@ -78,6 +78,7 @@ class Engine(BaseModel):
         dt: float
         keys: dict
         speed: float
+        scale: int
 
         def set_to_null() -> None:
             for hub in self._data['hubs']:
@@ -105,9 +106,10 @@ class Engine(BaseModel):
         while is_running:
             zoom = self._cmr.zoom
             c_x, c_y = self._cmr.pos
-            dt = self._clock.tick(180) / 1000
+            dt = self._clock.tick(100) / 1000
             keys = p.key.get_pressed()
-            speed = 600 / zoom
+            speed = 1000 / zoom
+            print(zoom)
 
             for event in p.event.get():
                 if event.type == p.QUIT:
@@ -116,7 +118,7 @@ class Engine(BaseModel):
                     Engine.WIDTH, Engine.HEIGHT = event.w, event.h
                 if event.type == p.MOUSEWHEEL:
                     zoom += event.y * 0.1
-                    zoom = max(0.2, min(zoom, 5))
+                    zoom = max(0.2, min(zoom, 2))
                     self._cmr.zoom = zoom
 
             if keys[p.K_w]:
@@ -127,6 +129,13 @@ class Engine(BaseModel):
                 c_x += dt * speed
             if keys[p.K_a]:
                 c_x -= dt * speed
+
+            if 1.5 <= zoom <= 2:
+                scale = 500
+            elif 0.2 <= zoom <= 0.5:
+                scale = 50
+            else:
+                scale = 100
 
 
 # generating grid as background
@@ -143,47 +152,48 @@ class Engine(BaseModel):
                             (0, s_y), (Engine.WIDTH, s_y))
 
 # generating hubs
+            hubs_loc: list[tuple[Hub, int, int]] = []
             for hb in self._data['hubs']:
-                img: p.Surface
-                r_img: p.Rect
-                closed_con: list[tuple[Hub, Hub]] = []
-
                 x, y = hb.pos
-                if hb == self._data['end_hub'] or hb == self._data['start_hub']:
-                    self._assets['start_end'] = p.transform.scale(
-                        self._assets['start_end'],
-                        (int(100), int(100))
-                        )
-
-                    img = self._assets['start_end']
-                else:
-                    self._assets['hub'] = p.transform.scale(
-                        self._assets['hub'],
-                        (int(100), int(100))
-                        )
-
-                    img = self._assets['hub']
-
-                r_img = img.get_rect()
 
                 x, y = (int(((Engine.WIDTH // 2) + int(x * zoom) - c_x)
                             * zoom),
                         int(((Engine.HEIGHT // 2) + int(y * zoom) - c_y)
                             * zoom))
 
-# drawing connection to hubs
+# drawing connection firstly
                 for n, _ in hb.next:
                     n_x, n_y = n.pos
                     n_x, n_y = (int(((Engine.WIDTH // 2) + int(n_x * zoom)
                                      - c_x) * zoom),
                                 int(((Engine.HEIGHT // 2) + int(n_y * zoom)
                                      - c_y) * zoom))
-                    if 
-                    p.draw.line(self._screen, w.name_to_rgb('yellow'),
-                                (x, y), (n_x, n_y), int(20 * zoom))
+                    p.draw.line(self._screen, w.name_to_rgb('orange'),
+                                (x, y), (n_x, n_y), int(10 * zoom))
+
+# seperate layers for connection adn hubs and save them in hubs_loc
+                hubs_loc.append((hb, x, y))
 
 # putting our hub in center of the world, but take into account location of
 # camera and value zoom.
+            for hb, x, y in hubs_loc:
+
+                if hb == self._data['end_hub'] or hb == self._data['start_hub']:
+                    self._assets['start_end'] = p.transform.scale(
+                        self._assets['start_end'],
+                        (scale, scale)
+                        )
+
+                    img = self._assets['start_end']
+                else:
+                    self._assets['hub'] = p.transform.scale(
+                        self._assets['hub'],
+                        (scale, scale)
+                        )
+
+                    img = self._assets['hub']
+
+                r_img = img.get_rect()
                 r_img.center = (x, y)
                 self._screen.blit(img, r_img)
 
