@@ -31,6 +31,7 @@ class Engine(BaseModel):
 
     stg: Strategy
 
+# defining the status of drons if all arrivees then true, not False
     @property
     def is_done(self) -> bool:
         return len(list(filter(lambda x: x.pos != self._data['end_hub'],
@@ -103,6 +104,12 @@ class Engine(BaseModel):
                 dron.route.append((turn+1, route[turn]))
             return True
 
+        def arriving_dron(dron: Dron) -> bool:
+            x, y = dron.pos
+            if x == 0:
+                return True
+            return False
+
         while is_running:
             zoom = self._cmr.zoom
             c_x, c_y = self._cmr.pos
@@ -131,7 +138,7 @@ class Engine(BaseModel):
                 c_x -= dt * speed
 
             if 1.5 <= zoom <= 2:
-                scale = 500
+                scale = 400
             elif 0.2 <= zoom <= 0.5:
                 scale = 50
             else:
