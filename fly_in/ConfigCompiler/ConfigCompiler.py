@@ -140,7 +140,9 @@ variable({name_arg[0]})')
             print(f'{type(e).__name__}: {e}')
 
         for d in range(count_drons):
+            x, y = data['start_hub'].pos
             data['dron'].append(Dron(id=d,
+                                     c_pos=(x-1, y-1),
                                      pos=data['start_hub']))
         
         # all_connection: set[Hub] = {n for h in data['hubs']

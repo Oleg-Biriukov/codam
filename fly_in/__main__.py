@@ -31,6 +31,52 @@ if __name__ == '__main__':
     main()
 
 
+# import pygame
+# import math
+
+# pygame.init()
+# screen = pygame.display.set_mode((800, 600))
+# clock = pygame.time.Clock()
+
+# x, y = 100, 100
+# target = (0, 0)
+# speed = 5
+
+# running = True
+# while running:
+#     for event in pygame.event.get():
+#         if event.type == pygame.QUIT:
+#             running = False
+#         if event.type == pygame.MOUSEBUTTONDOWN:
+#             target = pygame.mouse.get_pos()
+
+#     # Direction to target
+#     dx = target[0] - x
+#     dy = target[1] - y
+
+#     distance = math.hypot(dx, dy)
+
+#     if distance > 0:
+#         dx /= distance
+#         dy /= distance
+
+#         x += dx * speed
+#         y += dy * speed
+
+#     # Stop when close enough
+#     if distance < speed:
+#         x, y = target
+
+#     # Draw
+#     screen.fill((30, 30, 30))
+#     pygame.draw.circle(screen, (255, 100, 100), (int(x), int(y)), 10)
+#     pygame.draw.circle(screen, (100, 255, 100), target, 5)
+
+#     pygame.display.flip()
+#     clock.tick(60)
+
+# pygame.quit()
+
 # import pygame as p
 
 # p.init()

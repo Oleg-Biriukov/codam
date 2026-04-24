@@ -25,8 +25,8 @@ class Engine(BaseModel):
             'dron': (1169, 115, 220, 155)
             })
     _cmr: Camera = PrivateAttr()
-    WIDTH: ClassVar[int] = 1000
-    HEIGHT: ClassVar[int] = 1000
+    WIDTH: ClassVar[int] = 1500
+    HEIGHT: ClassVar[int] = 1500
     WORLD_R: ClassVar[int] = 10000
 
     stg: Strategy
@@ -64,7 +64,7 @@ class Engine(BaseModel):
 
         self._assets['hub'] = p.transform.scale(hub_p, (100, 100))
         self._assets['start_end'] = p.transform.scale(start_end, (100, 100))
-        self._assets['dron'] = p.transform.scale(dron_p, (30, 30))
+        self._assets['dron'] = p.transform.scale(dron_p, (50, 50))
 
         self._screen = p.display.set_mode((Engine.WIDTH, Engine.HEIGHT),
                                           p.RESIZABLE)
@@ -75,6 +75,7 @@ class Engine(BaseModel):
         sv_con_cap: List[list[int]] = [[n for n in hub.next]
                                        for hub in self._data['hubs']]
         is_running: bool = True
+        start: bool = False
         zoom: float
         dt: float
         keys: dict
@@ -105,11 +106,41 @@ class Engine(BaseModel):
             return True
 
         def arriving_dron(dron: Dron) -> bool:
-            x, y = dron.c_pos
-            
-            if dron.c_pos == dron.pos.pos:
+            import math as m
+            speed_d: int = 20
 
+            img = self._assets['dron']
+            r_img = img.get_rect()
+            x, y = dron.c_pos
+            print(dron.c_pos, dron.pos.pos)
+            dx = dron.pos.pos[0] - x
+            dy = dron.pos.pos[1] - y
+            print((dx, dy))
+            distance = m.hypot(dx, dy)
+            x, y = (int(((Engine.WORLD_R // 2) + int(x * zoom)
+                        - c_x) * zoom),
+                    int(((Engine.WORLD_R // 2) + int(y * zoom)
+                        - c_y) * zoom))
+            if distance > 0:
+                x /= distance
+                y /= distance
+
+                x += dx * speed_d
+                y += dy * speed_d
+            print(distance)
+            r_img.center = (x, y)
+            if distance < speed_d:
+                x, y = dron.pos.pos
+                r_img.center = (int(((Engine.WORLD_R // 2) + int(x * zoom)
+                                     - c_x) * zoom),
+                                int(((Engine.WORLD_R // 2) + int(y * zoom)
+                                     - c_y) * zoom))
+                self._screen.blit(img, r_img)
+                dron.c_pos = dron.pos.pos
                 return True
+            self._screen.blit(img, r_img)
+            x, y = dron.c_pos
+            dron.c_pos = (x + dx * speed_d, y + dy * speed_d)
             return False
 
         while is_running:
@@ -118,8 +149,8 @@ class Engine(BaseModel):
             dt = self._clock.tick(100) / 1000
             keys = p.key.get_pressed()
             speed = 1000 / zoom
-            print(zoom)
 
+# event checking
             for event in p.event.get():
                 if event.type == p.QUIT:
                     is_running = False
@@ -129,7 +160,7 @@ class Engine(BaseModel):
                     zoom += event.y * 0.1
                     zoom = max(0.2, min(zoom, 2))
                     self._cmr.zoom = zoom
-
+# keyboard checking
             if keys[p.K_w]:
                 c_y -= dt * speed
             if keys[p.K_s]:
@@ -138,7 +169,10 @@ class Engine(BaseModel):
                 c_x += dt * speed
             if keys[p.K_a]:
                 c_x -= dt * speed
-
+# start game
+            if keys[p.K_1]:
+                start = True
+# scale depency
             if 1.5 <= zoom <= 2:
                 scale = 400
             elif 0.2 <= zoom <= 0.5:
@@ -160,22 +194,22 @@ class Engine(BaseModel):
                 p.draw.line(self._screen, w.name_to_rgb('black'),
                             (0, s_y), (Engine.WIDTH, s_y))
 
-# generating hubs
+# generating connection and coordinates for future hubs
             hubs_loc: list[tuple[Hub, int, int]] = []
             for hb in self._data['hubs']:
                 x, y = hb.pos
 
-                x, y = (int(((Engine.WIDTH // 2) + int(x * zoom) - c_x)
+                x, y = (int(((Engine.WORLD_R // 2) + int(x * zoom) - c_x)
                             * zoom),
-                        int(((Engine.HEIGHT // 2) + int(y * zoom) - c_y)
+                        int(((Engine.WORLD_R // 2) + int(y * zoom) - c_y)
                             * zoom))
 
 # drawing connection firstly
                 for n, _ in hb.next:
                     n_x, n_y = n.pos
-                    n_x, n_y = (int(((Engine.WIDTH // 2) + int(n_x * zoom)
+                    n_x, n_y = (int(((Engine.WORLD_R // 2) + int(n_x * zoom)
                                      - c_x) * zoom),
-                                int(((Engine.HEIGHT // 2) + int(n_y * zoom)
+                                int(((Engine.WORLD_R // 2) + int(n_y * zoom)
                                      - c_y) * zoom))
                     p.draw.line(self._screen, w.name_to_rgb('orange'),
                                 (x, y), (n_x, n_y), int(10 * zoom))
@@ -206,19 +240,22 @@ class Engine(BaseModel):
                 r_img.center = (x, y)
                 self._screen.blit(img, r_img)
 
-            if self.is_done:
+            if self.is_done and start is True:
                 print(f'================={turns+1}==================')
                 for h in range(len(self._data['hubs'])):
                     for n in range(len(self._data['hubs'][h].next)):
                         self._data['hubs'][h].next[n] = sv_con_cap[h][n]
                 for d in self._data['dron']:
-                    set_to_null()
-                    self.stg.perform_turn(d, self._data, turns)
-                    if get_route(d) and d.pos != self._data['end_hub']:
-                        if not d.move_to():
-                            print(f'd{d.id} -> {d.pos.name}')
-                            continue
-                    print(f'd{d.id} -> {d.pos.name}')
+                    if arriving_dron(d):
+                        set_to_null()
+                        self.stg.perform_turn(d, self._data, turns)
+                        if get_route(d) and d.pos != self._data['end_hub']:
+                            if not d.move_to():
+                                print(f'd{d.id} -> {d.pos.name}')
+                                continue
+                        print(f'd{d.id} -> {d.pos.name}')
+                    else:
+                        break
                 turns += 1
 
             self._cmr.pos = (c_x, c_y)
