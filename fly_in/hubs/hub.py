@@ -79,6 +79,7 @@ class Hub(BaseModel):
 class Dron(BaseModel):
     id: int = Field(ge=0, le=10000)
     pos: Hub
+    c_pos: tuple[int, int]
     route: list[tuple[int, Hub]] = []
     _to_wait: int = PrivateAttr(0)
 

@@ -105,8 +105,10 @@ class Engine(BaseModel):
             return True
 
         def arriving_dron(dron: Dron) -> bool:
-            x, y = dron.pos
-            if x == 0:
+            x, y = dron.c_pos
+            
+            if dron.c_pos == dron.pos.pos:
+
                 return True
             return False
 
