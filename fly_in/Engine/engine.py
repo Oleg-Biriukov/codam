@@ -34,7 +34,12 @@ class Engine(BaseModel):
 # defining the status of drons if all arrivees then true, not False
     @property
     def is_done(self) -> bool:
-        return len(list(filter(lambda x: x.pos != self._data['end_hub'],
+        return len(list(filter(lambda x: x.c_pos != self._data['end_hub'].pos,
+                        self._data['dron']))) != 0
+
+    @property
+    def is_all_arrived(self) -> bool:
+        return len(list(filter(lambda x: x.c_pos != x.pos.pos,
                         self._data['dron']))) != 0
 
     def configure(self, filename: str) -> None:
@@ -117,17 +122,16 @@ class Engine(BaseModel):
             img = self._assets['dron']
             r_img = img.get_rect()
 
-            dx = dron.c_pos[0] - dron.pos.pos[0]
-            dy = dron.c_pos[1] - dron.pos.pos[1]
+            dx = dron.pos.pos[0] - dron.c_pos[0]
+            dy = dron.pos.pos[1] - dron.c_pos[1]
             distance = m.hypot(dx, dy)
-            print(distance)
             if distance > 0:
                 dx /= distance
                 dy /= distance
 
-            new_x = dron.c_pos[0] + dx * spd
-            new_y = dron.c_pos[1] + dy * spd
-            if distance < spd:
+            new_x = dron.c_pos[0] + dx * spd * zoom * dt
+            new_y = dron.c_pos[1] + dy * spd * zoom * dt
+            if distance < spd * zoom * dt:
                 dron.c_pos = dron.pos.pos
                 arrived = True
             else:
@@ -139,8 +143,7 @@ class Engine(BaseModel):
                             int(((Engine.WORLD_R // 2) + int(dron.c_pos[1]
                                 * zoom) - c_y) * zoom))
             r_img.center = (scr_x, scr_y)
-            print(arrived)
-            dron.c_pos = (x + dx * speed, y + dy * speed)
+            dron.c_pos = (new_x, new_y)
             self._screen.blit(img, r_img)
             return arrived
 
@@ -171,7 +174,7 @@ class Engine(BaseModel):
             if keys[p.K_a]:
                 c_x -= dt * speed
 # start game
-            if keys[p.K_1]:
+            if keys[p.K_SPACE]:
                 start = True
 # scale depency
             if 1.5 <= zoom <= 2:
@@ -241,24 +244,26 @@ class Engine(BaseModel):
                 r_img.center = (x, y)
                 self._screen.blit(img, r_img)
 
-            if self.is_done and start is True:
-                print(f'================={turns+1}==================')
+            if self.is_done and start:
                 for h in range(len(self._data['hubs'])):
                     for n in range(len(self._data['hubs'][h].next)):
                         self._data['hubs'][h].next[n] = sv_con_cap[h][n]
                 for d in self._data['dron']:
-                    if arriving_dron(d):
-                        set_to_null()
+                    set_to_null()
+                    if arriving_dron(d) and self.is_all_arrived:
                         self.stg.perform_turn(d, self._data, turns)
-                        if get_route(d) and d.pos != self._data['end_hub']:
-                            if not d.move_to():
-                                print(f'd{d.id} -> {d.pos.name}')
-                                continue
-                        print(f'd{d.id} -> {d.pos.name}')
-                    else:
-                        break
-                turns += 1
-
+                    if get_route(d) and d.pos != self._data['end_hub']:
+                        if not d.move_to():
+                            continue
+                if not self.is_all_arrived:
+                    print(f'================={turns+1}==================')
+                    turns += 1
+            else:
+                start = False
+                for drn in self._data['dron']:
+                    srx, sry = self._data['start_hub'].pos
+                    drn.c_pos = (srx-1, sry-1)
+                    drn.pos = self._data['start_hub']
             self._cmr.pos = (c_x, c_y)
             p.display.flip()
         p.quit()

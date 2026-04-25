@@ -105,6 +105,7 @@ class Dron(BaseModel):
                 hub.next[index] = (nxt, m_x - 1)
                 hub.max_drones -= 1
                 self.pos = hub
+                print(f'd{self.id} -> {self.pos.name}')
                 return True
         else:
             self._to_wait -= 1
