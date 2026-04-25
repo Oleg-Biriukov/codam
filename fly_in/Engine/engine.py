@@ -68,6 +68,8 @@ class Engine(BaseModel):
 
         self._screen = p.display.set_mode((Engine.WIDTH, Engine.HEIGHT),
                                           p.RESIZABLE)
+        self._cmr.pos = (Engine.WORLD_R//2, Engine.WORLD_R//2)
+
         self._clock = p.time.Clock()
 
     def make_turn(self) -> None:
@@ -107,41 +109,40 @@ class Engine(BaseModel):
 
         def arriving_dron(dron: Dron) -> bool:
             import math as m
-            speed_d: int = 20
+            arrived: bool
+            new_x: float
+            new_y: float
+            spd: float = 1000
 
             img = self._assets['dron']
             r_img = img.get_rect()
-            x, y = dron.c_pos
-            print(dron.c_pos, dron.pos.pos)
-            dx = dron.pos.pos[0] - x
-            dy = dron.pos.pos[1] - y
-            print((dx, dy))
-            distance = m.hypot(dx, dy)
-            x, y = (int(((Engine.WORLD_R // 2) + int(x * zoom)
-                        - c_x) * zoom),
-                    int(((Engine.WORLD_R // 2) + int(y * zoom)
-                        - c_y) * zoom))
-            if distance > 0:
-                x /= distance
-                y /= distance
 
-                x += dx * speed_d
-                y += dy * speed_d
+            dx = dron.c_pos[0] - dron.pos.pos[0]
+            dy = dron.c_pos[1] - dron.pos.pos[1]
+            distance = m.hypot(dx, dy)
             print(distance)
-            r_img.center = (x, y)
-            if distance < speed_d:
-                x, y = dron.pos.pos
-                r_img.center = (int(((Engine.WORLD_R // 2) + int(x * zoom)
-                                     - c_x) * zoom),
-                                int(((Engine.WORLD_R // 2) + int(y * zoom)
-                                     - c_y) * zoom))
-                self._screen.blit(img, r_img)
+            if distance > 0:
+                dx /= distance
+                dy /= distance
+
+            new_x = dron.c_pos[0] + dx * spd
+            new_y = dron.c_pos[1] + dy * spd
+            if distance < spd:
                 dron.c_pos = dron.pos.pos
-                return True
+                arrived = True
+            else:
+                dron.c_pos = (new_x, new_y)
+                arrived = False
+
+            scr_x, scr_y = (int(((Engine.WORLD_R // 2) + int(dron.c_pos[0]
+                                * zoom) - c_x) * zoom),
+                            int(((Engine.WORLD_R // 2) + int(dron.c_pos[1]
+                                * zoom) - c_y) * zoom))
+            r_img.center = (scr_x, scr_y)
+            print(arrived)
+            dron.c_pos = (x + dx * speed, y + dy * speed)
             self._screen.blit(img, r_img)
-            x, y = dron.c_pos
-            dron.c_pos = (x + dx * speed_d, y + dy * speed_d)
-            return False
+            return arrived
 
         while is_running:
             zoom = self._cmr.zoom
