@@ -39,8 +39,8 @@ class Engine(BaseModel):
 
     @property
     def is_all_arrived(self) -> bool:
-        return len(list(filter(lambda x: x.c_pos != x.pos.pos,
-                        self._data['dron']))) != 0
+        return len(list(filter(lambda x: x.c_pos == x.pos.pos,
+                        self._data['dron']))) == len(self._data['dron'])
 
     def configure(self, filename: str) -> None:
         self._cmr = Camera()
@@ -79,6 +79,7 @@ class Engine(BaseModel):
 
     def make_turn(self) -> None:
         turns: int = 0
+        dron_moved: int = 0
         sv_con_cap: List[list[int]] = [[n for n in hub.next]
                                        for hub in self._data['hubs']]
         is_running: bool = True
@@ -175,6 +176,7 @@ class Engine(BaseModel):
                 c_x -= dt * speed
 # start game
             if keys[p.K_SPACE]:
+                turns = 0
                 start = True
 # scale depency
             if 1.5 <= zoom <= 2:
@@ -250,12 +252,14 @@ class Engine(BaseModel):
                         self._data['hubs'][h].next[n] = sv_con_cap[h][n]
                 for d in self._data['dron']:
                     set_to_null()
-                    if arriving_dron(d) and self.is_all_arrived:
+                    if arriving_dron(d) or self.is_all_arrived:
                         self.stg.perform_turn(d, self._data, turns)
+                        dron_moved += 1
                     if get_route(d) and d.pos != self._data['end_hub']:
                         if not d.move_to():
                             continue
-                if not self.is_all_arrived:
+                if dron_moved == len(self._data['dron']):
+                    dron_moved = 0
                     print(f'================={turns+1}==================')
                     turns += 1
             else:
