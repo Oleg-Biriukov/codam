@@ -113,9 +113,8 @@ class Engine(BaseModel):
                 dron.route.append((turn+1, route[turn]))
             return True
 
-        def arriving_dron(dron: Dron) -> bool:
+        def arriving_dron(dron: Dron) -> tuple:
             import math as m
-            arrived: bool
             new_x: float
             new_y: float
             spd: float = 1000
@@ -134,19 +133,15 @@ class Engine(BaseModel):
             new_y = dron.c_pos[1] + dy * spd * zoom * dt
             if distance < spd * zoom * dt:
                 dron.c_pos = dron.pos.pos
-                arrived = True
             else:
                 dron.c_pos = (new_x, new_y)
-                arrived = False
 
             scr_x, scr_y = (int(((Engine.WORLD_R // 2) + int(dron.c_pos[0]
                                 * zoom) - c_x) * zoom),
                             int(((Engine.WORLD_R // 2) + int(dron.c_pos[1]
                                 * zoom) - c_y) * zoom))
             r_img.center = (scr_x, scr_y)
-            dron.c_pos = (new_x, new_y)
-            self._screen.blit(img, r_img)
-            return arrived
+            return (img, r_img)
 
         while is_running:
             zoom = self._cmr.zoom
@@ -176,7 +171,6 @@ class Engine(BaseModel):
                 c_x -= dt * speed
 # start game
             if keys[p.K_SPACE]:
-                turns = 0
                 start = True
 # scale depency
             if 1.5 <= zoom <= 2:
@@ -250,20 +244,22 @@ class Engine(BaseModel):
                 for h in range(len(self._data['hubs'])):
                     for n in range(len(self._data['hubs'][h].next)):
                         self._data['hubs'][h].next[n] = sv_con_cap[h][n]
+
                 for d in self._data['dron']:
-                    set_to_null()
-                    if arriving_dron(d) or self.is_all_arrived:
+                    self._screen.blit(*arriving_dron(d))
+                if self.is_all_arrived:
+                    for d in self._data['dron']:
+                        set_to_null()
                         self.stg.perform_turn(d, self._data, turns)
-                        dron_moved += 1
-                    if get_route(d) and d.pos != self._data['end_hub']:
-                        if not d.move_to():
-                            continue
-                if dron_moved == len(self._data['dron']):
-                    dron_moved = 0
-                    print(f'================={turns+1}==================')
-                    turns += 1
+                        if get_route(d) and d.pos != self._data['end_hub']:
+                            if not d.move_to():
+                                print(f'D{d.id}-{d.pos.name}', end=' ')
+                                continue
+                        print(f'D{d.id}-{d.pos.name}', end=' ')
+                    print('\n')
             else:
                 start = False
+                turns = 0
                 for drn in self._data['dron']:
                     srx, sry = self._data['start_hub'].pos
                     drn.c_pos = (srx-1, sry-1)
