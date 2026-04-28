@@ -79,7 +79,7 @@ class Engine(BaseModel):
 
     def make_turn(self) -> None:
         turns: int = 0
-        dron_moved: int = 0
+        font: p.font.Font
         sv_con_cap: List[list[int]] = [[n for n in hub.next]
                                        for hub in self._data['hubs']]
         is_running: bool = True
@@ -89,6 +89,7 @@ class Engine(BaseModel):
         keys: dict
         speed: float
         scale: int
+        text_s: p.Surface
 
         def set_to_null() -> None:
             for hub in self._data['hubs']:
@@ -145,6 +146,7 @@ class Engine(BaseModel):
 
         while is_running:
             zoom = self._cmr.zoom
+            font = p.font.SysFont(None, int(30.0 * zoom))
             c_x, c_y = self._cmr.pos
             dt = self._clock.tick(100) / 1000
             keys = p.key.get_pressed()
@@ -238,7 +240,12 @@ class Engine(BaseModel):
 
                 r_img = img.get_rect()
                 r_img.center = (x, y)
+
+                text_s = font.render(hb.name, True, w.name_to_rgb('black'))
+
                 self._screen.blit(img, r_img)
+                self._screen.blit(text_s,
+                                  text_s.get_rect(center=(x, y+scale-30)))
 
             if self.is_done and start:
                 for h in range(len(self._data['hubs'])):
@@ -249,12 +256,11 @@ class Engine(BaseModel):
                     self._screen.blit(*arriving_dron(d))
                 if self.is_all_arrived:
                     for d in self._data['dron']:
-                        set_to_null()
-                        self.stg.perform_turn(d, self._data, turns)
-                        if get_route(d) and d.pos != self._data['end_hub']:
-                            if not d.move_to():
-                                print(f'D{d.id}-{d.pos.name}', end=' ')
-                                continue
+                        if d.pos != self._data['end_hub']:
+                            set_to_null()
+                            self.stg.perform_turn(d, self._data, turns)
+                            get_route(d)
+                            d.move_to()
                         print(f'D{d.id}-{d.pos.name}', end=' ')
                     print('\n')
             else:

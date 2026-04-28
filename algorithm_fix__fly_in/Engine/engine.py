@@ -64,11 +64,10 @@ class Engine(BaseModel):
                     self._data['hubs'][h].next[n] = sv_con_cap[h][n]
 
             for d in self._data['dron']:
-                set_to_null()
-                self.stg.perform_turn(d, self._data, turns)
-                if get_route(d) and d.pos != self._data['end_hub']:
-                    if not d.move_to():
-                        print(f'd{d.id} -> {d.pos.name}')
-                        continue
+                if d.pos != self._data['end_hub']:
+                    set_to_null()
+                    self.stg.perform_turn(d, self._data, turns)
+                    get_route(d)
+                    d.move_to()
                 print(f'd{d.id} -> {d.pos.name}')
             turns += 1

@@ -80,7 +80,7 @@ class Dron(BaseModel):
     id: int = Field(ge=0, le=10000)
     pos: Hub
     route: list[tuple[int, Hub]] = []
-    _to_wait: int = PrivateAttr(0)
+    _to_wait: bool = PrivateAttr(False)
 
     def move_to(self) -> bool:
         def search_hub(lst: list[tuple[Hub, int]]) -> int:
@@ -91,7 +91,7 @@ class Dron(BaseModel):
                     break
             return i
 
-        if self._to_wait == 0:
+        if self._to_wait is False and self.route != []:
             _, hub = self.route[0]
             index: int = search_hub(hub.next)
             nxt, m_x = hub.next[index]
@@ -99,14 +99,14 @@ class Dron(BaseModel):
                     m_x > 0):
                 _, hub = self.route.pop(0)
                 if hub.zone.value == 'restricted':
-                    self._to_wait += 1
+                    self._to_wait = True
                 self.pos.max_drones += 1
                 hub.next[index] = (nxt, m_x - 1)
                 hub.max_drones -= 1
                 self.pos = hub
                 return True
         else:
-            self._to_wait -= 1
+            self._to_wait = False
         return False
 
 
