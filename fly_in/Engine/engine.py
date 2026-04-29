@@ -14,6 +14,9 @@ class Camera(BaseModel):
     speed: tuple[float, float] = (0.0, 0.0)
     zoom: float = 1.0
 
+    def display_info(self, font: any, res: tuple[int, int], wrld_range: int):
+
+
 
 class Engine(BaseModel):
     _data: DataConf = PrivateAttr()
@@ -78,7 +81,7 @@ class Engine(BaseModel):
         self._clock = p.time.Clock()
 
     def make_turn(self) -> None:
-        turns: int = 0
+        turns: int = 1
         font: p.font.Font
         sv_con_cap: List[list[int]] = [[n for n in hub.next]
                                        for hub in self._data['hubs']]
@@ -255,6 +258,7 @@ class Engine(BaseModel):
                 for d in self._data['dron']:
                     self._screen.blit(*arriving_dron(d))
                 if self.is_all_arrived:
+                    print(f'{turns}.', end=' ')
                     for d in self._data['dron']:
                         if d.pos != self._data['end_hub']:
                             set_to_null()
@@ -263,9 +267,10 @@ class Engine(BaseModel):
                             d.move_to()
                         print(f'D{d.id}-{d.pos.name}', end=' ')
                     print('\n')
+                    turns += 1
             else:
                 start = False
-                turns = 0
+                turns = 1
                 for drn in self._data['dron']:
                     srx, sry = self._data['start_hub'].pos
                     drn.c_pos = (srx-1, sry-1)
