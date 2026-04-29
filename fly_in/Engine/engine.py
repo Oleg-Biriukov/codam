@@ -1,33 +1,62 @@
 from pydantic import BaseModel, PrivateAttr
 from ConfigCompiler.ConfigCompiler import DataConf, ConfigCompiler
-from typing import List, ClassVar, Self
+from typing import List, ClassVar, Any
 from Engine.strategies import Strategy
 from hubs.hub import Hub, Dron
 import pygame as p
-import webcolors as w
+from webcolors import name_to_rgb as color
 import sys
 import datetime as dt
+import functools
 
 
 class Camera(BaseModel):
-    pos: tuple[float, float] = (0, 0)
+    SCREEN: ClassVar[p.Surface]
+    pos: tuple[int, int] = (0, 0)
     speed: tuple[float, float] = (0.0, 0.0)
     zoom: float = 1.0
+    font: Any
+    GUIDE: ClassVar[dict] = {
+        1: 'w,a,s,d - movement',
+        2: 'R3 - zoom in/zoom out',
+        3: 'SPACE - start'
+    }
 
-    def display_info(self, font: any, res: tuple[int, int], wrld_range: int):
+    def display_info(self) -> None:
+        offset: int = 0
 
+        def text_creator(t: str) -> tuple:
+            nonlocal offset
+            text: p.Surface = self.font.render(t,
+                                               True,
+                                               color('lightskyblue'))
+            text_r = text.get_rect()
+
+            x: int = Engine.WIDTH - 225
+            y: int = Engine.HEIGHT // 2
+
+            text_r.center = (x, y+offset)
+            offset += 40
+            return (text, text_r)
+
+        for t in Camera.GUIDE.values():
+            Camera.SCREEN.blit(*text_creator(t))
 
 
 class Engine(BaseModel):
     _data: DataConf = PrivateAttr()
     _screen: p.Surface = PrivateAttr()
     _clock: p.Surface = PrivateAttr()
+
     _assets: dict = PrivateAttr({
             'hub': (193, 17, 368, 308),
             'start_end': (661, 17, 408, 308),
             'dron': (1169, 115, 220, 155)
             })
     _cmr: Camera = PrivateAttr()
+    _bckgr: p.Surface = PrivateAttr()
+    _scale_bck: int = PrivateAttr(300)
+    FONT: ClassVar[str]
     WIDTH: ClassVar[int] = 1500
     HEIGHT: ClassVar[int] = 1500
     WORLD_R: ClassVar[int] = 10000
@@ -46,8 +75,6 @@ class Engine(BaseModel):
                         self._data['dron']))) == len(self._data['dron'])
 
     def configure(self, filename: str) -> None:
-        self._cmr = Camera()
-
         ConfigCompiler.modify_path(filename)
         print(f'\n[{dt.datetime.now()}] Initialization pygame module')
         p.init()
@@ -56,6 +83,12 @@ class Engine(BaseModel):
 
         try:
             asset = p.image.load('assets/hubs_dron.png')
+            self._bckgr = p.image.load('assets/clouds.png')
+            print('OK')
+            print(f'[{dt.datetime.now()}] Preparing font...', end=' ')
+            Engine.FONT = './assets/Minecraftia-Regular.ttf'
+            with open(Engine.FONT, 'r'):
+                pass
             print('OK')
             print(f'[{dt.datetime.now()}] Reading data from {filename}...',
                   end=' ')
@@ -76,6 +109,13 @@ class Engine(BaseModel):
 
         self._screen = p.display.set_mode((Engine.WIDTH, Engine.HEIGHT),
                                           p.RESIZABLE)
+
+        self._cmr = Camera(
+            font=p.font.Font(Engine.FONT, 30)
+        )
+
+        Camera.SCREEN = self._screen
+
         self._cmr.pos = (Engine.WORLD_R//2, Engine.WORLD_R//2)
 
         self._clock = p.time.Clock()
@@ -93,6 +133,30 @@ class Engine(BaseModel):
         speed: float
         scale: int
         text_s: p.Surface
+
+        @functools.lru_cache()
+        def changing_pixels(img: p.surface.Surface, chg: str) -> any:
+            pixels = p.PixelArray(img)
+            for y in range(scale):
+                for x in range(scale):
+                    clr = img.unmap_rgb(pixels[y, x])
+                    if clr == color('black'):
+                        pixels[y, x] = img.map_rgb(color(chg))
+            del pixels
+            return img
+
+        def sighness_bck() -> None:
+            s_x: float
+            s_y: float
+            scl: int = int(self._scale_bck * zoom)
+            bckgr = p.transform.scale(self._bckgr,
+                                      (scl, scl))
+
+            for y in range(-Engine.WORLD_R, Engine.WORLD_R, scl):
+                s_y = (y - c_y) * zoom
+                for x in range(-Engine.WORLD_R, Engine.WORLD_R, scl):
+                    s_x = (x - c_x) * zoom
+                    self._screen.blit(bckgr, (s_x, s_y))
 
         def set_to_null() -> None:
             for hub in self._data['hubs']:
@@ -149,7 +213,7 @@ class Engine(BaseModel):
 
         while is_running:
             zoom = self._cmr.zoom
-            font = p.font.SysFont(None, int(30.0 * zoom))
+            font = p.font.Font(Engine.FONT, int(30.0 * zoom))
             c_x, c_y = self._cmr.pos
             dt = self._clock.tick(100) / 1000
             keys = p.key.get_pressed()
@@ -167,13 +231,13 @@ class Engine(BaseModel):
                     self._cmr.zoom = zoom
 # keyboard checking
             if keys[p.K_w]:
-                c_y -= dt * speed
+                c_y -= int(dt * speed)
             if keys[p.K_s]:
-                c_y += dt * speed
+                c_y += int(dt * speed)
             if keys[p.K_d]:
-                c_x += dt * speed
+                c_x += int(dt * speed)
             if keys[p.K_a]:
-                c_x -= dt * speed
+                c_x -= int(dt * speed)
 # start game
             if keys[p.K_SPACE]:
                 start = True
@@ -186,17 +250,17 @@ class Engine(BaseModel):
                 scale = 100
 
 
-# generating grid as background
-            self._screen.fill(w.name_to_rgb('white'))
-            s_x: float
-            s_y: float
+# generating signess background
+            # sighness_bck()
+            self._screen.fill((79, 79, 79, 128))
+# grid on a layer up from background
             for x in range(-Engine.WORLD_R, Engine.WORLD_R, 100):
-                s_x = (x - c_x) * zoom + Engine.WIDTH // 2
-                p.draw.line(self._screen, w.name_to_rgb('black'),
+                s_x = (x - c_x) * zoom
+                p.draw.line(self._screen, (0, 0, 0, 125),
                             (s_x, 0), (s_x, Engine.HEIGHT))
             for y in range(-Engine.WORLD_R, Engine.WORLD_R, 100):
-                s_y = (y - c_y) * zoom + Engine.HEIGHT // 2
-                p.draw.line(self._screen, w.name_to_rgb('black'),
+                s_y = (y - c_y) * zoom
+                p.draw.line(self._screen, (0, 0, 0, 125),
                             (0, s_y), (Engine.WIDTH, s_y))
 
 # generating connection and coordinates for future hubs
@@ -216,7 +280,7 @@ class Engine(BaseModel):
                                      - c_x) * zoom),
                                 int(((Engine.WORLD_R // 2) + int(n_y * zoom)
                                      - c_y) * zoom))
-                    p.draw.line(self._screen, w.name_to_rgb('orange'),
+                    p.draw.line(self._screen, color('orange'),
                                 (x, y), (n_x, n_y), int(10 * zoom))
 
 # seperate layers for connection adn hubs and save them in hubs_loc
@@ -239,16 +303,22 @@ class Engine(BaseModel):
                         (scale, scale)
                         )
 
-                    img = self._assets['hub']
+                    img = changing_pixels(self._assets['hub'], hb.color.value)
 
                 r_img = img.get_rect()
                 r_img.center = (x, y)
-
-                text_s = font.render(hb.name, True, w.name_to_rgb('black'))
-
                 self._screen.blit(img, r_img)
+
+                text_s = font.render(hb.name, True, color('black'))
                 self._screen.blit(text_s,
                                   text_s.get_rect(center=(x, y+scale-30)))
+
+                if (hub_d := len([d for d in self._data['dron']
+                                 if d.c_pos == hb.pos])) > 1:
+                    text_s = font.render(str(hub_d), True, color('maroon'))
+                    self._screen.blit(text_s,
+                                      text_s.get_rect(
+                                          center=(x, y-int(70*zoom))))
 
             if self.is_done and start:
                 for h in range(len(self._data['hubs'])):
@@ -275,6 +345,7 @@ class Engine(BaseModel):
                     srx, sry = self._data['start_hub'].pos
                     drn.c_pos = (srx-1, sry-1)
                     drn.pos = self._data['start_hub']
+            self._cmr.display_info()
             self._cmr.pos = (c_x, c_y)
             p.display.flip()
         p.quit()
