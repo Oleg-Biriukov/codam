@@ -75,6 +75,18 @@ class Engine(BaseModel):
                         self._data['dron']))) == len(self._data['dron'])
 
     def configure(self, filename: str) -> None:
+        colored_hubs: dict = {}
+
+        def coloring(img: p.surface.Surface, chg: str) -> any:
+            pixels = p.PixelArray(img)
+            for y in range(100):
+                for x in range(100):
+                    clr = img.unmap_rgb(pixels[y, x])
+                    if clr == color('black'):
+                        pixels[y, x] = img.map_rgb(color(chg))
+            del pixels
+            return img
+
         ConfigCompiler.modify_path(filename)
         print(f'\n[{dt.datetime.now()}] Initialization pygame module')
         p.init()
@@ -107,6 +119,18 @@ class Engine(BaseModel):
         self._assets['start_end'] = p.transform.scale(start_end, (100, 100))
         self._assets['dron'] = p.transform.scale(dron_p, (50, 50))
 
+        colored_hubs[0] = self._assets['dron']
+
+        for hb in self._data['hubs']:
+            if (hb == self._data['start_hub'] or
+                    hb == self._data['end_hub']):
+                colored_hubs[hb.name] = coloring(self._assets['start_end'],
+                                                 hb.color.value)
+            else:
+                colored_hubs[hb.name] = coloring(self._assets['hub'],
+                                                 hb.color.value)
+        self._assets = colored_hubs
+
         self._screen = p.display.set_mode((Engine.WIDTH, Engine.HEIGHT),
                                           p.RESIZABLE)
 
@@ -133,17 +157,6 @@ class Engine(BaseModel):
         speed: float
         scale: int
         text_s: p.Surface
-
-        @functools.lru_cache()
-        def changing_pixels(img: p.surface.Surface, chg: str) -> any:
-            pixels = p.PixelArray(img)
-            for y in range(scale):
-                for x in range(scale):
-                    clr = img.unmap_rgb(pixels[y, x])
-                    if clr == color('black'):
-                        pixels[y, x] = img.map_rgb(color(chg))
-            del pixels
-            return img
 
         def sighness_bck() -> None:
             s_x: float
@@ -187,7 +200,7 @@ class Engine(BaseModel):
             new_y: float
             spd: float = 1000
 
-            img = self._assets['dron']
+            img = self._assets[0]
             r_img = img.get_rect()
 
             dx = dron.pos.pos[0] - dron.c_pos[0]
@@ -289,21 +302,12 @@ class Engine(BaseModel):
 # putting our hub in center of the world, but take into account location of
 # camera and value zoom.
             for hb, x, y in hubs_loc:
+                self._assets[hb.name] = p.transform.scale(
+                    self._assets[hb.name],
+                    (scale, scale)
+                    )
 
-                if hb == self._data['end_hub'] or hb == self._data['start_hub']:
-                    self._assets['start_end'] = p.transform.scale(
-                        self._assets['start_end'],
-                        (scale, scale)
-                        )
-
-                    img = self._assets['start_end']
-                else:
-                    self._assets['hub'] = p.transform.scale(
-                        self._assets['hub'],
-                        (scale, scale)
-                        )
-
-                    img = changing_pixels(self._assets['hub'], hb.color.value)
+                img = self._assets[hb.name]
 
                 r_img = img.get_rect()
                 r_img.center = (x, y)

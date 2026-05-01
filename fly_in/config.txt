@@ -4,7 +4,7 @@ end_hub: goal 10 1 [color=yellow]
 
 # My own map
 
-hub: roof1 2 5 [zone=normal color=red max_drones=2]
+hub: roof1 2 5 [zone=normal color=yellow max_drones=2]
 hub: roof2 4 5 [zone=normal color=blue]
 hub: roof3 6 5 [zone=normal color=blue]
 hub: roof4 8 5 [zone=normal color=blue max_drones=2]
