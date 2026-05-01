@@ -24,6 +24,7 @@ class Camera(BaseModel):
 
     def display_info(self) -> None:
         offset: int = 0
+        max_w: int = 0
 
         def text_creator(t: str) -> tuple:
             nonlocal offset
@@ -32,11 +33,11 @@ class Camera(BaseModel):
                                                color('lightskyblue'))
             text_r = text.get_rect()
 
-            x: int = Engine.WIDTH - 225
+            x: int = Engine.WIDTH - text.get_width()
             y: int = Engine.HEIGHT // 2
 
             text_r.center = (x, y+offset)
-            offset += 40
+            offset += text.get_height() + 10
             return (text, text_r)
 
         for t in Camera.GUIDE.values():
@@ -77,14 +78,14 @@ class Engine(BaseModel):
     def configure(self, filename: str) -> None:
         colored_hubs: dict = {}
 
-        def coloring(img: p.surface.Surface, chg: str) -> any:
-            pixels = p.PixelArray(img)
-            for y in range(100):
-                for x in range(100):
-                    clr = img.unmap_rgb(pixels[y, x])
-                    if clr == color('black'):
-                        pixels[y, x] = img.map_rgb(color(chg))
-            del pixels
+        def clring(img: p.Surface, chg: str) -> p.Surface:
+            img.lock()
+            for x in range(img.get_width()):
+                for y in range(img.get_height()):
+                    r, g, b, a = img.get_at((x, y))
+                    if r < 18 and g < 18 and b < 18 and a > 30:
+                        img.set_at((x, y), color(chg))
+            img.unlock()
             return img
 
         ConfigCompiler.modify_path(filename)
@@ -124,12 +125,14 @@ class Engine(BaseModel):
         for hb in self._data['hubs']:
             if (hb == self._data['start_hub'] or
                     hb == self._data['end_hub']):
-                colored_hubs[hb.name] = coloring(self._assets['start_end'],
-                                                 hb.color.value)
+                colored_hubs[hb.name] = clring(
+                    self._assets['start_end'].copy(),
+                    hb.color.value)
             else:
-                colored_hubs[hb.name] = coloring(self._assets['hub'],
-                                                 hb.color.value)
+                colored_hubs[hb.name] = clring(self._assets['hub'].copy(),
+                                               hb.color.value)
         self._assets = colored_hubs
+        print(colored_hubs)
 
         self._screen = p.display.set_mode((Engine.WIDTH, Engine.HEIGHT),
                                           p.RESIZABLE)
