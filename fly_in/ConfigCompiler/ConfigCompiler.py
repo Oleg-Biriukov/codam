@@ -44,10 +44,12 @@ class ConfigCompiler(BaseModel):
         arg: List[str]
         br: str
         meta: Meta
+        lines: int = 0
         count_drons: int = 0
         try:
             with open(cls.path, 'r') as conf:
                 for line in conf:
+                    lines += 1
                     line = line.strip()
                     if line == '':
                         continue
@@ -135,6 +137,8 @@ class ConfigCompiler(BaseModel):
 variable({name_arg[0]})')
 
         except Exception as e:
+            if type(e).__name__ == 'ValidationError':
+                raise ConfError('Incorrect configuration of hub')
             import traceback
             traceback.print_exc()
             print(f'{type(e).__name__}: {e}')

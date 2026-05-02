@@ -6,7 +6,8 @@ from hubs.hub import Hub, Dron
 import pygame as p
 from webcolors import name_to_rgb as color
 import sys
-import datetime as dt
+from datetime import datetime as dt
+from os import listdir as ls
 import functools
 
 
@@ -21,7 +22,7 @@ class Camera(BaseModel):
         1: 'w,a,s,d - movement',
         2: 'R3 - zoom in/zoom out',
         3: 'SPACE - start',
-        4: '-/= asjusting speed of drons'
+        4: '-/= - adjusting speed of drons'
     }
 
     def display_info(self) -> None:
@@ -66,12 +67,13 @@ class Engine(BaseModel):
             'dron': (1169, 115, 220, 155)
             })
     _cmr: Camera = PrivateAttr()
-    _bckgr: p.Surface = PrivateAttr()
-    _scale_bck: int = PrivateAttr(300)
+    _frames: dict = PrivateAttr({})
+
     FONT: ClassVar[str]
     WIDTH: ClassVar[int] = 1500
     HEIGHT: ClassVar[int] = 1500
     WORLD_R: ClassVar[int] = 10000
+    BCKGRND: ClassVar[str] = 'assets/background/'
 
     stg: Strategy
 
@@ -88,6 +90,7 @@ class Engine(BaseModel):
 
     def configure(self, filename: str) -> None:
         colored_hubs: dict = {}
+        frames: list = ls(Engine.BCKGRND)
 
         def clring(img: p.Surface, chg: str) -> p.Surface:
             if chg is None:
@@ -102,26 +105,31 @@ class Engine(BaseModel):
             return img
 
         ConfigCompiler.modify_path(filename)
-        print(f'\n[{dt.datetime.now()}] Initialization pygame module')
+        print(f'\n[{dt.now()}] Initialization pygame module')
         p.init()
         p.display.set_caption('fly_in')
-        print(f'[{dt.datetime.now()}] Loading assets...', end=' ')
+        print(f'[{dt.now()}] Loading assets...', end=' ')
 
         try:
             asset = p.image.load('assets/hubs_dron.png')
-            self._bckgr = p.image.load('assets/clouds.png')
             print('OK')
-            print(f'[{dt.datetime.now()}] Preparing font...', end=' ')
+            print(f'[{dt.now()}] Preparing font...', end=' ')
             Engine.FONT = './assets/Minecraftia-Regular.ttf'
             with open(Engine.FONT, 'r'):
                 pass
             print('OK')
-            print(f'[{dt.datetime.now()}] Reading data from {filename}...',
+            print(f'[{dt.now()}] Reading data from {filename}...',
                   end=' ')
             self._data = ConfigCompiler.get_values()
             print('OK')
-        except Exception:
+            print(f'[{dt.now()}] Loading {len(frames)} background images...',
+                  end=' ')
+            for i, frm in enumerate(frames):
+                self._frames[i] = p.image.load(Engine.BCKGRND+frm)
+            print('OK')
+        except Exception as e:
             print('KO')
+            print('Error:', e)
             print('Shutting down ...')
             sys.exit()
 
@@ -150,7 +158,7 @@ class Engine(BaseModel):
                                           p.RESIZABLE)
 
         self._cmr = Camera(
-            font=p.font.Font(Engine.FONT, 15)
+            font=p.font.Font(Engine.FONT, 25)
         )
 
         Camera.SCREEN = self._screen
@@ -172,20 +180,20 @@ class Engine(BaseModel):
         speed: float
         scale: int
         text_s: p.Surface
-        spd: float = 1000
+        spd_drn: float = 1000
+        countdown = len(self._frames) - 1
+        overlay: p.Surface = p.Surface((Engine.WIDTH, Engine.HEIGHT),
+                                       p.SRCALPHA)
+        overlay.fill((75, 75, 75, 180))
 
-        def sighness_bck() -> None:
-            s_x: float
-            s_y: float
-            scl: int = int(self._scale_bck * zoom)
-            bckgr = p.transform.scale(self._bckgr,
-                                      (scl, scl))
+        def set_background() -> p.Surface:
+            nonlocal countdown
 
-            for y in range(-Engine.WORLD_R, Engine.WORLD_R, scl):
-                s_y = (y - c_y) * zoom
-                for x in range(-Engine.WORLD_R, Engine.WORLD_R, scl):
-                    s_x = (x - c_x) * zoom
-                    self._screen.blit(bckgr, (s_x, s_y))
+            countdown -= 1
+            if countdown < 0:
+                countdown = len(self._frames) - 1
+            return p.transform.scale(self._frames[countdown],
+                                     (Engine.WIDTH, Engine.HEIGHT))
 
         def set_to_null() -> None:
             for hub in self._data['hubs']:
@@ -212,7 +220,6 @@ class Engine(BaseModel):
 
         def arriving_dron(dron: Dron) -> tuple:
             import math as m
-            nonlocal spd
             new_x: float
             new_y: float
 
@@ -226,9 +233,9 @@ class Engine(BaseModel):
                 dx /= distance
                 dy /= distance
 
-            new_x = dron.c_pos[0] + dx * spd * zoom * dt
-            new_y = dron.c_pos[1] + dy * spd * zoom * dt
-            if distance < spd * zoom * dt:
+            new_x = dron.c_pos[0] + dx * spd_drn * zoom * dt
+            new_y = dron.c_pos[1] + dy * spd_drn * zoom * dt
+            if distance < spd_drn * zoom * dt:
                 dron.c_pos = dron.pos.pos
             else:
                 dron.c_pos = (new_x, new_y)
@@ -244,7 +251,7 @@ class Engine(BaseModel):
             zoom = self._cmr.zoom
             font = p.font.Font(Engine.FONT, int(30.0 * zoom))
             c_x, c_y = self._cmr.pos
-            dt = self._clock.tick(100) / 1000
+            dt = self._clock.tick(30) / 1000
             keys = p.key.get_pressed()
             speed = 1000 / zoom
 
@@ -271,10 +278,10 @@ class Engine(BaseModel):
             if keys[p.K_SPACE]:
                 start = True
 # speed adjusting
-            if keys[p.K_MINUS] and spd > 1000:
-                spd -= 20
-            if keys[p.K_EQUALS] and spd < 3000:
-                spd += 20
+            if keys[p.K_MINUS] and spd_drn > 500:
+                spd_drn -= 100
+            if keys[p.K_EQUALS] and spd_drn < 10000:
+                spd_drn += 100
 # scale depency
             if 1.5 <= zoom <= 2:
                 scale = 400
@@ -285,17 +292,10 @@ class Engine(BaseModel):
 
 
 # generating signess background
-            # sighness_bck()
-            self._screen.fill((79, 79, 79, 128))
-# grid on a layer up from background
-            for x in range(-Engine.WORLD_R, Engine.WORLD_R, 100):
-                s_x = (x - c_x) * zoom
-                p.draw.line(self._screen, (0, 0, 0, 125),
-                            (s_x, 0), (s_x, Engine.HEIGHT))
-            for y in range(-Engine.WORLD_R, Engine.WORLD_R, 100):
-                s_y = (y - c_y) * zoom
-                p.draw.line(self._screen, (0, 0, 0, 125),
-                            (0, s_y), (Engine.WIDTH, s_y))
+            self._screen.blit(set_background(), (0, 0))
+
+            overlay = p.transform.scale(overlay, (Engine.WIDTH, Engine.HEIGHT))
+            self._screen.blit(overlay, (0, 0))
 
 # generating connection and coordinates for future hubs
             hubs_loc: list[tuple[Hub, int, int]] = []
@@ -334,7 +334,7 @@ class Engine(BaseModel):
                 r_img.center = (x, y)
                 self._screen.blit(img, r_img)
 
-                text_s = font.render(hb.name, True, color('black'))
+                text_s = font.render(hb.name, True, color('lightgray'))
                 self._screen.blit(text_s,
                                   text_s.get_rect(center=(x, y+scale-30)))
 
@@ -371,6 +371,6 @@ class Engine(BaseModel):
                     drn.pos = self._data['start_hub']
             self._cmr.display_info()
             self._cmr.pos = (c_x, c_y)
-            self._cmr.display_turn(turns-2, start)
+            self._cmr.display_turn(turns-1, start)
             p.display.flip()
         p.quit()
