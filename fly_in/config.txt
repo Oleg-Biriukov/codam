@@ -1,5 +1,5 @@
 nb_drones: 10
-start_hub: hub 1 1 [color=green]
+start_hub: hub 1 1 []
 end_hub: goal 10 1 [color=yellow]
 
 # My own map

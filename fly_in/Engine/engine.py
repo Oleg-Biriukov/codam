@@ -15,16 +15,17 @@ class Camera(BaseModel):
     pos: tuple[int, int] = (0, 0)
     speed: tuple[float, float] = (0.0, 0.0)
     zoom: float = 1.0
+    _turns: int = PrivateAttr(0)
     font: Any
     GUIDE: ClassVar[dict] = {
         1: 'w,a,s,d - movement',
         2: 'R3 - zoom in/zoom out',
-        3: 'SPACE - start'
+        3: 'SPACE - start',
+        4: '-/= asjusting speed of drons'
     }
 
     def display_info(self) -> None:
-        offset: int = 0
-        max_w: int = 0
+        offset: int = 30
 
         def text_creator(t: str) -> tuple:
             nonlocal offset
@@ -33,15 +34,25 @@ class Camera(BaseModel):
                                                color('lightskyblue'))
             text_r = text.get_rect()
 
-            x: int = Engine.WIDTH - text.get_width()
-            y: int = Engine.HEIGHT // 2
+            x: int = Engine.WIDTH // 2
+            y: int = offset
 
-            text_r.center = (x, y+offset)
-            offset += text.get_height() + 10
+            text_r.center = (x, y)
+            offset += text.get_height() + 2
             return (text, text_r)
 
         for t in Camera.GUIDE.values():
             Camera.SCREEN.blit(*text_creator(t))
+
+    def display_turn(self, turns: int, state: bool) -> None:
+        if state:
+            self._turns = turns
+        text: p.Surface = self.font.render(str(self._turns),
+                                           True,
+                                           color('lightskyblue'))
+        text_r = text.get_rect()
+        text_r.topright = (text.get_width()+20, text.get_height())
+        Camera.SCREEN.blit(text, text_r)
 
 
 class Engine(BaseModel):
@@ -79,6 +90,8 @@ class Engine(BaseModel):
         colored_hubs: dict = {}
 
         def clring(img: p.Surface, chg: str) -> p.Surface:
+            if chg is None:
+                return img
             img.lock()
             for x in range(img.get_width()):
                 for y in range(img.get_height()):
@@ -132,13 +145,12 @@ class Engine(BaseModel):
                 colored_hubs[hb.name] = clring(self._assets['hub'].copy(),
                                                hb.color.value)
         self._assets = colored_hubs
-        print(colored_hubs)
 
         self._screen = p.display.set_mode((Engine.WIDTH, Engine.HEIGHT),
                                           p.RESIZABLE)
 
         self._cmr = Camera(
-            font=p.font.Font(Engine.FONT, 30)
+            font=p.font.Font(Engine.FONT, 15)
         )
 
         Camera.SCREEN = self._screen
@@ -160,6 +172,7 @@ class Engine(BaseModel):
         speed: float
         scale: int
         text_s: p.Surface
+        spd: float = 1000
 
         def sighness_bck() -> None:
             s_x: float
@@ -199,9 +212,9 @@ class Engine(BaseModel):
 
         def arriving_dron(dron: Dron) -> tuple:
             import math as m
+            nonlocal spd
             new_x: float
             new_y: float
-            spd: float = 1000
 
             img = self._assets[0]
             r_img = img.get_rect()
@@ -257,6 +270,11 @@ class Engine(BaseModel):
 # start game
             if keys[p.K_SPACE]:
                 start = True
+# speed adjusting
+            if keys[p.K_MINUS] and spd > 1000:
+                spd -= 20
+            if keys[p.K_EQUALS] and spd < 3000:
+                spd += 20
 # scale depency
             if 1.5 <= zoom <= 2:
                 scale = 400
@@ -335,7 +353,6 @@ class Engine(BaseModel):
                 for d in self._data['dron']:
                     self._screen.blit(*arriving_dron(d))
                 if self.is_all_arrived:
-                    print(f'{turns}.', end=' ')
                     for d in self._data['dron']:
                         if d.pos != self._data['end_hub']:
                             set_to_null()
@@ -354,5 +371,6 @@ class Engine(BaseModel):
                     drn.pos = self._data['start_hub']
             self._cmr.display_info()
             self._cmr.pos = (c_x, c_y)
+            self._cmr.display_turn(turns-2, start)
             p.display.flip()
         p.quit()
