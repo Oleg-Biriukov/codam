@@ -1,8 +1,6 @@
 from pydantic import BaseModel, Field, field_validator, PrivateAttr
 from enum import Enum
 from typing import Self, List
-# webcolor
-# color = name_to_rgb(clr)
 import re
 
 
@@ -13,42 +11,20 @@ class Zone(Enum):
     PRIORITY = 'priority'
 
 
-class Color(Enum):
-    NONE = None
-    RED = 'red'
-    YELLOW = 'yellow'
-    BLUE = 'blue'
-    GRAY = 'gray'
-    GREEN = 'green'
-    ORANGE = 'orange'
-    CYAN = 'cyan'
-    PURPLE = 'purple'
-    BROWN = 'brown'
-    LIME = 'lime'
-    MEGENTA = 'magenta'
-    GOLD = 'gold'
-    BLACK = 'black'
-    MAROON = 'maroon'
-    DARKRED = 'darkred'
-    VIOLET = 'violet'
-    CRIMSON = 'crimson'
-    RAINBOW = 'rainbow'
-
-
 # patteln ^ - all values;
 # [some filter, if ^ we use this as exception]<size>(it could be +)$-end of str
 class Hub(BaseModel):
     name: str = Field(pattern="^[a-zA-Z0-9_]{2,30}$")
     pos: tuple[int, int]
     zone: Zone = Zone.NORMAL
-    color: Color = Color.NONE
+    color: str = 'None'
     max_drones: int = Field(default=1)
     next: List[tuple[Self, int]] = Field(repr=False, default=[])
     _g: float = float('inf')
     parent: Self | None = None
     is_possible: bool = True
 
-    @field_validator('max_drones', mode='before')
+    @field_validator('max_drones', 'color', 'pos', mode='before')
     @classmethod
     def auto_conversion(cls, v, info):
         if isinstance(v, str):
@@ -57,6 +33,11 @@ class Hub(BaseModel):
             if info.field_name == 'max_drones':
                 pattern = "^[0-9]{0,10}$"
             else:
+                from webcolors import name_to_rgb as color
+                try:
+                    color(v)
+                except Exception:
+                    raise ValueError('This color is not part of css3.')
                 return v
             if not re.fullmatch(pattern, v):
                 raise ValueError(f'{info.field_name} has invalid format.')

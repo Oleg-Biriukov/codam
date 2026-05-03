@@ -1,21 +1,7 @@
 from pydantic import BaseModel
 from typing import TypedDict, List, ClassVar, cast
-from hubs.hub import Hub, Zone, Color, Dron
-from .ErrorPrompts import HubError, ConfError
-
-
-class DataConf(TypedDict):
-    dron: List[Dron]
-    start_hub: Hub | None
-    end_hub: Hub | None
-    hubs: List[Hub | None]
-
-
-class Meta(TypedDict):
-    zone: Zone
-    color: Color
-    max_drones: str
-    max_link_capacity: str
+from hubs.hub import Hub, Dron
+from DataPrompts import HubError, ConfError, DataConf, Meta, LINES
 
 
 class ConMeta(TypedDict):
@@ -44,104 +30,97 @@ class ConfigCompiler(BaseModel):
         arg: List[str]
         br: str
         meta: Meta
-        lines: int = 0
         count_drons: int = 0
-        try:
-            with open(cls.path, 'r') as conf:
-                for line in conf:
-                    lines += 1
-                    line = line.strip()
-                    if line == '':
-                        continue
-                    if line[0] != '#':
-                        name_arg: List[str] = line.split(': ')
 
-                        if (name_arg[0] == 'start_hub' and
-                                           data['start_hub'] is None):
+        with open(cls.path, 'r') as conf:
+            for line in conf:
+                LINES += 1
+                line = line.strip()
+                if line == '':
+                    continue
+                if line[0] != '#':
+                    name_arg: List[str] = line.split(': ')
 
-                            arg = name_arg[1].strip().split(' ')
+                    if (name_arg[0] == 'start_hub' and
+                                       data['start_hub'] is None):
 
-                            br = ' '.join(arg[3::]).strip('[]')
+                        arg = name_arg[1].strip().split(' ')
 
-                            meta = cast(Meta, dict(var.split('=')
-                                        for var in br.split()))
+                        br = ' '.join(arg[3::]).strip('[]')
 
-                            meta['max_drones'] = 'endless'
+                        meta = cast(Meta, dict(var.split('=')
+                                               for var in br.split()))
 
-                            data['start_hub'] = Hub(name=arg[0],
-                                                    pos=(int(arg[1]) * 400,
-                                                         int(arg[2]) * 400),
-                                                    **meta)
+                        meta['max_drones'] = 'endless'
 
-                            data['hubs'].append(data['start_hub'])
+                        data['start_hub'] = Hub(name=arg[0],
+                                                pos=(int(arg[1]) * 400,
+                                                     int(arg[2]) * 400),
+                                                **meta)
 
-                        elif (name_arg[0] == 'end_hub' and
-                                             data['end_hub'] is None):
+                        data['hubs'].append(data['start_hub'])
 
-                            arg = name_arg[1].strip().split(' ')
+                    elif (name_arg[0] == 'end_hub' and
+                          data['end_hub'] is None):
 
-                            br = ' '.join(arg[3::]).strip('[]')
+                        arg = name_arg[1].strip().split(' ')
 
-                            meta = cast(Meta, dict(var.split('=')
-                                        for var in br.split()))
+                        br = ' '.join(arg[3::]).strip('[]')
 
-                            meta['max_drones'] = 'endless'
+                        meta = cast(Meta, dict(var.split('=')
+                                               for var in br.split()))
 
-                            data['end_hub'] = Hub(name=arg[0],
-                                                  pos=(int(arg[1]) * 400,
-                                                       int(arg[2]) * 400),
-                                                  **meta)
+                        meta['max_drones'] = 'endless'
 
-                            data['hubs'].append(data['end_hub'])
+                        data['end_hub'] = Hub(name=arg[0],
+                                              pos=(int(arg[1]) * 400,
+                                                   int(arg[2]) * 400),
+                                              **meta)
 
-                        elif name_arg[0] == 'hub':
-                            arg = name_arg[1].strip().split(' ')
+                        data['hubs'].append(data['end_hub'])
 
-                            br = ' '.join(arg[3::]).strip('[]')
+                    elif name_arg[0] == 'hub':
+                        arg = name_arg[1].strip().split(' ')
 
-                            meta = cast(Meta, dict(var.split('=')
-                                        for var in br.split()))
+                        br = ' '.join(arg[3::]).strip('[]')
 
-                            data['hubs'].append(Hub(name=arg[0],
-                                                    pos=(int(arg[1]) * 400,
-                                                         int(arg[2]) * 400),
-                                                    **meta))
-                        elif name_arg[0] == 'connection':
-                            mx_c: str
-                            arg = name_arg[1].strip().split(' ')
+                        meta = cast(Meta, dict(var.split('=')
+                                               for var in br.split()))
 
-                            br = ' '.join(arg[1::]).strip('[]')
+                        data['hubs'].append(Hub(name=arg[0],
+                                                pos=(int(arg[1]) * 400,
+                                                     int(arg[2]) * 400),
+                                                **meta))
+                    elif name_arg[0] == 'connection':
+                        mx_c: str
+                        arg = name_arg[1].strip().split(' ')
 
-                            con: List[str] = arg[0].split('-')
-                            hub_con: List[Hub | None] = [search_hub(
-                                c,
-                                cast(List[Hub],
-                                     data['hubs']))
-                                                         for c in con]
-                            if None not in hub_con or len(set(con)) < 2:
-                                conct: List[Hub] = cast(List[Hub],
-                                                        hub_con)
-                                if br:
-                                    mx_c = br.split('=')[1]
-                                else:
-                                    mx_c = '1'
-                                if (conct[0].add_next((conct[1], mx_c)) or
-                                        conct[1].add_next((conct[0], mx_c))):
-                                    raise ConnectionError('Wrong meta-data')
+                        br = ' '.join(arg[1::]).strip('[]')
+
+                        con: List[str] = arg[0].split('-')
+                        hub_con: List[Hub | None] = [search_hub(
+                            c,
+                            cast(List[Hub],
+                                 data['hubs']))
+                                                        for c in con]
+                        if None not in hub_con or len(set(con)) < 2:
+                            conct: List[Hub] = cast(List[Hub],
+                                                    hub_con)
+                            if br:
+                                mx_c = br.split('=')[1]
                             else:
-                                raise HubError('wrong name for connection')
-                        elif name_arg[0] == 'nb_drones' and data['dron'] == []:
-                            count_drons = int(name_arg[1])
+                                mx_c = '1'
+                            if (conct[0].add_next((conct[1], mx_c)) or
+                                    conct[1].add_next((conct[0], mx_c))):
+                                raise ConnectionError('Wrong meta-data')
                         else:
-                            raise ConfError(f'not appropriate type of \
+                            raise HubError('wrong name for connection')
+                    elif (name_arg[0] == 'nb_drones' and count_drons == 0
+                          and int(name_arg[1]) > 0):
+                        count_drons = int(name_arg[1])
+                    else:
+                        raise ConfError(f'not appropriate type of \
 variable({name_arg[0]})')
-
-        except Exception as e:
-            if type(e).__name__ == 'ValidationError':
-                raise ConfError('Incorrect configuration of hub')
-            import traceback
-            traceback.print_exc()
-            print(f'{type(e).__name__}: {e}')
 
         for d in range(count_drons):
             x, y = data['start_hub'].pos

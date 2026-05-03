@@ -1,5 +1,6 @@
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, PrivateAttr, ValidationError
 from ConfigCompiler.ConfigCompiler import DataConf, ConfigCompiler
+from DataPrompts import LINES
 from typing import List, ClassVar, Any
 from Engine.strategies import Strategy
 from hubs.hub import Hub, Dron
@@ -93,7 +94,7 @@ class Engine(BaseModel):
         frames: list = ls(Engine.BCKGRND)
 
         def clring(img: p.Surface, chg: str) -> p.Surface:
-            if chg is None:
+            if chg == 'None':
                 return img
             img.lock()
             for x in range(img.get_width()):
@@ -129,7 +130,13 @@ class Engine(BaseModel):
             print('OK')
         except Exception as e:
             print('KO')
-            print('Error:', e)
+            print('Error:', end='')
+            if LINES > 0:
+                print(LINES)
+            if type(e) is ValidationError:
+                print(e.errors()[0]['msg'])
+            else:
+                print(e)
             print('Shutting down ...')
             sys.exit()
 
@@ -148,10 +155,10 @@ class Engine(BaseModel):
                     hb == self._data['end_hub']):
                 colored_hubs[hb.name] = clring(
                     self._assets['start_end'].copy(),
-                    hb.color.value)
+                    hb.color)
             else:
                 colored_hubs[hb.name] = clring(self._assets['hub'].copy(),
-                                               hb.color.value)
+                                               hb.color)
         self._assets = colored_hubs
 
         self._screen = p.display.set_mode((Engine.WIDTH, Engine.HEIGHT),
