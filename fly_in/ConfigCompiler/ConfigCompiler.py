@@ -1,133 +1,231 @@
-from pydantic import BaseModel
-from typing import TypedDict, List, ClassVar, cast
+from pydantic import BaseModel, ValidationError
+from typing import List, ClassVar
 from hubs.hub import Hub, Dron
-from DataPrompts import HubError, ConfError, DataConf, Meta, LINES
-
-
-class ConMeta(TypedDict):
-    max_link_capacity: int | None
+from DataPrompts import HubError, ConfError, Meta
 
 
 class ConfigCompiler(BaseModel):
     path: ClassVar[str] = ''
+    META_DATA: ClassVar[List] = ['color', 'zone', 'max_drones']
 
     @classmethod
     def modify_path(cls, new_name: str) -> None:
         cls.path = new_name
 
     @classmethod
-    def get_values(cls) -> DataConf:
-        def search_hub(name: str, hubs: List[Hub]) -> Hub | None:
+    def get_values(cls) -> dict:
+        def search_hub(name: str, hubs: List) -> Hub | None:
             for hub in hubs:
                 if hub.name == name:
                     return hub
             return None
 
-        data: DataConf = {'hubs': [],
-                          'dron': [],
-                          'start_hub': None,
-                          'end_hub': None}
+        data: dict = {'hubs': [],
+                      'dron': [],
+                      'start_hub': None,
+                      'end_hub': None}
         arg: List[str]
         br: str
-        meta: Meta
+        meta: dict
         count_drons: int = 0
+        line_number: int = 0
+        con_list: list = []
+        text_error: str
 
         with open(cls.path, 'r') as conf:
             for line in conf:
-                LINES += 1
                 line = line.strip()
+                line_number += 1
                 if line == '':
                     continue
+
                 if line[0] != '#':
                     name_arg: List[str] = line.split(': ')
 
                     if (name_arg[0] == 'start_hub' and
-                                       data['start_hub'] is None):
+                                       data['start_hub'] is None
+                                       and count_drons > 0):
 
                         arg = name_arg[1].strip().split(' ')
 
                         br = ' '.join(arg[3::]).strip('[]')
 
-                        meta = cast(Meta, dict(var.split('=')
-                                               for var in br.split()))
+                        try:
+                            meta = dict(var.split('=')
+                                        for var in br.split())
+                        except Exception:
+                            text_error = f'{line_number}: wrong meta\
+ variable'
+                            raise HubError(text_error)
+
+                        # validation meta variables
+                        for var_m in meta.keys():
+                            if var_m not in cls.META_DATA:
+                                text_error = f'{line_number}: wrong meta\
+ variable'
+                                raise HubError(text_error)
 
                         meta['max_drones'] = 'endless'
 
-                        data['start_hub'] = Hub(name=arg[0],
-                                                pos=(int(arg[1]) * 400,
-                                                     int(arg[2]) * 400),
-                                                **meta)
+                        if arg[0] in [h.name for h in data['hubs']]:
+                            raise HubError(f'{line_number}: same name')
+
+                        try:
+                            data['start_hub'] = Hub(name=arg[0],
+                                                    pos=(int(arg[1]) * 400,
+                                                         int(arg[2]) * 400),
+                                                    **meta)
+                        except Exception as e:
+                            text_error = f'{line_number}: '
+                            if isinstance(e, ValidationError):
+                                text_error += 'invalid meta data'
+                            elif isinstance(e, ValueError):
+                                text_error += 'invalid position'
+                            raise HubError(text_error)
 
                         data['hubs'].append(data['start_hub'])
 
                     elif (name_arg[0] == 'end_hub' and
-                          data['end_hub'] is None):
+                          data['end_hub'] is None and
+                          count_drons > 0):
 
                         arg = name_arg[1].strip().split(' ')
 
                         br = ' '.join(arg[3::]).strip('[]')
 
-                        meta = cast(Meta, dict(var.split('=')
-                                               for var in br.split()))
+                        try:
+                            meta = dict(var.split('=')
+                                        for var in br.split())
+                        except Exception:
+                            text_error = f'{line_number}: wrong meta\
+ variable'
+                            raise HubError(text_error)
+
+                        # validation meta variables
+                        for var_m in meta.keys():
+                            if var_m not in cls.META_DATA:
+                                text_error = f'{line_number}: wrong meta\
+ variable'
+                                raise HubError(text_error)
 
                         meta['max_drones'] = 'endless'
 
-                        data['end_hub'] = Hub(name=arg[0],
-                                              pos=(int(arg[1]) * 400,
-                                                   int(arg[2]) * 400),
-                                              **meta)
+                        if arg[0] in [h.name for h in data['hubs']]:
+                            raise HubError(f'{line_number}: same name')
+
+                        try:
+                            data['end_hub'] = Hub(name=arg[0],
+                                                  pos=(int(arg[1]) * 400,
+                                                       int(arg[2]) * 400),
+                                                  **meta)
+                        except Exception as e:
+                            text_error = f'{line_number}: '
+                            if isinstance(e, ValidationError):
+                                text_error += 'invalid meta data'
+                            elif isinstance(e, ValueError):
+                                text_error += 'invalid position'
+                            raise HubError(text_error)
 
                         data['hubs'].append(data['end_hub'])
 
-                    elif name_arg[0] == 'hub':
+                    elif name_arg[0] == 'hub' and count_drons > 0:
                         arg = name_arg[1].strip().split(' ')
 
                         br = ' '.join(arg[3::]).strip('[]')
 
-                        meta = cast(Meta, dict(var.split('=')
-                                               for var in br.split()))
+                        try:
+                            meta = dict(var.split('=')
+                                        for var in br.split())
+                        except Exception:
+                            text_error = f'{line_number}: wrong meta\
+ variable'
+                            raise HubError(text_error)
 
-                        data['hubs'].append(Hub(name=arg[0],
-                                                pos=(int(arg[1]) * 400,
-                                                     int(arg[2]) * 400),
-                                                **meta))
-                    elif name_arg[0] == 'connection':
+                        # validation meta variables
+                        for var_m in meta.keys():
+                            if var_m not in cls.META_DATA:
+                                text_error = f'{line_number}: wrong meta\
+ variable'
+                                raise HubError(text_error)
+
+                        if arg[0] in [h.name for h in data['hubs']]:
+                            raise HubError(f'{line_number}: same name')
+
+                        try:
+                            data['hubs'].append(Hub(name=arg[0],
+                                                    pos=(int(arg[1]) * 400,
+                                                         int(arg[2]) * 400),
+                                                    **meta))
+                        except Exception as e:
+                            text_error = f'{line_number}: '
+                            if isinstance(e, ValidationError):
+                                text_error += 'invalid meta data'
+                            elif isinstance(e, ValueError):
+                                text_error += 'invalid position'
+                            raise HubError(text_error)
+
+                    elif name_arg[0] == 'connection' and count_drons > 0:
                         mx_c: str
                         arg = name_arg[1].strip().split(' ')
 
                         br = ' '.join(arg[1::]).strip('[]')
 
                         con: List[str] = arg[0].split('-')
-                        hub_con: List[Hub | None] = [search_hub(
-                            c,
-                            cast(List[Hub],
-                                 data['hubs']))
-                                                        for c in con]
-                        if None not in hub_con or len(set(con)) < 2:
-                            conct: List[Hub] = cast(List[Hub],
-                                                    hub_con)
+
+                        if sorted(con) in con_list:
+                            raise ConnectionError(f'{line_number}\
+ same connections')
+                        else:
+                            con_list.append(sorted(con))
+
+                        if len(set(con)) != 2:
+                            raise ConfError(f'{line_number}: not appropriate \
+{name_arg[0]} definition')
+
+                        conct: List = [
+                            search_hub(c, data['hubs'])
+                            for c in con]
+
+                        if None not in conct or len(con) < 2:
                             if br:
                                 mx_c = br.split('=')[1]
                             else:
                                 mx_c = '1'
                             if (conct[0].add_next((conct[1], mx_c)) or
                                     conct[1].add_next((conct[0], mx_c))):
-                                raise ConnectionError('Wrong meta-data')
+                                raise ConnectionError(f'{line_number}: \
+Wrong meta-data')
                         else:
                             raise HubError('wrong name for connection')
-                    elif (name_arg[0] == 'nb_drones' and count_drons == 0
-                          and int(name_arg[1]) > 0):
+                    elif (name_arg[0] == 'nb_drones'):
                         count_drons = int(name_arg[1])
                     else:
-                        raise ConfError(f'not appropriate type of \
-variable({name_arg[0]})')
+                        # appropriate error prompt
+                        # if nb_drones wasnt defined firstly
+                        text_error = f'{line_number}: '
+                        if line_number != 1 and name_arg[0] == 'nb_drones':
+                            text_error += 'nb_drones wasn`t\
+ defined firstly'
+                        # if end_hub not only one
+                        elif (name_arg[0] == 'end_hub' and
+                              data['end_hub'] is not None):
+                            text_error += 'end_hub\
+  defined twice'
+                        # same to previos
+                        elif (name_arg[0] == 'start_hub' and
+                              data['start_hub'] is not None):
+                            text_error += 'start_hub\
+  defined twice'
+                        else:
+                            text_error += f'not appropriate {name_arg[0]}\
+ definition'
+                        raise ConfError(text_error)
 
         for d in range(count_drons):
             x, y = data['start_hub'].pos
             data['dron'].append(Dron(id=d,
                                      c_pos=(x-1, y-1),
-                                     pos=data['start_hub']))
-        
+                                     pos=data['start_hub']))   
         # all_connection: set[Hub] = {n for h in data['hubs']
         #                             for n in h.next}
 

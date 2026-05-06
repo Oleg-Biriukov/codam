@@ -1,6 +1,5 @@
 from pydantic import BaseModel, PrivateAttr, ValidationError
-from ConfigCompiler.ConfigCompiler import DataConf, ConfigCompiler
-from DataPrompts import LINES
+from ConfigCompiler.ConfigCompiler import ConfigCompiler
 from typing import List, ClassVar, Any
 from Engine.strategies import Strategy
 from hubs.hub import Hub, Dron
@@ -58,7 +57,7 @@ class Camera(BaseModel):
 
 
 class Engine(BaseModel):
-    _data: DataConf = PrivateAttr()
+    _data: dict = PrivateAttr()
     _screen: p.Surface = PrivateAttr()
     _clock: p.Surface = PrivateAttr()
 
@@ -130,9 +129,7 @@ class Engine(BaseModel):
             print('OK')
         except Exception as e:
             print('KO')
-            print('Error:', end='')
-            if LINES > 0:
-                print(LINES)
+            print(type(e).__name__, end=' ln_')
             if type(e) is ValidationError:
                 print(e.errors()[0]['msg'])
             else:

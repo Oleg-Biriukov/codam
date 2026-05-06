@@ -1,14 +1,7 @@
 from pydantic import BaseModel, Field, field_validator, PrivateAttr
-from enum import Enum
 from typing import Self, List
+from DataPrompts import Zone
 import re
-
-
-class Zone(Enum):
-    NORMAL = 'normal'
-    BLOCKED = 'blocked'
-    RESTRICTED = 'restricted'
-    PRIORITY = 'priority'
 
 
 # patteln ^ - all values;
@@ -48,7 +41,7 @@ class Hub(BaseModel):
         if item:
             h, c = item
             if re.fullmatch("^[0-9]{0,10}$", c):
-                if h not in self.next:
+                if (h, int(c)) not in self.next:
                     self.next.append((h, int(c)))
                 return False
         return True

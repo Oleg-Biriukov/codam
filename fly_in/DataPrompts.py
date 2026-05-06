@@ -1,8 +1,12 @@
-from typing import TypedDict, List
-from hubs.hub import Zone, Dron, Hub
+from typing import TypedDict
+from enum import Enum
 
-global LINES
-LINES: int = 0
+
+class Zone(Enum):
+    NORMAL = 'normal'
+    BLOCKED = 'blocked'
+    RESTRICTED = 'restricted'
+    PRIORITY = 'priority'
 
 
 class HubError(Exception):
@@ -18,13 +22,6 @@ class ConfError(SyntaxError):
 class ConnectionError(SyntaxError):
     def __init__(self, message: str) -> None:
         super().__init__(message)
-
-
-class DataConf(TypedDict):
-    dron: List[Dron]
-    start_hub: Hub | None
-    end_hub: Hub | None
-    hubs: List[Hub | None]
 
 
 class Meta(TypedDict):
