@@ -2,6 +2,7 @@ from pydantic import BaseModel, PrivateAttr, ValidationError
 from ConfigCompiler.ConfigCompiler import ConfigCompiler
 from typing import List, ClassVar, Any
 from Engine.strategies import Strategy
+from DataPrompts import GraphError
 from hubs.hub import Hub, Dron
 import pygame as p
 from webcolors import name_to_rgb as color
@@ -58,9 +59,11 @@ class Camera(BaseModel):
 
 class Engine(BaseModel):
     _data: dict = PrivateAttr()
+    stg: Strategy
+
+    # visual stuff
     _screen: p.Surface = PrivateAttr()
     _clock: p.Surface = PrivateAttr()
-
     _assets: dict = PrivateAttr({
             'hub': (193, 17, 368, 308),
             'start_end': (661, 17, 408, 308),
@@ -68,14 +71,12 @@ class Engine(BaseModel):
             })
     _cmr: Camera = PrivateAttr()
     _frames: dict = PrivateAttr({})
-
     FONT: ClassVar[str]
     WIDTH: ClassVar[int] = 1500
     HEIGHT: ClassVar[int] = 1500
     WORLD_R: ClassVar[int] = 10000
     BCKGRND: ClassVar[str] = 'assets/background/'
-
-    stg: Strategy
+    # ==============================================
 
 # defining the status of drons if all arrivees then true, not False
     @property
@@ -84,9 +85,60 @@ class Engine(BaseModel):
                         self._data['dron']))) != 0
 
     @property
+    def is_passed(self) -> bool:
+        return len(list(filter(lambda x: x.pos != self._data['end_hub'],
+                        self._data['dron']))) != 0
+
+    @property
     def is_all_arrived(self) -> bool:
         return len(list(filter(lambda x: x.c_pos == x.pos.pos,
                         self._data['dron']))) == len(self._data['dron'])
+
+    def _solve_path(self):
+        turns: int = 0
+        sv_con_cap: List[list[int]] = [[n for n in hub.next]
+                                       for hub in self._data['hubs']]
+        _complete_paths: dict = {d.id: [] for d in self._data['dron']}
+
+        def set_to_null() -> None:
+            for hub in self._data['hubs']:
+                hub.parent = None
+                hub._g = float('inf')
+
+        def get_route(dron: Dron) -> bool:
+            route: List[Hub] = []
+            pos: Hub = self._data['end_hub']
+            while pos != d.pos:
+                route.append(pos)
+                pos = pos.parent
+                if pos is None:
+                    for i in range(len(dron.route)):
+                        t, h = dron.route[i]
+                        dron.route[i] = (t+1, h)
+                    return False
+
+            route = route[::-1]
+            d.route = []
+            for turn in range(len(route)):
+                dron.route.append((turn+1, route[turn]))
+            return True
+
+        while self.is_passed:
+            for h in range(len(self._data['hubs'])):
+                for n in range(len(self._data['hubs'][h].next)):
+                    self._data['hubs'][h].next[n] = sv_con_cap[h][n]
+            for d in self._data['dron']:
+                set_to_null()
+                self.stg.perform_turn(d, self._data, turns)
+                get_route(d)
+                d.move_to()
+                _complete_paths[d.id].append((turns, d.pos))
+            turns += 1
+        set_to_null()
+        for d in self._data['dron']:
+            d.pos = self._data['start_hub']
+            d.route = _complete_paths[d.id]
+        return True
 
     def configure(self, filename: str) -> None:
         colored_hubs: dict = {}
@@ -126,6 +178,10 @@ class Engine(BaseModel):
                   end=' ')
             for i, frm in enumerate(frames):
                 self._frames[i] = p.image.load(Engine.BCKGRND+frm)
+            print('OK')
+            print(f'[{dt.now()}] Checking passability...', end=' ')
+            if not self._solve_path():
+                raise GraphError('Unpassable graph !')
             print('OK')
         except Exception as e:
             print('KO')
@@ -174,8 +230,6 @@ class Engine(BaseModel):
     def make_turn(self) -> None:
         turns: int = 1
         font: p.font.Font
-        sv_con_cap: List[list[int]] = [[n for n in hub.next]
-                                       for hub in self._data['hubs']]
         is_running: bool = True
         start: bool = False
         zoom: float
@@ -199,28 +253,6 @@ class Engine(BaseModel):
             return p.transform.scale(self._frames[countdown],
                                      (Engine.WIDTH, Engine.HEIGHT))
 
-        def set_to_null() -> None:
-            for hub in self._data['hubs']:
-                hub.parent = None
-                hub._g = float('inf')
-
-        def get_route(dron: Dron) -> bool:
-            route: List[Hub] = []
-            pos: Hub = self._data['end_hub']
-            while pos != d.pos:
-                route.append(pos)
-                pos = pos.parent
-                if pos is None:
-                    for i in range(len(dron.route)):
-                        t, h = dron.route[i]
-                        dron.route[i] = (t+1, h)
-                    return False
-
-            route = route[::-1]
-            d.route = []
-            for turn in range(len(route)):
-                dron.route.append((turn+1, route[turn]))
-            return True
 
         def arriving_dron(dron: Dron) -> tuple:
             import math as m
@@ -350,19 +382,11 @@ class Engine(BaseModel):
                                           center=(x, y-int(70*zoom))))
 
             if self.is_done and start:
-                for h in range(len(self._data['hubs'])):
-                    for n in range(len(self._data['hubs'][h].next)):
-                        self._data['hubs'][h].next[n] = sv_con_cap[h][n]
-
                 for d in self._data['dron']:
                     self._screen.blit(*arriving_dron(d))
                 if self.is_all_arrived:
-                    for d in self._data['dron']:
-                        if d.pos != self._data['end_hub']:
-                            set_to_null()
-                            self.stg.perform_turn(d, self._data, turns)
-                            get_route(d)
-                            d.move_to()
+                    if d.pos != self._data['end_hub']:
+                        d.move_to()
                         print(f'D{d.id}-{d.pos.name}', end=' ')
                     print('\n')
                     turns += 1

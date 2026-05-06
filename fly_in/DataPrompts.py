@@ -24,6 +24,11 @@ class ConnectionError(SyntaxError):
         super().__init__(message)
 
 
+class GraphError(SyntaxError):
+    def __init__(self, message: str) -> None:
+        super().__init__(message)
+
+
 class Meta(TypedDict):
     zone: Zone
     color: str

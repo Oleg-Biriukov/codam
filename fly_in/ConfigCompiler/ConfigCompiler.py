@@ -225,8 +225,6 @@ Wrong meta-data')
             x, y = data['start_hub'].pos
             data['dron'].append(Dron(id=d,
                                      c_pos=(x-1, y-1),
-                                     pos=data['start_hub']))   
-        # all_connection: set[Hub] = {n for h in data['hubs']
-        #                             for n in h.next}
+                                     pos=data['start_hub']))
 
         return data
