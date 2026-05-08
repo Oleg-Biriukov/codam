@@ -20,13 +20,46 @@ class ConfigCompiler(BaseModel):
                     return hub
             return None
 
+        def validate_meta(arg: list) -> dict:
+            meta: dict
+
+            if len(arg[:3]) != 3:
+                text_error = f'{line_number}: incorrect hub definition'
+                raise HubError(text_error)
+
+            br = ' '.join(arg[3::])
+
+            if br != '':
+                if (br[0] != '[' or br[::-1][0] != ']' or
+                   br.count('[') > 1 or br.count(']') > 1):
+                    text_error = f'{line_number}: meta was incorrect defined'
+                    raise HubError(text_error)
+
+            br = br.strip('[]')
+
+            try:
+                meta = dict(var.split('=')
+                            for var in br.split())
+            except Exception:
+                text_error = f'{line_number}: wrong meta\
+ variable'
+                raise HubError(text_error)
+
+        # validation meta variables
+            for var_m in meta.keys():
+                if var_m not in cls.META_DATA:
+                    text_error = f'{line_number}: wrong meta\
+ variable'
+                    raise HubError(text_error)
+            return meta
+
         data: dict = {'hubs': [],
                       'dron': [],
                       'start_hub': None,
                       'end_hub': None}
-        arg: List[str]
-        br: str
+        arg: list
         meta: dict
+        br: str
         count_drons: int = 0
         line_number: int = 0
         con_list: list = []
@@ -48,22 +81,7 @@ class ConfigCompiler(BaseModel):
 
                         arg = name_arg[1].strip().split(' ')
 
-                        br = ' '.join(arg[3::]).strip('[]')
-
-                        try:
-                            meta = dict(var.split('=')
-                                        for var in br.split())
-                        except Exception:
-                            text_error = f'{line_number}: wrong meta\
- variable'
-                            raise HubError(text_error)
-
-                        # validation meta variables
-                        for var_m in meta.keys():
-                            if var_m not in cls.META_DATA:
-                                text_error = f'{line_number}: wrong meta\
- variable'
-                                raise HubError(text_error)
+                        meta = validate_meta(arg)
 
                         meta['max_drones'] = 'endless'
 
@@ -91,22 +109,7 @@ class ConfigCompiler(BaseModel):
 
                         arg = name_arg[1].strip().split(' ')
 
-                        br = ' '.join(arg[3::]).strip('[]')
-
-                        try:
-                            meta = dict(var.split('=')
-                                        for var in br.split())
-                        except Exception:
-                            text_error = f'{line_number}: wrong meta\
- variable'
-                            raise HubError(text_error)
-
-                        # validation meta variables
-                        for var_m in meta.keys():
-                            if var_m not in cls.META_DATA:
-                                text_error = f'{line_number}: wrong meta\
- variable'
-                                raise HubError(text_error)
+                        meta = validate_meta(arg)
 
                         meta['max_drones'] = 'endless'
 
@@ -131,22 +134,7 @@ class ConfigCompiler(BaseModel):
                     elif name_arg[0] == 'hub' and count_drons > 0:
                         arg = name_arg[1].strip().split(' ')
 
-                        br = ' '.join(arg[3::]).strip('[]')
-
-                        try:
-                            meta = dict(var.split('=')
-                                        for var in br.split())
-                        except Exception:
-                            text_error = f'{line_number}: wrong meta\
- variable'
-                            raise HubError(text_error)
-
-                        # validation meta variables
-                        for var_m in meta.keys():
-                            if var_m not in cls.META_DATA:
-                                text_error = f'{line_number}: wrong meta\
- variable'
-                                raise HubError(text_error)
+                        meta = validate_meta(arg)
 
                         if arg[0] in [h.name for h in data['hubs']]:
                             raise HubError(f'{line_number}: same name')
@@ -168,7 +156,25 @@ class ConfigCompiler(BaseModel):
                         mx_c: str
                         arg = name_arg[1].strip().split(' ')
 
-                        br = ' '.join(arg[1::]).strip('[]')
+                        br = ' '.join(arg[1::])
+
+                        if br != '':
+                            if (br[0] != '[' or br[::-1][0] != ']' or
+                               br.count('[') > 1 or br.count(']') > 1):
+                                text_error = f'{line_number}: meta was\
+ incorrect defined'
+                                raise HubError(text_error)
+
+                        br = br.strip('[]')
+                        if br:
+                            mx_c = br.split('=')[1]
+                        else:
+                            mx_c = '1'  
+                        for var_m in :
+                            if var_m not in cls.META_DATA:
+                                text_error = f'{line_number}: wrong meta\
+ variable'
+                                raise HubError(text_error)
 
                         con: List[str] = arg[0].split('-')
 
@@ -196,7 +202,9 @@ class ConfigCompiler(BaseModel):
                                 raise ConnectionError(f'{line_number}: \
 Wrong meta-data')
                         else:
-                            raise HubError('wrong name for connection')
+                            text_error = f'{line_number}: wrong name for\
+ connection'
+                            raise HubError(text_error)
                     elif (name_arg[0] == 'nb_drones'):
                         count_drons = int(name_arg[1])
                     else:
@@ -225,6 +233,8 @@ Wrong meta-data')
             x, y = data['start_hub'].pos
             data['dron'].append(Dron(id=d,
                                      c_pos=(x-1, y-1),
-                                     pos=data['start_hub']))
+                                     pos=data['start_hub']))   
+        # all_connection: set[Hub] = {n for h in data['hubs']
+        #                             for n in h.next}
 
         return data

@@ -1,5 +1,5 @@
 nb_drones: 10
-start_hub: hub 1 1 [color=blue zone=normal]
+start_hub: hub 1 1 [color=blue]
 end_hub: goal 10 1 [color=yellow]
 
 # My own map
@@ -10,7 +10,7 @@ hub: roof3 6 5 [zone=normal color=blue]
 hub: roof4 8 5 [zone=normal color=blue max_drones=2]
 hub: s1 2 7 [zone=normal color=blue]
 hub: s2 4 7 [zone=normal color=green]
-hub: s3 6 7 [zone=normal color=blue]
+hub: s3 6 7 [zone=blocked color=blue]
 hub: s4 8 7 [zone=normal color=red]
 hub: p1 4 8 [zone=normal color=red]
 hub: p2 6 8 [zone=normal color=red]
@@ -27,7 +27,7 @@ connection: p1-p2
 connection: p2-s4
 connection: s3-s4
 connection: s4-roof4
-connection: s3-roof4
+
 
 #hub: roof1 2 2 [zone=priority color=red max_drones=2]
 #hub: s1 1 2 [zone=normal color=blue]

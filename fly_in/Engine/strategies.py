@@ -64,7 +64,8 @@ class Astar(Strategy):
                 if (n in close_list or
                         not is_valid_paths(dron, n) or
                         (n.max_drones < 1 and (n, c) in dron.pos.next) or
-                        (c < 1 and (n, c) in dron.pos.next) or
+                        (c < 1 and
+                         (n, c) in dron.pos.next) or
                         n.zone.value == 'blocked'):
                     continue
                 priority = 1
