@@ -1,4 +1,4 @@
-from pydantic import BaseModel, PrivateAttr, ValidationError
+from pydantic import BaseModel, PrivateAttr, ValidationError, ConfigDict
 from ConfigCompiler.ConfigCompiler import ConfigCompiler
 from typing import List, ClassVar, Any
 from Engine.strategies import Strategy
@@ -12,12 +12,13 @@ import functools
 
 
 class Camera(BaseModel):
+    model_config = ConfigDict(arbitrary_types_allowed=True)
     SCREEN: ClassVar[p.Surface]
     pos: tuple[int, int] = (0, 0)
     speed: tuple[float, float] = (0.0, 0.0)
     zoom: float = 1.0
     _turns: int = PrivateAttr(0)
-    font: Any
+    font: p.font.Font
     GUIDE: ClassVar[dict] = {
         1: 'w,a,s,d - movement',
         2: 'R3 - zoom in/zoom out',
@@ -57,7 +58,7 @@ class Camera(BaseModel):
 
     def error(self, txt: str) -> None:
         beggining: str = 'ERROR: '
-        new_font: any = p.font.Font(Engine.FONT, 50)
+        new_font: p.font.Font = p.font.Font(Engine.FONT, 50)
         text: p.Surface = new_font.render(beggining + txt,
                                           True,
                                           color('darkred'))
@@ -69,7 +70,7 @@ class Camera(BaseModel):
 class Engine(BaseModel):
     _data: dict = PrivateAttr()
     _screen: p.Surface = PrivateAttr()
-    _clock: p.Surface = PrivateAttr()
+    _clock: p.time.Clock = PrivateAttr()
 
     _assets: dict = PrivateAttr({
             'hub': (193, 17, 368, 308),
@@ -182,7 +183,7 @@ class Engine(BaseModel):
         self._clock = p.time.Clock()
 
     def make_turn(self) -> None:
-        turns: int = 1
+        turns: int = 0
         font: p.font.Font
         sv_con_cap: List[list[int]] = [[n for n in hub.next]
                                        for hub in self._data['hubs']]
@@ -191,7 +192,7 @@ class Engine(BaseModel):
         uncompletable: bool = False
         zoom: float
         dt: float
-        keys: dict
+        keys: p.key.ScancodeWrapper
         speed: float
         scale: int
         text_s: p.Surface
@@ -383,6 +384,7 @@ class Engine(BaseModel):
                                 start = False
                                 break
                             d.move_to()
+
                         print(f'D{d.id}-{d.pos.name}', end=' ')
                     print('\n')
                     turns += 1
@@ -399,6 +401,6 @@ class Engine(BaseModel):
                 self._cmr.error('you have unsolvable configuration')
             else:
                 self._cmr.display_info()
-                self._cmr.display_turn(turns-1, start)
+                self._cmr.display_turn(turns-2, start)
             p.display.flip()
         p.quit()

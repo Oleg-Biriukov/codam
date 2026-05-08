@@ -135,7 +135,8 @@ class ConfigCompiler(BaseModel):
 
                         data['hubs'].append(data['end_hub'])
 
-                    elif name_arg[0] == 'hub' and count_drons > 0:
+                    elif (name_arg[0] == 'hub' and count_drons > 0 and
+                          data['start_hub'] is not None):
                         arg = name_arg[1].strip().split(' ')
 
                         meta = validate_meta(arg)
@@ -168,7 +169,7 @@ class ConfigCompiler(BaseModel):
                                len(arg) != 2):
                                 text_error = f'{line_number}: meta was\
  incorrect defined'
-                                raise HubError(text_error)
+                                raise ConnectionError(text_error)
 
                         br = br.strip('[]')
                         if br != '':
@@ -176,12 +177,7 @@ class ConfigCompiler(BaseModel):
                                len(br.split()) != 1):
                                 text_error = f'{line_number}: wrong meta\
  variable'
-                                raise HubError(text_error)
-
-                        if br:
-                            mx_c = br.split('=')[1]
-                        else:
-                            mx_c = '1'
+                                raise ConnectionError(text_error)
 
                         con: List[str] = arg[0].split('-')
 
@@ -192,8 +188,8 @@ class ConfigCompiler(BaseModel):
                             con_list.append(sorted(con))
 
                         if len(set(con)) != 2:
-                            raise ConfError(f'{line_number}: not appropriate \
-{name_arg[0]} definition')
+                            raise ConnectionError(f'{line_number}: not\
+ appropriate {name_arg[0]} definition')
 
                         conct: List = [
                             search_hub(c, data['hubs'])
@@ -204,6 +200,13 @@ class ConfigCompiler(BaseModel):
                                 mx_c = br.split('=')[1]
                             else:
                                 mx_c = '1'
+
+                            try:
+                                int(mx_c)
+                            except Exception:
+                                raise ConnectionError(f'{line_number}: \
+Wrong meta-data')
+
                             if (conct[0].add_next((conct[1], mx_c)) or
                                     conct[1].add_next((conct[0], mx_c))):
                                 raise ConnectionError(f'{line_number}: \
@@ -230,6 +233,11 @@ Wrong meta-data')
                               data['end_hub'] is not None):
                             text_error += 'end_hub\
   defined twice'
+                        elif (name_arg[0] == 'hub' and
+                              data['start_hub'] is None):
+                            raise HubError(f'{line_number}: \
+No start or end hubs at beginning')
+
                         # same to previos
                         elif (name_arg[0] == 'start_hub' and
                               data['start_hub'] is not None):
@@ -239,16 +247,11 @@ Wrong meta-data')
                             text_error += 'not appropriate config variable\
  definition'
                         raise ConfError(text_error)
-        
-        if data['end_hub'] is None or data['start_hub'] is None:
-            raise HubError('No start or end hubs')
 
         for d in range(count_drons):
             x, y = data['start_hub'].pos
             data['dron'].append(Dron(id=d,
                                      c_pos=(x-1, y-1),
-                                     pos=data['start_hub']))   
-        # all_connection: set[Hub] = {n for h in data['hubs']
-        #                             for n in h.next}
+                                     pos=data['start_hub']))
 
         return data

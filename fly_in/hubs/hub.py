@@ -40,6 +40,7 @@ class Hub(BaseModel):
     def add_next(self, item: tuple) -> bool:
         if item:
             h, c = item
+
             if re.fullmatch("^[0-9]{0,10}$", c):
                 if (h, int(c)) not in self.next:
                     self.next.append((h, int(c)))
