@@ -160,21 +160,24 @@ class ConfigCompiler(BaseModel):
 
                         if br != '':
                             if (br[0] != '[' or br[::-1][0] != ']' or
-                               br.count('[') > 1 or br.count(']') > 1):
+                               br.count('[') > 1 or br.count(']') > 1 or
+                               len(arg) != 2):
                                 text_error = f'{line_number}: meta was\
  incorrect defined'
                                 raise HubError(text_error)
 
                         br = br.strip('[]')
-                        if br:
-                            mx_c = br.split('=')[1]
-                        else:
-                            mx_c = '1'  
-                        for var_m in :
-                            if var_m not in cls.META_DATA:
+                        if br != '':
+                            if (br.split('=')[0] != 'max_link_capacity' or
+                               len(br.split()) != 1):
                                 text_error = f'{line_number}: wrong meta\
  variable'
                                 raise HubError(text_error)
+
+                        if br:
+                            mx_c = br.split('=')[1]
+                        else:
+                            mx_c = '1'
 
                         con: List[str] = arg[0].split('-')
 
@@ -206,7 +209,11 @@ Wrong meta-data')
  connection'
                             raise HubError(text_error)
                     elif (name_arg[0] == 'nb_drones'):
-                        count_drons = int(name_arg[1])
+                        try:
+                            count_drons = int(name_arg[1])
+                        except Exception:
+                            text_error = f'{line_number}: incorrect value'
+                            raise HubError(text_error)
                     else:
                         # appropriate error prompt
                         # if nb_drones wasnt defined firstly
@@ -225,7 +232,7 @@ Wrong meta-data')
                             text_error += 'start_hub\
   defined twice'
                         else:
-                            text_error += f'not appropriate {name_arg[0]}\
+                            text_error += 'not appropriate config variable\
  definition'
                         raise ConfError(text_error)
 
