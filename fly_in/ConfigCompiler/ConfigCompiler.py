@@ -85,6 +85,10 @@ class ConfigCompiler(BaseModel):
 
                         meta['max_drones'] = 'endless'
 
+                        if meta.get('zone') == 'blocked':
+                            raise HubError(f'{line_number}: start hub cannot\
+ be blocked')
+
                         if arg[0] in [h.name for h in data['hubs']]:
                             raise HubError(f'{line_number}: same name')
 
@@ -235,6 +239,9 @@ Wrong meta-data')
                             text_error += 'not appropriate config variable\
  definition'
                         raise ConfError(text_error)
+        
+        if data['end_hub'] is None or data['start_hub'] is None:
+            raise HubError('No start or end hubs')
 
         for d in range(count_drons):
             x, y = data['start_hub'].pos
