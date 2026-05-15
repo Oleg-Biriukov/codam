@@ -14,7 +14,6 @@ class Camera(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
     SCREEN: ClassVar[p.Surface]
     pos: tuple[int, int] = (0, 0)
-    speed: tuple[float, float] = (0.0, 0.0)
     zoom: float = 1.0
     _turns: int = PrivateAttr(0)
     font: p.font.Font
@@ -336,7 +335,7 @@ hubs positions, connection and drons if we start the game
                 scale = 100
 
 
-# generating signess background
+# generating background
             self._screen.blit(set_background(), (0, 0))
 
             overlay = p.transform.scale(overlay, (Engine.WIDTH, Engine.HEIGHT))
