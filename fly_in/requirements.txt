@@ -1,0 +1,5 @@
+pydantic>=2.0
+mypy>=1.16
+flake8>=3.0
+pygame>=2.6.1
+webcolors>=25.10.0

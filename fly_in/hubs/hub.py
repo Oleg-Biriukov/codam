@@ -26,7 +26,7 @@ class Hub(BaseModel):
             if info.field_name == 'max_drones':
                 pattern = "^[0-9]{0,10}$"
             else:
-                from webcolors import name_to_rgb as color
+                from webcolors import name_to_rgb as color  # type: ignore
                 try:
                     color(v)
                 except Exception:
@@ -54,9 +54,9 @@ class Hub(BaseModel):
 class Dron(BaseModel):
     id: int = Field(ge=0, le=10000)
     pos: Hub
-    c_pos: tuple[int, int]
+    c_pos: tuple[float, float]
     route: list[tuple[int, Hub]] = []
-    _to_wait: int = PrivateAttr(0)
+    _to_wait: bool = PrivateAttr(False)
 
     def move_to(self) -> bool:
         def search_hub(lst: list[tuple[Hub, int]]) -> int:

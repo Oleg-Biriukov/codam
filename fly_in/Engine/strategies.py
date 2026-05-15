@@ -1,36 +1,26 @@
 from abc import ABC, abstractmethod
 from pydantic import BaseModel
-from typing import ClassVar, List, TypedDict
+from typing import ClassVar, List
 from hubs.hub import Hub, Dron
 import heapq
-import functools
-
-
-class DataConf(TypedDict):
-    dron: List[Dron]
-    start_hub: Hub | None
-    end_hub: Hub | None
-    hubs: List[Hub | None]
 
 
 class Strategy(ABC, BaseModel):
+    '''
+    abstraction for creating various strategies
+    '''
     total_turns: ClassVar[int]
 
     @abstractmethod
-    def perform_turn(self, dron: Dron, data: DataConf, turns: int) -> None:
+    def perform_turn(self, dron: Dron, data: dict, turns: int) -> None:
+        '''
+        computing one route for one dron separately
+        '''
         pass
 
-    @classmethod
-    def set_to_null(cls) -> None:
-        cls.total_turns = 0
 
-    @classmethod
-    def get_turns(cls) -> int:
-        return cls.total_turns
-
-
-class Astar(Strategy):
-    def perform_turn(self, dron: Dron, data: DataConf, turns: int) -> None:
+class Dijkstra(Strategy):
+    def perform_turn(self, dron: Dron, data: dict, turns: int) -> None:
         # @functools.lru_cache(maxsize=1000)
         def is_valid_paths(dron: Dron, next: Hub) -> bool:
             count_drons = 0
@@ -50,8 +40,8 @@ class Astar(Strategy):
 
         pos: Hub
         priority: int
-        new_g: int
-        open_list: List[Hub] = []
+        new_g: float
+        open_list: List = []
         close_list: List[Hub] = []
         dron.pos._g = turns
         heapq.heappush(open_list, (1, dron.pos))
@@ -70,11 +60,11 @@ class Astar(Strategy):
                     continue
                 priority = 1
                 if n.zone.value == 'restricted':
-                    new_g = pos._g + 2
+                    new_g = pos._g + 2.0
                 else:
                     if n.zone.value == 'priority':
                         priority = 0
-                    new_g = pos._g + 1
+                    new_g = pos._g + 1.0
                 if n not in open_list and n._g > new_g:
                     n.parent = pos
                     n._g = new_g

@@ -1,10 +1,19 @@
 from pydantic import BaseModel, ValidationError
 from typing import List, ClassVar
 from hubs.hub import Hub, Dron
-from DataPrompts import HubError, ConfError, Meta
+from DataPrompts import HubError, ConfError
 
 
 class ConfigCompiler(BaseModel):
+    '''
+    extracts all data from config file by own syntax:
+
+    nb_drones: <number>
+    start_hub: <name> <x> <y> [zone=<type> color=<color> max_drones=<num>]
+    end_hub: <name> <x> <y> [zone=<type> color=<color> max_drones=<num>]
+    hub: <name> <x> <y> [zone=<type> color=<color> max_drones=<num>]
+    connection: <hub1>-<hub2> [max_link_capacity=<num>]
+    '''
     path: ClassVar[str] = ''
     META_DATA: ClassVar[List] = ['color', 'zone', 'max_drones']
 
@@ -158,6 +167,10 @@ class ConfigCompiler(BaseModel):
                             raise HubError(text_error)
 
                     elif name_arg[0] == 'connection' and count_drons > 0:
+                        if data['end_hub'] is None:
+                            raise ConnectionError('global: before creating\
+ connection you have to define end_zone')
+
                         mx_c: str
                         arg = name_arg[1].strip().split(' ')
 
@@ -218,6 +231,8 @@ Wrong meta-data')
                     elif (name_arg[0] == 'nb_drones'):
                         try:
                             count_drons = int(name_arg[1])
+                            if count_drons <= 0:
+                                raise Exception
                         except Exception:
                             text_error = f'{line_number}: incorrect value'
                             raise HubError(text_error)
@@ -235,8 +250,8 @@ Wrong meta-data')
   defined twice'
                         elif (name_arg[0] == 'hub' and
                               data['start_hub'] is None):
-                            raise HubError(f'{line_number}: \
-No start or end hubs at beginning')
+                            raise HubError('global: \
+No start_hub at beginning')
 
                         # same to previos
                         elif (name_arg[0] == 'start_hub' and
