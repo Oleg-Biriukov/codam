@@ -14,7 +14,7 @@
 
 #include "codexion.h"
 
-t_coder	*la_init(void *content)
+t_coder	*la_init(void *data)
 {
 	t_coder	*array;
 
@@ -22,7 +22,7 @@ t_coder	*la_init(void *content)
 	if (array == NULL)
 		return (NULL);
 	array->prev = NULL;
-	array->content = content;
+	array->data = data;
 	array->next = NULL;
 	return (array);
 }
@@ -36,13 +36,13 @@ t_coder	*la_start(t_coder *array)
 	return (array);
 }
 
-t_coder	*la_append(t_coder *array, void *content)
+t_coder	*la_append(t_coder *array, void *data)
 {
 	t_coder	*next_array;
 
 	if (!array)
-		return (la_init(content));
-	next_array = la_init(content);
+		return (la_init(data));
+	next_array = la_init(data);
 	if (!next_array)
 		return (la_free(array));
 	array->next = next_array;
@@ -61,15 +61,15 @@ void	*la_free(t_coder *array)
 	{
 		next_array = array->next;
 		free(array);
-		free(array->content);
+		free(array->data);
 		array = next_array;
 	}
 	free(array);
-	free(array->content);
+	free(array->data);
 	return (NULL);
 }
 
-int	la_len(t_coder *array)
+unsigned int	la_len(t_coder *array)
 {
 	size_t	len;
 
