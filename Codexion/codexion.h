@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/16 17:01:34 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/17 18:12:36 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,9 +22,14 @@
 
 typedef struct t_content
 {
-	unsigned int id;
-	pthread_t 	 t;
-	void		 *mutex;
+	unsigned int 	id;
+	pthread_t 	 	t;
+	void		 	*mutex;
+	struct timeval	start;
+	unsigned int 	t_burnout;
+	unsigned int 	t_compile;
+	unsigned int 	t_debug;
+	unsigned int 	t_refactor; 
 } t_content;
 
 
@@ -38,10 +43,6 @@ typedef struct t_coder
 typedef struct t_span
 {
 	unsigned int 	n_coders;
-	unsigned int 	t_burnout;
-	unsigned int 	t_compile;
-	unsigned int 	t_debug;
-	unsigned int 	t_refactor;
 	unsigned int 	n_compiles;
 	unsigned int 	d_cooldown;
 	char 		 	*schdlr;
