@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/17 18:12:36 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/18 17:26:32 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ typedef struct t_coder
 {
 	unsigned int 	id;
 	pthread_t 	 	t;
-	void		 	*mutex;
+	pthread_mutex_t	*mutex;
 	struct timeval	start;
 	unsigned int 	t_burnout;
 	unsigned int 	t_compile;
@@ -37,8 +37,9 @@ typedef struct t_dongle
 {
 	unsigned int	id;
 	unsigned int 	d_cooldown;
-	void			*mutex;
+	pthread_mutex_t	*mutex;
 	struct timeval	start;
+	pthread_t		t;
 } t_dongle;
 
 

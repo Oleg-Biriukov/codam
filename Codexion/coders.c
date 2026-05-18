@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/17 18:23:01 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/18 17:22:59 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,15 +15,19 @@
 static void *smth(void *a)
 {
 	t_array 		*array;
+	t_coder			*data;
 	struct timeval	current_time;
 
 	array = (t_array *) a;
-	
-	while (current_time.tv_sec - array->data->start.tv_sec != array->data->t_burnout/1000){
+	data = (t_coder *) array->data;
+	gettimeofday(&current_time, NULL);
+
+
+	while (current_time.tv_sec - data->start.tv_sec != data->t_burnout/1000){
 		gettimeofday(&current_time, NULL);
 		
 	}
-	printf("T%d burn out\n", array->data->id);
+	printf("T%d burn out\n", data->id);
 	return (NULL);
 }
 
@@ -57,7 +61,7 @@ int init_arrays(t_span *s)
 	s->coders = array;
 	while (array)
 	{
-		pthread_join(array->data->t, NULL);
+		pthread_join(((t_coder *) array->data)->t, NULL);
 		array = array->next;
 	}
 	return (0);
