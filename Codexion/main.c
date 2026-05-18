@@ -12,10 +12,14 @@
 
 #include "codexion.h"
 
-void free_all(t_span *s)
+int free_all(t_span *s)
 {
+	pthread_mutex_destroy(&s->dongle->mutex);
+	pthread_mutex_destroy(&s->coders->mutex);
+	la_free(s->dongle);
 	la_free(s->coders);
-	pthread_mutex_destroy(&s->mutex);
+	free(s);
+	return (0);
 }
 
 int main()
@@ -26,13 +30,17 @@ int main()
 	if (!s){
 		printf("Something went wrong");
 	}
-	pthread_mutex_init(&s->mutex, NULL);
 	s->n_coders = 3;
 	s->d_cooldown = 500;
 	s->n_compiles = 2;
+	s->t_compile = 2000;
+	s->t_burnout = 10000;
+	s->t_refactor = 1000;
+	s->t_debug = 1500;
 	s->schdlr = "fifo";
-	if (!init_coders(s))
-		return (0);
+	if (!init_arrays(s) || !init_dongle(s))
+		return (free_all(s));
 	printf("%d", la_len(s->coders));
+	free_all(s);
 	return (0);
 }

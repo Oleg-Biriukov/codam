@@ -14,11 +14,11 @@
 
 #include "codexion.h"
 
-t_coder	*la_init(void *data)
+t_array	*la_init(void *data)
 {
-	t_coder	*array;
+	t_array	*array;
 
-	array = malloc(sizeof(t_coder));
+	array = malloc(sizeof(t_array));
 	if (array == NULL)
 		return (NULL);
 	array->prev = NULL;
@@ -27,7 +27,7 @@ t_coder	*la_init(void *data)
 	return (array);
 }
 
-t_coder	*la_start(t_coder *array)
+t_array	*la_start(t_array *array)
 {
 	if (!array)
 		return (NULL);
@@ -36,9 +36,9 @@ t_coder	*la_start(t_coder *array)
 	return (array);
 }
 
-t_coder	*la_append(t_coder *array, void *data)
+t_array	*la_append(t_array *array, void *data)
 {
-	t_coder	*next_array;
+	t_array	*next_array;
 
 	if (!array)
 		return (la_init(data));
@@ -50,9 +50,9 @@ t_coder	*la_append(t_coder *array, void *data)
 	return (next_array);
 }
 
-void	*la_free(t_coder *array)
+void	*la_free(t_array *array)
 {
-	t_coder	*next_array;
+	t_array	*next_array;
 
 	if (array == NULL)
 		return (NULL);
@@ -60,16 +60,16 @@ void	*la_free(t_coder *array)
 	while (array->next != NULL)
 	{
 		next_array = array->next;
-		free(array);
 		free(array->data);
+		free(array);
 		array = next_array;
 	}
-	free(array);
 	free(array->data);
+	free(array);
 	return (NULL);
 }
 
-unsigned int	la_len(t_coder *array)
+unsigned int	la_len(t_array *array)
 {
 	size_t	len;
 

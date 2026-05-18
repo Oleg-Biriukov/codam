@@ -20,7 +20,7 @@
 # include <sys/time.h>
 
 
-typedef struct t_content
+typedef struct t_coder
 {
 	unsigned int 	id;
 	pthread_t 	 	t;
@@ -30,32 +30,46 @@ typedef struct t_content
 	unsigned int 	t_compile;
 	unsigned int 	t_debug;
 	unsigned int 	t_refactor; 
-} t_content;
-
-
-typedef struct t_coder
-{
-	t_content	   *data;
-	struct t_coder *next;
-	struct t_coder *prev;
 } t_coder;
+
+
+typedef struct t_dongle
+{
+	unsigned int	id;
+	unsigned int 	d_cooldown;
+	void			*mutex;
+	struct timeval	start;
+} t_dongle;
+
+
+typedef struct t_array
+{
+	void	   	   *data;
+	struct t_array *next;
+	struct t_array *prev;
+} t_array;
 
 typedef struct t_span
 {
+	unsigned int 	t_burnout;
+	unsigned int 	t_compile;
+	unsigned int 	t_debug;
+	unsigned int 	t_refactor; 
 	unsigned int 	n_coders;
 	unsigned int 	n_compiles;
 	unsigned int 	d_cooldown;
 	char 		 	*schdlr;
-	pthread_mutex_t mutex;
-	t_coder 		*coders;
+	t_array 		*coders;
+	t_array 		*dongle;
 } t_span;
 
-unsigned int	la_len(t_coder *array);
-t_coder			*la_start(t_coder *array);
-t_coder			*la_append(t_coder *array, void *content);
-t_coder			*la_init(void *content);
-void			*la_free(t_coder *array);
-int				init_coders(t_span *s);
+unsigned int	la_len(t_array *array);
+t_array			*la_start(t_array *array);
+t_array			*la_append(t_array *array, void *content);
+t_array			*la_init(void *content);
+void			*la_free(t_array *array);
+int				init_arrays(t_span *s);
+int				init_dongle(t_span *s);
 
 #endif
 
