@@ -6,13 +6,13 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/18 17:24:24 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/19 17:55:11 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void    *smt(void *a)
+void    *cool_down(void *a)
 {
     struct timeval  current_time;
     t_array         *array;
@@ -31,6 +31,7 @@ int init_dongle(t_span *s)
     t_array         *array;
     t_dongle        *data;
     pthread_mutex_t mutex;
+    pthread_cond_t  cond;
 
     array = NULL;
     pthread_mutex_init(&mutex, NULL);
@@ -43,18 +44,14 @@ int init_dongle(t_span *s)
         gettimeofday(&data->start, NULL);
         data->id = la_len(la_start(array)) - 1;
         data->d_cooldown = s->d_cooldown;
-        data->mutex = &mutex;
-        if (pthread_create(&data->t, NULL, &smt, (void *) array) != 0)
+        data->mutex = mutex;
+        data->is_active = 1;
+        if (pthread_create(&data->t, NULL, &cool_down, array) != 0)
         {
             printf("Something went wrong with T%d", data->id);
             return (-1);
         }
     }
-    array = la_start(array);
-    s->dongle = array;
-    while (array){
-        pthread_join(((t_dongle *) array->data)->t, NULL);
-        array = array -> next;
-    }
+    s->dongle = la_start(array);
     return (0);
 }
