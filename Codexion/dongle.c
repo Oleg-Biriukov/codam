@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/19 17:55:11 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/23 15:34:56 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,7 @@ int init_dongle(t_span *s)
     t_array         *array;
     t_dongle        *data;
     pthread_mutex_t mutex;
-    pthread_cond_t  cond;
+    // pthread_cond_t  cond;
 
     array = NULL;
     pthread_mutex_init(&mutex, NULL);
@@ -46,11 +46,11 @@ int init_dongle(t_span *s)
         data->d_cooldown = s->d_cooldown;
         data->mutex = mutex;
         data->is_active = 1;
-        if (pthread_create(&data->t, NULL, &cool_down, array) != 0)
-        {
-            printf("Something went wrong with T%d", data->id);
-            return (-1);
-        }
+        // if (pthread_create(&data->t, NULL, &cool_down, array) != 0)
+        // {
+        //     printf("Something went wrong with T%d", data->id);
+        //     return (-1);
+        // }
     }
     s->dongle = la_start(array);
     return (0);

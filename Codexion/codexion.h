@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/19 17:54:35 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/23 14:53:25 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,24 +18,9 @@
 # include <unistd.h>
 # include <pthread.h>
 # include <sys/time.h>
+# include <string.h>
 
 
-typedef struct t_coder
-{
-	unsigned int 	id;
-	pthread_t 	 	th_burnout;
-	pthread_t 	 	th_stages;
-	unsigned int	is_done;
-	unsigned int	is_burnout;
-	unsigned int	compiles;
-	unsigned int 	t_burnout;
-	unsigned int 	t_compile;
-	unsigned int 	t_debug;
-	unsigned int 	t_refactor; 
-	pthread_cond_t	cond;
-	struct timeval	start;
-	pthread_mutex_t	mutex;
-} t_coder;
 
 
 typedef struct t_dongle
@@ -48,6 +33,23 @@ typedef struct t_dongle
 	int				is_active;
 } t_dongle;
 
+typedef struct t_coder
+{
+	t_dongle		conn[2];
+	pthread_t 	 	th_burnout;
+	pthread_t 	 	th_stages;
+	unsigned int 	id;
+	unsigned int	is_done;
+	unsigned int	is_burnout;
+	unsigned int	compiles;
+	unsigned int 	t_burnout;
+	unsigned int 	t_compile;
+	unsigned int 	t_debug;
+	unsigned int 	t_refactor; 
+	pthread_cond_t	cond;
+	struct timeval	start;
+	pthread_mutex_t	mutex;
+} t_coder;
 
 typedef struct t_array
 {
@@ -58,7 +60,7 @@ typedef struct t_array
 
 typedef struct t_span
 {
-	pthread_cond_t	mutex;
+	pthread_mutex_t	mutex;
 	pthread_cond_t	cond;
 	unsigned int 	t_burnout;
 	unsigned int 	t_compile;
@@ -67,19 +69,22 @@ typedef struct t_span
 	unsigned int 	n_coders;
 	unsigned int 	n_compiles;
 	unsigned int 	d_cooldown;
-	char 		 	*schdlr;
+	t_array			*workspace;
 	t_array 		*coders;
 	t_array 		*dongle;
+	char 		 	*schdlr;
 } t_span;
 
 unsigned int	la_len(t_array *array);
 t_array			*la_start(t_array *array);
 t_array			*la_append(t_array *array, void *content);
 t_array			*la_init(void *content);
+t_array			*get_elem(t_array *stack, int num);
 void			*la_free(t_array *array);
 void			*stages(t_array *array);
 int				init_arrays(t_span *s);
 int				init_dongle(t_span *s);
+int				scheduler(t_span *s);
 
 #endif
 

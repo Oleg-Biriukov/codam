@@ -6,11 +6,19 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/19 17:04:12 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/23 12:16:20 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
+
+t_array	*get_elem(t_array *stack, int num)
+{
+	stack = la_start(stack);
+	while (num-- && stack)
+		stack = stack->next;
+	return (stack);
+}
 
 void	*stages(t_array *array)
 {

@@ -56,7 +56,6 @@ void	*la_free(t_array *array)
 
 	if (array == NULL)
 		return (NULL);
-	array = la_start(array);
 	while (array->next != NULL)
 	{
 		next_array = array->next;
