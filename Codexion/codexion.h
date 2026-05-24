@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/23 14:53:25 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/24 17:02:58 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,14 @@ typedef struct t_dongle
 
 typedef struct t_coder
 {
-	t_dongle		conn[2];
+	void			*s;
+	t_dongle		*conn[2];
 	pthread_t 	 	th_burnout;
 	pthread_t 	 	th_stages;
 	unsigned int 	id;
 	unsigned int	is_done;
 	unsigned int	is_burnout;
 	unsigned int	compiles;
-	unsigned int 	t_burnout;
-	unsigned int 	t_compile;
-	unsigned int 	t_debug;
-	unsigned int 	t_refactor; 
-	pthread_cond_t	cond;
 	struct timeval	start;
 	pthread_mutex_t	mutex;
 } t_coder;
@@ -82,6 +78,7 @@ t_array			*la_init(void *content);
 t_array			*get_elem(t_array *stack, int num);
 void			*la_free(t_array *array);
 void			*stages(t_array *array);
+int				proccess(t_array *array);
 int				init_arrays(t_span *s);
 int				init_dongle(t_span *s);
 int				scheduler(t_span *s);

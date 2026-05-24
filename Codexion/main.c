@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/23 17:12:45 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/24 16:06:05 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,17 +14,20 @@
 
 int free_all(t_span *s)
 {
-	pthread_mutex_destroy(&(((t_dongle *) s->dongle)->mutex));
-	pthread_mutex_destroy(&(((t_coder *) s->coders)->mutex));
+	int		len_workspace;
+	t_array	*n_array;
+
+	len_workspace = s->n_coders * 2;
+	pthread_mutex_destroy(&(((t_dongle *) s->dongle->data)->mutex));
+	pthread_mutex_destroy(&(((t_coder *) s->coders->data)->mutex));
 	pthread_cond_destroy(&s->cond);
 	la_free(s->dongle);
 	la_free(s->coders);
-	while (s->n_coders--)
+	while (len_workspace--)
 	{
+		n_array = s->workspace->next;
 		free(s->workspace);
-		s->workspace = s->workspace->next;
-		free(s->workspace);
-		s->workspace = s->workspace->next;
+		s->workspace = n_array;
 	}
 	free(s);
 	return (0);
@@ -68,7 +71,7 @@ int main()
 	}
 	pthread_cond_init(&s->cond, NULL);
 	pthread_mutex_init(&s->mutex, NULL);
-	s->n_coders = 3;
+	s->n_coders = 5;
 	s->d_cooldown = 500;
 	s->n_compiles = 2;
 	s->t_compile = 20000;
@@ -83,11 +86,18 @@ int main()
 	if (init_dongle(s) != 0)
 		return (printf("Error"), free_all(s));
 	if (workspace_init(s) !=0)
-		return (printf("Error"), free_all(s));
+		return (printf("Error"), free_all(s));	
+	if (scheduler(s) != 0)
+			return(printf("Error"), free_all(s));
 	
-	
-	// if (scheduler(s) != 0)
-		// return(printf("Error"), free_all(s));
 	free_all(s);
 	return (0);
-}
+	}
+		
+		// t_array *a = s->coders;
+		// for (unsigned int i = 0; i < s->n_coders; i++){
+		// 	if (((t_coder *) a->data)->conn[0] != NULL  &&
+		// 		((t_coder *) a->data)->conn[1] != NULL)
+		// 		printf("C%d -> {D%d, D%d}\n", ((t_coder *)a->data)->id, ((t_coder *)a->data)->conn[0]->id, ((t_coder *)a->data)->conn[1]->id);
+		// 	a = a->next;
+		// }

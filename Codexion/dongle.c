@@ -6,25 +6,25 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/23 15:34:56 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/24 16:35:46 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void    *cool_down(void *a)
-{
-    struct timeval  current_time;
-    t_array         *array;
-    t_dongle        *data;
+// void    *cool_down(void *a)
+// {
+//     struct timeval  current_time;
+//     t_array         *array;
+//     t_dongle        *data;
 
-    array = (t_array *) a;
-    data = (t_dongle *) array->data;
-	gettimeofday(&current_time, NULL);
-    while (current_time.tv_sec - data->start.tv_sec != data->d_cooldown/1000)
-		gettimeofday(&current_time, NULL);
-    return NULL;
-}
+//     array = (t_array *) a;
+//     data = (t_dongle *) array->data;
+// 	gettimeofday(&current_time, NULL);
+//     while (current_time.tv_sec - data->start.tv_sec != data->d_cooldown/1000)
+// 		gettimeofday(&current_time, NULL);
+//     return NULL;
+// }
 
 int init_dongle(t_span *s)
 {
@@ -42,7 +42,7 @@ int init_dongle(t_span *s)
         if (!data || !array)
             return (-1);
         gettimeofday(&data->start, NULL);
-        data->id = la_len(la_start(array)) - 1;
+        data->id = la_len(la_start(array));
         data->d_cooldown = s->d_cooldown;
         data->mutex = mutex;
         data->is_active = 1;

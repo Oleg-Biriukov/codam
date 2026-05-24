@@ -6,19 +6,21 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/23 15:35:12 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/24 17:14:15 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-// static int proccess(t_array *array)
-// {
-// 	return (la_len(array));
-// 	// t_coder			*data;
-// 	// struct timeval	current_time;
-// 	// return (0)
-// }
+int proccess(t_array *array)
+{
+	struct timespec	burnout;
+	t_span			*s;
+	s = (t_span *) ((t_coder *) array->data)->s;
+	gettimeofday(&burnout, NULL);
+	pthread_cond_timedwait(&s->cond, &s->mutex, &burnout);	
+	return (1);
+}
 
 
 int init_arrays(t_span *s)
@@ -34,16 +36,15 @@ int init_arrays(t_span *s)
 		array = la_append(array, data);
 		if (!array || !data)
 			return (-1);
-		data->id = la_len(la_start(array)) - 1;
+		data->id = la_len(la_start(array));
 		data->mutex = mutex;
 		gettimeofday(&data->start, NULL);
-		data->t_compile = s->t_compile;
-		data->t_burnout = s->t_burnout;
-		data->t_refactor = s->t_refactor;
-		data->t_debug = s->t_debug;
+		data->s = (void *) s;
 		data->is_done = 0;
 		data->is_burnout = 0;
 		data->compiles = 0;
+		data->conn[0] = NULL;
+		data->conn[1] = NULL;
 	
 		// if (pthread_create(&data->th_burnout, NULL, (void *) &proccess, array) != 0 ||
 		// 	pthread_create(&data->th_stages, NULL, (void *) &stages, array) != 0)
