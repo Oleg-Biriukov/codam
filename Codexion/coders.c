@@ -12,14 +12,40 @@
 
 #include "codexion.h"
 
+static int	check_burnout(t_array *array)
+{
+	pthread_t	t[2];
+
+	if (pthread_create(&t[0], NULL, &cool_down, array) != 0)
+		return (-1);
+	if (pthread_create(&t[1], NULL, &stages, array) != 0)
+		return (-1);
+	return (0);
+}
+
 int proccess(t_array *array)
 {
+	struct timeval	now;
 	struct timespec	burnout;
 	t_span			*s;
-	s = (t_span *) ((t_coder *) array->data)->s;
-	gettimeofday(&burnout, NULL);
-	pthread_cond_timedwait(&s->cond, &s->mutex, &burnout);	
-	return (1);
+	int 			res;
+	t_coder			*data;
+
+	data = (t_coder *) array->data;
+	s = (t_span *) data->s;
+	res = 0;
+	gettimeofday(&now, NULL);
+	burnout = convert(now, s->t_burnout);
+	while (res != ETIMEDOUT)
+	{
+		res = pthread_cond_timedwait(&s->cond, &s->mutex, &burnout);
+		gettimeofday(&now, NULL);
+		now = convert(now, 0);
+		data->left = (burnout.tv_sec * 1000000L + burnout.tv_usec) - (now.tv_sec * 1000000L + now.tv_usec);
+		if (res == 0 && data->conn[0] && data->conn[1])
+			return(check_burnout(array));
+	}
+	return (-1);
 }
 
 

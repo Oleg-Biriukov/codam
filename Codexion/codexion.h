@@ -19,9 +19,7 @@
 # include <pthread.h>
 # include <sys/time.h>
 # include <string.h>
-
-
-
+# include <errno.h>
 
 typedef struct t_dongle
 {
@@ -35,6 +33,7 @@ typedef struct t_dongle
 
 typedef struct t_coder
 {
+	int				left;
 	void			*s;
 	t_dongle		*conn[2];
 	pthread_t 	 	th_burnout;
@@ -71,6 +70,7 @@ typedef struct t_span
 	char 		 	*schdlr;
 } t_span;
 
+struct timespec	convert(struct timeval from, int b_out);
 unsigned int	la_len(t_array *array);
 t_array			*la_start(t_array *array);
 t_array			*la_append(t_array *array, void *content);
@@ -78,6 +78,10 @@ t_array			*la_init(void *content);
 t_array			*get_elem(t_array *stack, int num);
 void			*la_free(t_array *array);
 void			*stages(t_array *array);
+void    		*cool_down(void *a);
+void			set_to_null(t_span *s);
+void			la_remove(t_array *a);
+int				start(t_span *s);
 int				proccess(t_array *array);
 int				init_arrays(t_span *s);
 int				init_dongle(t_span *s);

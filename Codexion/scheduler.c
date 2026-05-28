@@ -33,6 +33,7 @@ static int	fifo(t_span *s)
 		if (coder == s->workspace->prev->prev)
 			break;
 	}
+	pthread_cond_broadcast(&s->cond)
 	return (0);
 }
 

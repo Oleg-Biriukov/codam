@@ -12,20 +12,6 @@
 
 #include "codexion.h"
 
-// void    *cool_down(void *a)
-// {
-//     struct timeval  current_time;
-//     t_array         *array;
-//     t_dongle        *data;
-
-//     array = (t_array *) a;
-//     data = (t_dongle *) array->data;
-// 	gettimeofday(&current_time, NULL);
-//     while (current_time.tv_sec - data->start.tv_sec != data->d_cooldown/1000)
-// 		gettimeofday(&current_time, NULL);
-//     return NULL;
-// }
-
 int init_dongle(t_span *s)
 {
     t_array         *array;
@@ -46,11 +32,6 @@ int init_dongle(t_span *s)
         data->d_cooldown = s->d_cooldown;
         data->mutex = mutex;
         data->is_active = 1;
-        // if (pthread_create(&data->t, NULL, &cool_down, array) != 0)
-        // {
-        //     printf("Something went wrong with T%d", data->id);
-        //     return (-1);
-        // }
     }
     s->dongle = la_start(array);
     return (0);

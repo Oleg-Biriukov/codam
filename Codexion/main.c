@@ -59,6 +59,30 @@ static int	workspace_init(t_span *s)
 	return (0);
 }
 
+void	set_to_null(t_span *s)
+{
+	t_array		*c_a;
+	t_array		*d_a;
+	t_coder		*c_data;
+	t_dongle	*d_data;
+
+	c_a = s->coders;
+	d_a = s->dongle;
+	while (c_a)
+	{
+
+		c_data = (t_coder *) c_a->data;
+		d_data = (t_dongle *) d_a->data;
+		gettimeofday(&c_data->start, NULL);
+		c_data->conn[0] = NULL;
+		c_data->conn[1] = NULL;
+		c_data->is_burnout = 0;
+		d_data->is_active = 1;
+		c_a = c_a->next;
+		d_a = d_a->next;
+	}
+}
+
 int main()
 {
 	t_span 		*s;
@@ -88,7 +112,7 @@ int main()
 	if (workspace_init(s) !=0)
 		return (printf("Error"), free_all(s));	
 	if (scheduler(s) != 0)
-			return(printf("Error"), free_all(s));
+		return(printf("Error"), free_all(s));
 	
 	free_all(s);
 	return (0);

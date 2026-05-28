@@ -11,47 +11,39 @@
 /* ************************************************************************** */
 
 #include "codexion.h"
-
-t_array	*get_elem(t_array *stack, int num)
+int	cool_down_check(t_coder *data, int proccess_t)
 {
-	stack = la_start(stack);
-	while (num-- && stack)
-		stack = stack->next;
-	return (stack);
+	struct timeval	current_time;
+	struct timeval	start_time;
+
+	gettimeofday(&current_time, NULL);
+	gettimeofday(&start_time, NULL);
+	while (current_time.tv_sec - start_time.tv_sec < proccess_t / 1000)
+	{
+		phtread_mutex_lock(&data->mutex);
+		if (data->is_burnout == 1)
+			return (-1);
+		pthread_mutex_unlock($data->mutex);
+		gettimeofday(&current_time, NULL);
+	}
+	return (0);
 }
 
-// void	*stages(t_array *array)
-// {
-// 	t_coder	*data;
-// 	struct timeval	current_time;
-// 	struct timeval	start_time;
+void	*stages(t_array *array)
+{
+	t_coder	*data;
+	struct timeval	current_time;
+	struct timeval	start_time;
 
-// 	gettimeofday(&current_time, NULL);
-// 	gettimeofday(&start_time, NULL);
-// 	data = (t_coder *) array->data;
-// 	printf("T%d is compiling...\n", data->id);
-// 	while (current_time.tv_sec - start_time.tv_sec < data->t_compile / 1000)
-// 	{
-// 		if (data->is_burnout == 1)
-// 			return (NULL);
-// 		gettimeofday(&current_time, NULL);
-// 	}
-// 	gettimeofday(&start_time, NULL);
-// 	printf("T%d is debugging...\n", data->id);
-// 	while (current_time.tv_sec - start_time.tv_sec < data->t_debug / 1000)
-// 	{
-// 		if (data->is_burnout == 1)
-// 			return (NULL);
-// 		gettimeofday(&current_time, NULL);
-// 	}
-// 	gettimeofday(&start_time, NULL);
-// 	printf("T%d is refactoring...\n", data->id);
-// 	while (current_time.tv_sec - start_time.tv_sec < data->t_refactor / 1000)
-// 	{
-// 		if (data->is_burnout == 1)
-// 			return (NULL);
-// 		gettimeofday(&current_time, NULL);
-// 	}
-// 	data->is_done = 1;
-// 	return (NULL);
-// }
+	data = (t_coder *) array->data;
+	if (cool_down_check(data, data->t_compile) != 0)
+		return (-1)
+	if (cool_down_check(data, data->t_debug) != 0)
+		return (-1)
+	if (cool_down_check(data, data->t_refactor) != 0)
+		return (-1)
+	phtread_mutex_lock(&data->mutex);
+	data->is_done = 1;
+	phtread_mutex_unlock(&data->mutex);
+	return (NULL);
+}
