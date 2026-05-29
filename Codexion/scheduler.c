@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/24 16:25:27 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/29 16:47:05 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,9 @@ static int	fifo(t_span *s)
 		}
 		coder = coder->prev->prev;
 		if (coder == s->workspace->prev->prev)
-			break;
+			break ;
 	}
-	pthread_cond_broadcast(&s->cond)
+	pthread_cond_broadcast(&s->cond_b);
 	return (0);
 }
 

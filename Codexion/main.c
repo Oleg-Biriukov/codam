@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/24 16:06:05 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/29 16:45:17 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,10 @@ int free_all(t_span *s)
 	t_array	*n_array;
 
 	len_workspace = s->n_coders * 2;
-	pthread_mutex_destroy(&(((t_dongle *) s->dongle->data)->mutex));
-	pthread_mutex_destroy(&(((t_coder *) s->coders->data)->mutex));
-	pthread_cond_destroy(&s->cond);
+	pthread_mutex_destroy(&s->mutex_cod);
+	pthread_mutex_destroy(&s->mutex);
+	pthread_cond_destroy(&s->cond_end);
+	pthread_cond_destroy(&s->cond_b);
 	la_free(s->dongle);
 	la_free(s->coders);
 	while (len_workspace--)
@@ -59,42 +60,19 @@ static int	workspace_init(t_span *s)
 	return (0);
 }
 
-void	set_to_null(t_span *s)
-{
-	t_array		*c_a;
-	t_array		*d_a;
-	t_coder		*c_data;
-	t_dongle	*d_data;
-
-	c_a = s->coders;
-	d_a = s->dongle;
-	while (c_a)
-	{
-
-		c_data = (t_coder *) c_a->data;
-		d_data = (t_dongle *) d_a->data;
-		gettimeofday(&c_data->start, NULL);
-		c_data->conn[0] = NULL;
-		c_data->conn[1] = NULL;
-		c_data->is_burnout = 0;
-		d_data->is_active = 1;
-		c_a = c_a->next;
-		d_a = d_a->next;
-	}
-}
-
 int main()
 {
 	t_span 		*s;
-	// pthread_t 	t[2];
+	pthread_t 	t;
 	// int			result[2];
 
 	s = malloc(sizeof(t_span));
 	if (!s){
 		printf("Something went wrong");
 	}
-	pthread_cond_init(&s->cond, NULL);
-	pthread_mutex_init(&s->mutex, NULL);
+	pthread_cond_init(&s->cond_b, NULL);
+	pthread_cond_init(&s->cond_end, NULL);
+	pthread_mutex_init(&s->mutex_end, NULL);
 	s->n_coders = 5;
 	s->d_cooldown = 500;
 	s->n_compiles = 2;
@@ -111,9 +89,10 @@ int main()
 		return (printf("Error"), free_all(s));
 	if (workspace_init(s) !=0)
 		return (printf("Error"), free_all(s));	
-	if (scheduler(s) != 0)
+	if (pthread_create(&t, NULL, (void *) &start, s) != 0)
 		return(printf("Error"), free_all(s));
 	
+	pthread_cond_wait(&s->cond_b, &s->mutex_end);
 	free_all(s);
 	return (0);
 	}

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   helper_func.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: obirukov <obirukov@student.codam.nl>       #+#  +:+       +#+        */
+/*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026-05-27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026-05-27 14:37:21 by obirukov         ###   ########.fr       */
+/*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
+/*   Updated: 2026/05/29 16:36:25 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,31 +37,31 @@ void	la_remove(t_array *a)
 		next->prev = prev;
 }
 
-void    *cool_down(t_array *a)
-{
-    t_coder *data;
+// int    cool_down(t_array *a)
+// {
+//     t_coder *data;
 
-    data = (t_coder *) a->data;
-	struct timeval	current_time;
-	struct timeval	start_time;
+//     data = (t_coder *) a->data;
+// 	struct timeval	current_time;
+// 	struct timeval	start_time;
 
 	
-	gettimeofday(&current_time, NULL);
-	gettimeofday(&start_time, NULL);
-	while (current_time.tv_sec - start_time.tv_sec < data->left)
-	{
-		phtread_mutex_lock(&data->mutex);
-		if (data->is_done == 1)
-			return (0);
-		pthread_mutex_unlock($data->mutex);
-		gettimeofday(&current_time, NULL);
-	}
-    pthread_mutex_lock(&data->mutex);
-	if (data->is_done == 0)
-    	data->is_burnout = 1;
-    pthread_mutex_unlock(&data->mutex);
-    return (-1);
-}
+// 	gettimeofday(&current_time, NULL);
+// 	gettimeofday(&start_time, NULL);
+// 	while (current_time.tv_sec - start_time.tv_sec < data->left)
+// 	{
+// 		pthread_mutex_lock(&data->mutex);
+// 		if (data->is_done == 1)
+// 			return (0);
+// 		pthread_mutex_unlock(&data->mutex);
+// 		gettimeofday(&current_time, NULL);
+// 	}
+//     pthread_mutex_lock(&data->mutex);
+// 	if (data->is_done == 0)
+//     	data->is_burnout = 1;
+//     pthread_mutex_unlock(&data->mutex);
+//     return (-1);
+// }
 
 struct timespec	convert(struct timeval from, int b_out)
 {

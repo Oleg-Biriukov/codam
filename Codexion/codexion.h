@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/24 17:02:58 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/29 16:43:23 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ typedef struct t_dongle
 {
 	unsigned int	id;
 	unsigned int 	d_cooldown;
-	pthread_mutex_t	mutex;
+	void			*s;
 	struct timeval	start;
 	pthread_t		t;
 	int				is_active;
@@ -43,7 +43,6 @@ typedef struct t_coder
 	unsigned int	is_burnout;
 	unsigned int	compiles;
 	struct timeval	start;
-	pthread_mutex_t	mutex;
 } t_coder;
 
 typedef struct t_array
@@ -55,8 +54,11 @@ typedef struct t_array
 
 typedef struct t_span
 {
-	pthread_mutex_t	mutex;
-	pthread_cond_t	cond;
+	pthread_mutex_t	mutex_end;
+	pthread_mutex_t	mutex_don;
+	pthread_mutex_t	mutex_cod;
+	pthread_cond_t	cond_b;
+	pthread_cond_t	cond_end;
 	unsigned int 	t_burnout;
 	unsigned int 	t_compile;
 	unsigned int 	t_debug;
@@ -77,11 +79,11 @@ t_array			*la_append(t_array *array, void *content);
 t_array			*la_init(void *content);
 t_array			*get_elem(t_array *stack, int num);
 void			*la_free(t_array *array);
-void			*stages(t_array *array);
-void    		*cool_down(void *a);
 void			set_to_null(t_span *s);
 void			la_remove(t_array *a);
+int	    		cool_down(t_array *a);
 int				start(t_span *s);
+int				stages(t_array *array);
 int				proccess(t_array *array);
 int				init_arrays(t_span *s);
 int				init_dongle(t_span *s);
