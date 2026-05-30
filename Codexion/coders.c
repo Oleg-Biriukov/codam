@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/29 16:36:35 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/30 17:08:27 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,15 @@
 // 	return (0);
 // }
 
-int proccess(t_array *array)
+int proccess(t_array *a)
 {
-	
+	t_coder	*data;
+	t_span	*s;
+
+	data = (t_coder *) a->data;
+	s = (t_span *) data->s;
+	if (data->conn[0] && data->conn[1])
+		stages(a);
 }
 
 

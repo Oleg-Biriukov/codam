@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/29 16:45:17 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/30 14:54:06 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int free_all(t_span *s)
 
 	len_workspace = s->n_coders * 2;
 	pthread_mutex_destroy(&s->mutex_cod);
-	pthread_mutex_destroy(&s->mutex);
+	pthread_mutex_destroy(&s->mutex_g);
 	pthread_cond_destroy(&s->cond_end);
 	pthread_cond_destroy(&s->cond_b);
 	la_free(s->dongle);
@@ -72,7 +72,7 @@ int main()
 	}
 	pthread_cond_init(&s->cond_b, NULL);
 	pthread_cond_init(&s->cond_end, NULL);
-	pthread_mutex_init(&s->mutex_end, NULL);
+	pthread_mutex_init(&s->mutex_g, NULL);
 	s->n_coders = 5;
 	s->d_cooldown = 500;
 	s->n_compiles = 2;
@@ -80,6 +80,7 @@ int main()
 	s->t_burnout = 10000;
 	s->t_refactor = 3000;
 	s->t_debug = 4000;
+	s->is_failed = 0;
 	s->schdlr = "fifo";
 	s->workspace = NULL;
 
@@ -89,10 +90,9 @@ int main()
 		return (printf("Error"), free_all(s));
 	if (workspace_init(s) !=0)
 		return (printf("Error"), free_all(s));	
-	if (pthread_create(&t, NULL, (void *) &start, s) != 0)
+	if (start(s) != 0)
 		return(printf("Error"), free_all(s));
 	
-	pthread_cond_wait(&s->cond_b, &s->mutex_end);
 	free_all(s);
 	return (0);
 	}

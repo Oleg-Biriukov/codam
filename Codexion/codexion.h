@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/29 16:43:23 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/05/30 14:30:08 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,9 +33,9 @@ typedef struct t_dongle
 
 typedef struct t_coder
 {
-	int				left;
 	void			*s;
 	t_dongle		*conn[2];
+	pthread_t		t;
 	pthread_t 	 	th_burnout;
 	pthread_t 	 	th_stages;
 	unsigned int 	id;
@@ -54,11 +54,12 @@ typedef struct t_array
 
 typedef struct t_span
 {
-	pthread_mutex_t	mutex_end;
+	pthread_mutex_t	mutex_g;
 	pthread_mutex_t	mutex_don;
 	pthread_mutex_t	mutex_cod;
 	pthread_cond_t	cond_b;
 	pthread_cond_t	cond_end;
+	unsigned int	is_failed;
 	unsigned int 	t_burnout;
 	unsigned int 	t_compile;
 	unsigned int 	t_debug;
