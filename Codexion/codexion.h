@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/30 14:30:08 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/03 16:11:05 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@
 typedef struct t_dongle
 {
 	unsigned int	id;
-	unsigned int 	d_cooldown;
+	unsigned int	is_cooldown;
 	void			*s;
 	struct timeval	start;
 	pthread_t		t;
@@ -37,7 +37,6 @@ typedef struct t_coder
 	t_dongle		*conn[2];
 	pthread_t		t;
 	pthread_t 	 	th_burnout;
-	pthread_t 	 	th_stages;
 	unsigned int 	id;
 	unsigned int	is_done;
 	unsigned int	is_burnout;
@@ -59,30 +58,35 @@ typedef struct t_span
 	pthread_mutex_t	mutex_cod;
 	pthread_cond_t	cond_b;
 	pthread_cond_t	cond_end;
+	unsigned int	time;
+	unsigned int	is_over;
 	unsigned int	is_failed;
 	unsigned int 	t_burnout;
 	unsigned int 	t_compile;
 	unsigned int 	t_debug;
 	unsigned int 	t_refactor; 
-	unsigned int 	n_coders;
 	unsigned int 	n_compiles;
 	unsigned int 	d_cooldown;
 	t_array			*workspace;
 	t_array 		*coders;
 	t_array 		*dongle;
 	char 		 	*schdlr;
+	int 			n_coders;
 } t_span;
 
 struct timespec	convert(struct timeval from, int b_out);
-unsigned int	la_len(t_array *array);
 t_array			*la_start(t_array *array);
 t_array			*la_append(t_array *array, void *content);
 t_array			*la_init(void *content);
 t_array			*get_elem(t_array *stack, int num);
 void			*la_free(t_array *array);
-void			set_to_null(t_span *s);
+void			set_to_null(t_coder *data);
+void			la_sort(t_array *a, int (cond)(t_array *, t_array *));
 void			la_remove(t_array *a);
-int	    		cool_down(t_array *a);
+int    			check_burnout(t_span *s);
+int				la_len(t_array *array);
+int 			fail(t_span *s);
+int    			cool_down_dongle(t_span *s);
 int				start(t_span *s);
 int				stages(t_array *array);
 int				proccess(t_array *array);

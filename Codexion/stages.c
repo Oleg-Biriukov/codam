@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/30 17:11:29 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/03 12:42:09 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	cool_down_check(t_coder *data, int proccess_t)
 	s = (t_span *) data->s;
 	gettimeofday(&current_time, NULL);
 	gettimeofday(&start_time, NULL);
-	while (current_time.tv_sec - start_time.tv_sec < proccess_t / 1000)
+	while (current_time.tv_usec - start_time.tv_usec < proccess_t * 1000)
 	{
 		pthread_mutex_lock(&s->mutex_cod);
 		if (data->is_burnout == 1)

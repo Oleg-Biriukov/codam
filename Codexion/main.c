@@ -6,11 +6,29 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/30 14:54:06 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:34:11 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
+
+static void	timer(t_span *s)
+{
+	struct timeval	c_time;
+	struct timeval	s_time;
+
+	gettimeofday(&s_time, NULL);
+	while (s->is_over != 1)
+	{
+		if (s->is_failed == 1)
+			return ;
+		gettimeofday(&c_time, NULL);
+		pthread_mutex_lock(&s->mutex_g);
+		s->time = (c_time.tv_sec * 1000000L + c_time.tv_usec) - (s_time.tv_sec * 1000000L + s_time.tv_usec);
+		s->time /= 1000;
+		pthread_mutex_unlock(&s->mutex_g);
+	}
+}
 
 int free_all(t_span *s)
 {
@@ -64,7 +82,6 @@ int main()
 {
 	t_span 		*s;
 	pthread_t 	t;
-	// int			result[2];
 
 	s = malloc(sizeof(t_span));
 	if (!s){
@@ -81,6 +98,7 @@ int main()
 	s->t_refactor = 3000;
 	s->t_debug = 4000;
 	s->is_failed = 0;
+	s->is_over = 0;
 	s->schdlr = "fifo";
 	s->workspace = NULL;
 
@@ -89,10 +107,13 @@ int main()
 	if (init_dongle(s) != 0)
 		return (printf("Error"), free_all(s));
 	if (workspace_init(s) !=0)
-		return (printf("Error"), free_all(s));	
+		return (printf("Error"), free_all(s));
+	if (pthread_create(&t, NULL, (void *) &timer, s) != 0)
+		return (printf("Error"), free_all(s));
 	if (start(s) != 0)
 		return(printf("Error"), free_all(s));
-	
+	if (pthread_join(t, NULL) != 0)
+		return (printf("Error"), free_all(s));
 	free_all(s);
 	return (0);
 	}

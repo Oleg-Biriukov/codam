@@ -6,22 +6,78 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/30 17:08:27 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/03 14:36:58 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-// static int	check_burnout(t_array *array)
-// {
-// 	pthread_t	t[2];
+// start count down for each coders.
+static int    cool_down_c(t_coder *data)
+{
+	t_span	*s;
+    struct timeval	current_time;
 
-// 	if (pthread_create(&t[0], NULL, (void *) &cool_down, array) != 0)
-// 		return (-1);
-// 	if (pthread_create(&t[1], NULL, (void *) &stages, array) != 0)
-// 		return (-1);
-// 	return (0);
-// }
+	s = (t_span *) data->s;
+    pthread_mutex_lock(&s->mutex_cod);
+    gettimeofday(&data->start, NULL);
+    pthread_mutex_unlock(&s->mutex_cod);
+
+	gettimeofday(&current_time, NULL);
+	while (current_time.tv_usec - data->start.tv_usec < s->t_burnout * 1000)
+	{
+		pthread_mutex_lock(&s->mutex_cod);
+		if (data->is_done == 1)
+			return (pthread_mutex_unlock(&s->mutex_cod));
+		pthread_mutex_unlock(&s->mutex_cod);
+		gettimeofday(&current_time, NULL);
+	}
+	pthread_mutex_lock(&s->mutex_cod);
+    data->is_burnout = 1;
+	return (pthread_mutex_unlock(&s->mutex_cod));
+}
+
+int    check_burnout(t_span *s)
+{
+    unsigned int    compiles;
+    t_array         *a;
+    t_coder         *data;
+
+    compiles = 0;
+    a = s->coders;
+
+	while(a)
+    {
+        data = (t_coder *) a->data;
+        if (pthread_create(&data->t, NULL, (void *) &proccess, a) != 0)
+            return (-1);
+        a = a->next;
+    }
+	a = s->coders;
+    while (a)
+    {
+        data = (t_coder *) a->data;
+        if (pthread_create(&data->th_burnout, NULL, (void *) &cool_down_c, data) != 0)
+            return (fail(s));
+        a = a->next;
+    }
+    a = s->workspace;
+    while (a)
+    {
+        data = (t_coder *) a->data;
+        if (data->is_burnout == 1)
+            return (fail(s));
+        if (data->is_done == 1)
+        {
+            pthread_join(data->th_burnout, NULL);
+			set_to_null(data);
+            if (pthread_create(&data->th_burnout, NULL, (void *) &cool_down_c, data) != 0)
+                return (fail(s));
+        }
+        a = a->next->next;
+    }
+	return (0);
+}
 
 int proccess(t_array *a)
 {
@@ -32,6 +88,7 @@ int proccess(t_array *a)
 	s = (t_span *) data->s;
 	if (data->conn[0] && data->conn[1])
 		stages(a);
+	return (0);
 }
 
 

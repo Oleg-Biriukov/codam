@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/05/29 16:36:25 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/03 15:58:45 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,38 @@
 
 t_array	*get_elem(t_array *stack, int num)
 {
-	stack = la_start(stack);
 	while (num-- && stack)
 		stack = stack->next;
 	return (stack);
+}
+
+void	la_sort(t_array *a, int (cond)(t_array *, t_array *))
+{
+	void	*tmp;
+	t_array *ar;
+	int     count;
+
+    ar = la_start(a);
+    count = 0;
+	while (1)
+	{
+	    if (!ar->next)
+		{
+		    ar = la_start(a);
+		    if (la_len(la_start(a)) - 1 == count)
+		        break;
+		    count = 0;
+		}
+		if(!cond(ar, ar->next))
+		{
+			tmp = ar->next->data;
+			ar->next->data = ar->data;
+			ar->data = tmp;
+		}
+		else
+		    count++;
+		ar = ar->next;
+	}
 }
 
 void	la_remove(t_array *a)
