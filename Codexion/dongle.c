@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:00:01 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/04 17:55:06 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,11 +21,11 @@ static int cool_down_d(t_dongle *data)
     s = (t_span *) data->s;
     gettimeofday(&current_time, NULL);
     gettimeofday(&start_time, NULL);
-	while (current_time.tv_usec - start_time.tv_usec < s->d_cooldown * 1000)
+	while (interval(start_time, current_time) < s->d_cooldown * 1000)
 	{
-		pthread_mutex_lock(&s->mutex_g);
+		pthread_mutex_lock(&s->mutex_cod);
 		if (s->is_failed == 1)
-			return (pthread_mutex_unlock(&s->mutex_g));
+			return (pthread_mutex_unlock(&s->mutex_cod));
 		pthread_mutex_unlock(&s->mutex_cod);
 		gettimeofday(&current_time, NULL);
 	}
@@ -43,9 +43,9 @@ int    cool_down_dongle(t_span *s)
     while (1)
     {
         data = (t_dongle *)  a->data;
-        pthread_mutex_lock(&s->mutex_g);
+        pthread_mutex_lock(&s->mutex_cod);
         if (s->is_over || s->is_failed)
-            return (pthread_mutex_unlock(&s->mutex_g));
+            return (pthread_mutex_unlock(&s->mutex_cod));
         pthread_mutex_unlock(&s->mutex_cod);
         pthread_mutex_lock(&s->mutex_cod);
         if (data->is_cooldown == 1)
@@ -68,7 +68,6 @@ int init_dongle(t_span *s)
     t_dongle        *data;
 
     array = NULL;
-    pthread_mutex_init(&s->mutex_don, NULL);
     while(la_len(la_start(array)) != s->n_coders)
     {
         data = malloc(sizeof(t_dongle));

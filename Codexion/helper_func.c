@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/03 15:58:45 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:37:46 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,14 @@ t_array	*get_elem(t_array *stack, int num)
 	while (num-- && stack)
 		stack = stack->next;
 	return (stack);
+}
+
+int	interval(struct timeval s, struct timeval c)
+{
+	int	diff;
+
+	diff = (c.tv_sec * 1000000L + c.tv_usec) - (s.tv_sec * 1000000L + s.tv_usec);
+	return (diff);
 }
 
 void	la_sort(t_array *a, int (cond)(t_array *, t_array *))

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:34:11 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/04 17:48:50 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@ static void	timer(t_span *s)
 		if (s->is_failed == 1)
 			return ;
 		gettimeofday(&c_time, NULL);
-		pthread_mutex_lock(&s->mutex_g);
+		pthread_mutex_lock(&s->mutex_cod);
 		s->time = (c_time.tv_sec * 1000000L + c_time.tv_usec) - (s_time.tv_sec * 1000000L + s_time.tv_usec);
 		s->time /= 1000;
-		pthread_mutex_unlock(&s->mutex_g);
+		pthread_mutex_unlock(&s->mutex_cod);
 	}
 }
 
@@ -37,9 +37,9 @@ int free_all(t_span *s)
 
 	len_workspace = s->n_coders * 2;
 	pthread_mutex_destroy(&s->mutex_cod);
-	pthread_mutex_destroy(&s->mutex_g);
-	pthread_cond_destroy(&s->cond_end);
-	pthread_cond_destroy(&s->cond_b);
+	pthread_mutex_destroy(&s->mutex_cond);
+	pthread_cond_destroy(&s->cond_next);
+	pthread_cond_destroy(&s->cond_cod);
 	la_free(s->dongle);
 	la_free(s->coders);
 	while (len_workspace--)
@@ -87,18 +87,20 @@ int main()
 	if (!s){
 		printf("Something went wrong");
 	}
-	pthread_cond_init(&s->cond_b, NULL);
-	pthread_cond_init(&s->cond_end, NULL);
-	pthread_mutex_init(&s->mutex_g, NULL);
-	s->n_coders = 5;
+	pthread_cond_init(&s->cond_next, NULL);
+	pthread_cond_init(&s->cond_cod, NULL);
+	pthread_mutex_init(&s->mutex_cod, NULL);
+	pthread_mutex_init(&s->mutex_cond, NULL);
+	s->n_coders = 2;
 	s->d_cooldown = 500;
-	s->n_compiles = 2;
-	s->t_compile = 20000;
+	s->n_compiles = 1;
+	s->t_compile = 1000;
 	s->t_burnout = 10000;
 	s->t_refactor = 3000;
 	s->t_debug = 4000;
 	s->is_failed = 0;
 	s->is_over = 0;
+	s->n_in_progress = 0;
 	s->schdlr = "fifo";
 	s->workspace = NULL;
 

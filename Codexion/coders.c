@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/03 14:36:58 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:27:12 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static int    cool_down_c(t_coder *data)
     pthread_mutex_unlock(&s->mutex_cod);
 
 	gettimeofday(&current_time, NULL);
-	while (current_time.tv_usec - data->start.tv_usec < s->t_burnout * 1000)
+	while (interval(data->start, current_time) < s->t_burnout * 1000)
 	{
 		pthread_mutex_lock(&s->mutex_cod);
 		if (data->is_done == 1)
@@ -39,13 +39,12 @@ static int    cool_down_c(t_coder *data)
 
 int    check_burnout(t_span *s)
 {
-    unsigned int    compiles;
     t_array         *a;
     t_coder         *data;
 
-    compiles = 0;
     a = s->coders;
-
+	pthread_cond_wait(&s->cond_cod, &s->mutex_cond);
+	pthread_mutex_unlock(&s->mutex_cond);
 	while(a)
     {
         data = (t_coder *) a->data;
@@ -68,7 +67,14 @@ int    check_burnout(t_span *s)
         if (data->is_burnout == 1)
             return (fail(s));
         if (data->is_done == 1)
-        {
+        {	
+			if (s->n_in_progress == 0)
+			{
+				pthread_mutex_lock(&s->mutex_cond);
+				pthread_cond_broadcast(&s->cond_next);
+				pthread_mutex_unlock(&s->mutex_cond);
+				usleep(4);
+			}
             pthread_join(data->th_burnout, NULL);
 			set_to_null(data);
             if (pthread_create(&data->th_burnout, NULL, (void *) &cool_down_c, data) != 0)
@@ -86,20 +92,29 @@ int proccess(t_array *a)
 
 	data = (t_coder *) a->data;
 	s = (t_span *) data->s;
-	if (data->conn[0] && data->conn[1])
-		stages(a);
+	while (1)
+	{
+		if (s->is_failed || s->is_over)
+			return(-1);
+		if (data->conn[0] && data->conn[1])
+		{
+			stages(a);
+			pthread_mutex_lock(&s->mutex_cod);
+			data->conn[0]->is_cooldown = 1;
+			data->conn[1]->is_cooldown = 1;
+			pthread_mutex_unlock(&s->mutex_cod);
+		}
+	}
 	return (0);
 }
 
 
 int init_arrays(t_span *s)
 {
-	pthread_mutex_t mutex;
 	t_array	  		*array;
 	t_coder   		*data;
 
 	array = NULL;
-	pthread_mutex_init(&mutex, NULL);
 	while (la_len(la_start(array)) < s->n_coders){
 		data = malloc(sizeof(t_coder));
 		array = la_append(array, data);
@@ -113,10 +128,6 @@ int init_arrays(t_span *s)
 		data->compiles = 0;
 		data->conn[0] = NULL;
 		data->conn[1] = NULL;
-	
-		// if (pthread_create(&data->th_burnout, NULL, (void *) &proccess, array) != 0 ||
-		// 	pthread_create(&data->th_stages, NULL, (void *) &stages, array) != 0)
-		// 	return (-2);
 	}
 	s->coders = la_start(array);
 	return (0);

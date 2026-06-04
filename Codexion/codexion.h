@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/03 16:11:05 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:28:28 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,25 +53,25 @@ typedef struct t_array
 
 typedef struct t_span
 {
-	pthread_mutex_t	mutex_g;
-	pthread_mutex_t	mutex_don;
+	pthread_mutex_t	mutex_cond;
 	pthread_mutex_t	mutex_cod;
-	pthread_cond_t	cond_b;
-	pthread_cond_t	cond_end;
+	pthread_cond_t	cond_next;
+	pthread_cond_t	cond_cod;
 	unsigned int	time;
 	unsigned int	is_over;
 	unsigned int	is_failed;
-	unsigned int 	t_burnout;
-	unsigned int 	t_compile;
-	unsigned int 	t_debug;
-	unsigned int 	t_refactor; 
-	unsigned int 	n_compiles;
-	unsigned int 	d_cooldown;
 	t_array			*workspace;
 	t_array 		*coders;
 	t_array 		*dongle;
 	char 		 	*schdlr;
 	int 			n_coders;
+	int 			n_in_progress;
+	int			 	t_burnout;
+	int			 	t_compile;
+	int			 	t_refactor; 
+	int			 	n_compiles;
+	int			 	d_cooldown;
+	int			 	t_debug;
 } t_span;
 
 struct timespec	convert(struct timeval from, int b_out);
@@ -93,6 +93,7 @@ int				proccess(t_array *array);
 int				init_arrays(t_span *s);
 int				init_dongle(t_span *s);
 int				scheduler(t_span *s);
+int				interval(struct timeval s, struct timeval c);
 
 #endif
 

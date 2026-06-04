@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/03 12:42:09 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/04 16:25:26 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ int	cool_down_check(t_coder *data, int proccess_t)
 	s = (t_span *) data->s;
 	gettimeofday(&current_time, NULL);
 	gettimeofday(&start_time, NULL);
-	while (current_time.tv_usec - start_time.tv_usec < proccess_t * 1000)
+	while (interval(start_time, current_time) < proccess_t * 1000)
 	{
 		pthread_mutex_lock(&s->mutex_cod);
 		if (data->is_burnout == 1)
@@ -38,13 +38,20 @@ int		stages(t_array *array)
 
 	data = (t_coder *) array->data;
 	s = (t_span *) data->s;
+	printf("[%d ms] START_COMPILE\tC%d\n", s->time , data->id);
+	pthread_mutex_lock(&s->mutex_cod);
+	data->compiles += 1;
+	s->n_in_progress--;
+	pthread_mutex_unlock(&s->mutex_cod);
 	if (cool_down_check(data, s->t_compile) != 0)
 		return (-1);
 	pthread_mutex_lock(&s->mutex_cod);
-	data->compiles = 1;
+	data->compiles += 1;
 	pthread_mutex_unlock(&s->mutex_cod);
+	printf("[%d ms] START_DEBUG\tC%d\n", s->time , data->id);
 	if (cool_down_check(data, s->t_debug) != 0)
 		return (-1);
+	printf("[%d ms] START_REFACTOR\tC%d\n", s->time , data->id);
 	if (cool_down_check(data, s->t_refactor) != 0)
 		return (-1);
 	pthread_mutex_lock(&s->mutex_cod);
