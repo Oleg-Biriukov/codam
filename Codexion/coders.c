@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:27:12 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/05 17:04:14 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ int    check_burnout(t_span *s)
     a = s->coders;
 	pthread_cond_wait(&s->cond_cod, &s->mutex_cond);
 	pthread_mutex_unlock(&s->mutex_cond);
+	printf("check_burnout");
 	while(a)
     {
         data = (t_coder *) a->data;
@@ -98,10 +99,13 @@ int proccess(t_array *a)
 			return(-1);
 		if (data->conn[0] && data->conn[1])
 		{
-			stages(a);
+			// stages(a);
+			usleep(5000);
+			printf("[%d] C%d\n", s->time, data->id);
 			pthread_mutex_lock(&s->mutex_cod);
 			data->conn[0]->is_cooldown = 1;
 			data->conn[1]->is_cooldown = 1;
+			data->is_done = 1;
 			pthread_mutex_unlock(&s->mutex_cod);
 		}
 	}

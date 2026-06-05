@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:25:26 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/05 16:59:12 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	cool_down_check(t_coder *data, int proccess_t)
 	{
 		pthread_mutex_lock(&s->mutex_cod);
 		if (data->is_burnout == 1)
-			return (-1);
+			return (pthread_mutex_unlock(&s->mutex_cod), -1);
 		pthread_mutex_unlock(&s->mutex_cod);
 		gettimeofday(&current_time, NULL);
 	}
@@ -54,8 +54,8 @@ int		stages(t_array *array)
 	printf("[%d ms] START_REFACTOR\tC%d\n", s->time , data->id);
 	if (cool_down_check(data, s->t_refactor) != 0)
 		return (-1);
-	pthread_mutex_lock(&s->mutex_cod);
-	data->is_done = 1;
-	pthread_mutex_unlock(&s->mutex_cod);
+	// pthread_mutex_lock(&s->mutex_cod);
+	// data->is_done = 1;
+	// pthread_mutex_unlock(&s->mutex_cod);
 	return (0);
 }

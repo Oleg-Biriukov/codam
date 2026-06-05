@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/04 17:36:57 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/06/05 16:57:01 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,8 +38,8 @@ int start(t_span *s)
 
     if (pthread_create(&t[0], NULL, (void *) &check_burnout, s))
         return (-1);
-    if (pthread_create(&t[1], NULL, (void *) &cool_down_dongle, s))
-        return (-1);
+    // if (pthread_create(&t[1], NULL, (void *) &cool_down_dongle, s))
+    //     return (-1);
     if (pthread_create(&t[2], NULL, (void *) &scheduler, s))
         return (-1);
     a = s->coders;
@@ -69,3 +69,8 @@ int start(t_span *s)
         return (-1);
     return (0);
 }
+
+
+/*
+
+*/
