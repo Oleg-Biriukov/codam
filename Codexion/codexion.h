@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:28:28 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/11 15:23:59 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,7 @@ typedef struct t_coder
 	unsigned int	is_done;
 	unsigned int	is_burnout;
 	unsigned int	compiles;
+	struct timeval	req_t;
 	struct timeval	start;
 } t_coder;
 
@@ -53,12 +54,13 @@ typedef struct t_array
 
 typedef struct t_span
 {
-	pthread_mutex_t	mutex_cond;
-	pthread_mutex_t	mutex_cod;
+	// pthread_mutex_t	mutex_cond;
+	pthread_mutex_t	mut;
 	pthread_cond_t	cond_next;
 	pthread_cond_t	cond_cod;
 	unsigned int	time;
 	unsigned int	is_over;
+	unsigned int	is_ready;
 	unsigned int	is_failed;
 	t_array			*workspace;
 	t_array 		*coders;
@@ -83,6 +85,8 @@ void			*la_free(t_array *array);
 void			set_to_null(t_coder *data);
 void			la_sort(t_array *a, int (cond)(t_array *, t_array *));
 void			la_remove(t_array *a);
+void			coder(t_coder *data);
+void			dongle(t_dongle *data);
 int    			check_burnout(t_span *s);
 int				la_len(t_array *array);
 int 			fail(t_span *s);

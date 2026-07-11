@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/05 16:59:12 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/11 14:22:08 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,10 @@ int	cool_down_check(t_coder *data, int proccess_t)
 	gettimeofday(&start_time, NULL);
 	while (interval(start_time, current_time) < proccess_t * 1000)
 	{
-		pthread_mutex_lock(&s->mutex_cod);
+		pthread_mutex_lock(&s->mut);
 		if (data->is_burnout == 1)
-			return (pthread_mutex_unlock(&s->mutex_cod), -1);
-		pthread_mutex_unlock(&s->mutex_cod);
+			return (pthread_mutex_unlock(&s->mut), -1);
+		pthread_mutex_unlock(&s->mut);
 		gettimeofday(&current_time, NULL);
 	}
 	return (0);
@@ -39,23 +39,23 @@ int		stages(t_array *array)
 	data = (t_coder *) array->data;
 	s = (t_span *) data->s;
 	printf("[%d ms] START_COMPILE\tC%d\n", s->time , data->id);
-	pthread_mutex_lock(&s->mutex_cod);
+	pthread_mutex_lock(&s->mut);
 	data->compiles += 1;
 	s->n_in_progress--;
-	pthread_mutex_unlock(&s->mutex_cod);
+	pthread_mutex_unlock(&s->mut);
 	if (cool_down_check(data, s->t_compile) != 0)
 		return (-1);
-	pthread_mutex_lock(&s->mutex_cod);
+	pthread_mutex_lock(&s->mut);
 	data->compiles += 1;
-	pthread_mutex_unlock(&s->mutex_cod);
+	pthread_mutex_unlock(&s->mut);
 	printf("[%d ms] START_DEBUG\tC%d\n", s->time , data->id);
 	if (cool_down_check(data, s->t_debug) != 0)
 		return (-1);
 	printf("[%d ms] START_REFACTOR\tC%d\n", s->time , data->id);
 	if (cool_down_check(data, s->t_refactor) != 0)
 		return (-1);
-	// pthread_mutex_lock(&s->mutex_cod);
+	// pthread_mutex_lock(&s->mut);
 	// data->is_done = 1;
-	// pthread_mutex_unlock(&s->mutex_cod);
+	// pthread_mutex_unlock(&s->mut);
 	return (0);
 }

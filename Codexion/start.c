@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/05 16:57:01 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/11 15:29:17 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,9 @@
 
 int fail(t_span *s)
 {
-    pthread_mutex_lock(&s->mutex_cod);
+    pthread_mutex_lock(&s->mut);
     s->is_failed = 1;
-    return (pthread_mutex_unlock(&s->mutex_cod));
+    return (pthread_mutex_unlock(&s->mut));
 }
 
 void	set_to_null(t_coder *data)
@@ -32,45 +32,58 @@ void	set_to_null(t_coder *data)
 
 int start(t_span *s)
 {
-    int             compiles;
-    pthread_t       t[3];
+    int             counter;
     t_array         *a;
-
-    if (pthread_create(&t[0], NULL, (void *) &check_burnout, s))
-        return (-1);
-    // if (pthread_create(&t[1], NULL, (void *) &cool_down_dongle, s))
-    //     return (-1);
-    if (pthread_create(&t[2], NULL, (void *) &scheduler, s))
-        return (-1);
-    a = s->coders;
-    compiles = 0;
-    while (compiles != s->n_compiles * s->n_coders)
+    t_coder         *c_data;
+    t_dongle        *d_data;
+    
+    // creating new threads
+    a = s->workspace;
+    counter = 0;
+    while (counter != s->n_coders * 2)
     {
-        pthread_mutex_lock(&s->mutex_cod);
-        if (s->is_failed == 1)
-            return (pthread_mutex_unlock(&s->mutex_cod), -1);
-        pthread_mutex_unlock(&s->mutex_cod);
-        compiles = 0;
-        while (a)
+        counter++;
+        // if counter dividable to 2 then it is dongle
+        if (counter % 2 == 0)
         {
-            compiles += ((t_coder *) a->data)->compiles;
-            a = a->next;
+            d_data = (t_dongle *) a->data;
+            if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
+                return(fail(s));
         }
-        a = s->coders;
+        else
+        {
+            c_data = (t_coder *) a->data;
+            if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
+                return(fail(s));
+        }
+        
+        a = a->next;
     }
-    pthread_mutex_lock(&s->mutex_cod);
+    
+    // while (!s->is_over)
+    // {
+    
+    // awaiting for rest threads
+    a = s->workspace;
+    counter = 0;
+    while (counter != s->n_coders * 2)
+    {
+        counter++;
+        if (counter % 2 == 0)
+        {
+            d_data = (t_dongle *) a->data;
+            pthread_join(d_data->t, NULL);
+        }
+        else
+        {
+            c_data = (t_coder *) a->data;
+            pthread_join(c_data->t, NULL);
+        }
+        
+        a = a->next;
+    }
+    pthread_mutex_lock(&s->mut);
     s->is_over = 1;
-    pthread_mutex_unlock(&s->mutex_cod);
-    if (pthread_join(t[0], NULL) != 0)
-        return (-1);
-    if (pthread_join(t[1], NULL) != 0)
-        return (-1);
-    if (pthread_join(t[2], NULL) != 0)
-        return (-1);
+    pthread_mutex_unlock(&s->mut);
     return (0);
 }
-
-
-/*
-
-*/

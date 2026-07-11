@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/05 15:45:48 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/11 14:19:51 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,10 @@ static void	timer(t_span *s)
 		if (s->is_failed == 1)
 			return ;
 		gettimeofday(&c_time, NULL);
-		pthread_mutex_lock(&s->mutex_cod);
+		pthread_mutex_lock(&s->mut);
 		s->time = (c_time.tv_sec * 1000000L + c_time.tv_usec) - (s_time.tv_sec * 1000000L + s_time.tv_usec);
 		s->time /= 1000;
-		pthread_mutex_unlock(&s->mutex_cod);
+		pthread_mutex_unlock(&s->mut);
 	}
 }
 
@@ -36,8 +36,8 @@ int free_all(t_span *s)
 	t_array	*n_array;
 
 	len_workspace = s->n_coders * 2;
-	pthread_mutex_destroy(&s->mutex_cod);
-	pthread_mutex_destroy(&s->mutex_cond);
+	pthread_mutex_destroy(&s->mut);
+	// pthread_mutex_destroy(&s->mutex_cond);
 	pthread_cond_destroy(&s->cond_next);
 	pthread_cond_destroy(&s->cond_cod);
 	la_free(s->dongle);
@@ -89,8 +89,8 @@ int main()
 	}
 	pthread_cond_init(&s->cond_next, NULL);
 	pthread_cond_init(&s->cond_cod, NULL);
-	pthread_mutex_init(&s->mutex_cod, NULL);
-	pthread_mutex_init(&s->mutex_cond, NULL);
+	pthread_mutex_init(&s->mut, NULL);
+	// pthread_mutex_init(&s->mutex_cond, NULL);
 	s->n_coders = 2;
 	s->d_cooldown = 500;
 	s->n_compiles = 1;
