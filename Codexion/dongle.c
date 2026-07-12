@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/11 14:49:04 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/12 15:41:08 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,8 @@ void    dongle(t_dongle *data)
     t_span  *s;
 
     s = (t_span *) data->s;
-    printf("[%d ms] Dongle id %d\n", s->time, data->id);
+    // printf("[%d ms] Dongle id %d\n", s->time, data->id);
+    la_len(s->coders);
 }
 
 int init_dongle(t_span *s)

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/11 15:23:59 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/12 13:44:28 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,11 +36,11 @@ typedef struct t_coder
 	void			*s;
 	t_dongle		*conn[2];
 	pthread_t		t;
-	pthread_t 	 	th_burnout;
 	unsigned int 	id;
 	unsigned int	is_done;
 	unsigned int	is_burnout;
 	unsigned int	compiles;
+	pthread_cond_t	cond;
 	struct timeval	req_t;
 	struct timeval	start;
 } t_coder;
@@ -81,6 +81,7 @@ t_array			*la_start(t_array *array);
 t_array			*la_append(t_array *array, void *content);
 t_array			*la_init(void *content);
 t_array			*get_elem(t_array *stack, int num);
+t_array			*find_elem(t_array *haystack, t_array *needle);
 void			*la_free(t_array *array);
 void			set_to_null(t_coder *data);
 void			la_sort(t_array *a, int (cond)(t_array *, t_array *));

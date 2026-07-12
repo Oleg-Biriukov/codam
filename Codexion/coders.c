@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/11 15:26:15 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/12 16:34:34 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,21 @@ void	coder(t_coder *data)
 	t_span  *s;
 
     s = (t_span *) data->s;
-    printf("[%d ms] Coder id %d\n", s->time, data->id);
+	if (s->is_failed || s->is_over)
+		return;
+	pthread_mutex_lock(&s->mut);
+	while (!(data->conn[0] && data->conn[1]))
+		pthread_cond_wait(&data->cond, &s->mut);
+	pthread_mutex_unlock(&s->mut);
+	printf("[%d ms] Processing of %d coder\n", s->time, data->id);
+	sleep(3);
+	printf("[%d ms] Done for %d\n", s->time, data->id);
+	pthread_mutex_lock(&s->mut);
+	data->conn[0]->is_active = 1;
+	data->conn[1]->is_active = 1;
+	data->conn[0] = NULL;
+	data->conn[1] = NULL;
+	pthread_mutex_unlock(&s->mut);
 }
 
 int init_arrays(t_span *s)
@@ -32,6 +46,7 @@ int init_arrays(t_span *s)
 		if (!array || !data)
 			return (-1);
 		data->id = la_len(la_start(array));
+		pthread_cond_init(&data->cond, NULL);
 		gettimeofday(&data->start, NULL);
 		gettimeofday(&data->req_t, NULL);
 		data->s = (void *) s;

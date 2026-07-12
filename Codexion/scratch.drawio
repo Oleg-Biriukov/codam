@@ -1,0 +1,115 @@
+<mxfile host="65bd71144e">
+    <diagram id="Pejyf9wMxZ2UKxD8HCwP" name="Page-1">
+        <mxGraphModel dx="2356" dy="1796" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="13" value="sorting out the coders" style="swimlane;childLayout=stackLayout;resizeParent=1;resizeParentMax=0;horizontal=1;startSize=20;horizontalStack=0;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-610" y="40" width="220" height="210" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" value="coder 1" style="swimlane;startSize=20;horizontal=0;html=1;" vertex="1" parent="13">
+                    <mxGeometry y="20" width="220" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="coder2" style="swimlane;startSize=20;horizontal=0;html=1;" vertex="1" parent="13">
+                    <mxGeometry y="80" width="220" height="70" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="coder3" style="swimlane;startSize=20;horizontal=0;html=1;" vertex="1" parent="13">
+                    <mxGeometry y="150" width="220" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="22" value="scheduler" style="text;html=1;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;" vertex="1" parent="1">
+                    <mxGeometry x="-530" y="10" width="60" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="25" value="" style="endArrow=classic;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="26" target="14">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="-290" y="90" as="sourcePoint"/>
+                        <mxPoint x="-360" y="160" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="26" value="picking first one in list&lt;div&gt;and resort again&lt;/div&gt;" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+                    <mxGeometry x="-320" y="115" width="120" height="60" as="geometry"/>
+                </mxCell>
+                <mxCell id="29" value="" style="endArrow=none;dashed=1;html=1;exitX=1.012;exitY=0.052;exitDx=0;exitDy=0;exitPerimeter=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="13" target="32">
+                    <mxGeometry width="50" height="50" relative="1" as="geometry">
+                        <mxPoint x="-360" y="-50" as="sourcePoint"/>
+                        <mxPoint x="-270" y="-50" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="-310" y="51"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="30" value="by func" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="29">
+                    <mxGeometry x="-0.7983" y="1" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="32" value="func define by what we sort" style="swimlane;html=1;startSize=20;horizontal=0;childLayout=flowLayout;flowOrientation=west;resizable=0;interRankCellSpacing=50;containerType=tree;fontSize=12;" vertex="1" parent="1">
+                    <mxGeometry x="-540" y="-220" width="460" height="152" as="geometry"/>
+                </mxCell>
+                <mxCell id="33" value="we experssing&lt;br&gt;address of needed func" style="whiteSpace=wrap;html=1;" vertex="1" parent="32">
+                    <mxGeometry x="40" y="56.5" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="34" value="fifo&lt;br&gt;who first requests" style="whiteSpace=wrap;html=1;" vertex="1" parent="32">
+                    <mxGeometry x="190" y="20" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="35" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" parent="32" source="33" target="34">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="152" y="68.25"/>
+                            <mxPoint x="178" y="40"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="36" value="edf&lt;br&gt;who have the closest deadline" style="whiteSpace=wrap;html=1;" vertex="1" parent="32">
+                    <mxGeometry x="190" y="91.5" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="37" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" parent="32" source="33" target="36">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="152" y="84.75"/>
+                            <mxPoint x="178" y="111.5"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="38" value="sorted list" style="whiteSpace=wrap;html=1;" vertex="1" parent="32">
+                    <mxGeometry x="340" y="56.5" width="100" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="39" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" parent="32" source="34" target="38">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="302" y="40"/>
+                            <mxPoint x="328" y="69"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="40" value="" style="html=1;rounded=1;curved=0;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startSize=6;endSize=6;noEdgeStyle=1;orthogonal=1;" edge="1" parent="32" source="36" target="38">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="302" y="111.5"/>
+                            <mxPoint x="328" y="84"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="42" value="Coder" style="swimlane;startSize=20;horizontal=1;containerType=tree;" vertex="1" parent="1">
+                    <mxGeometry x="20" y="-15" width="400" height="320" as="geometry"/>
+                </mxCell>
+                <mxCell id="43" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startArrow=none;endArrow=none;rounded=0;curved=0;" edge="1" parent="42" source="44" target="45">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="44" value="awaiting signal from&lt;div&gt;scheduler&lt;/div&gt;" style="whiteSpace=wrap;html=1;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1" parent="42">
+                    <mxGeometry x="140" y="60" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="45" value="processing stages" style="whiteSpace=wrap;html=1;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1" parent="42">
+                    <mxGeometry x="140" y="140" width="120" height="40" as="geometry"/>
+                </mxCell>
+                <mxCell id="46" value="" style="edgeStyle=elbowEdgeStyle;elbow=vertical;sourcePerimeterSpacing=0;targetPerimeterSpacing=0;startArrow=none;endArrow=none;rounded=0;curved=0;" edge="1" target="47" source="45" parent="42">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="220" y="85" as="sourcePoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="47" value="processing stages" style="whiteSpace=wrap;html=1;treeFolding=1;treeMoving=1;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;startArrow&quot;:&quot;none&quot;,&quot;endArrow&quot;:&quot;none&quot;};" vertex="1" parent="42">
+                    <mxGeometry x="140" y="225" width="120" height="40" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

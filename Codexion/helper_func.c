@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/06/04 16:37:46 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/12 13:43:37 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,17 @@
 
 t_array	*get_elem(t_array *stack, int num)
 {
+	stack = la_start(stack);
 	while (num-- && stack)
 		stack = stack->next;
 	return (stack);
+}
+
+t_array	*find_elem(t_array *haystack, t_array *needle)
+{
+	while (needle->data != haystack->data && haystack)
+		haystack = haystack->next;
+	return (haystack);
 }
 
 int	interval(struct timeval s, struct timeval c)

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/11 15:29:17 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/12 15:18:26 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ int start(t_span *s)
     t_array         *a;
     t_coder         *c_data;
     t_dongle        *d_data;
+    pthread_t       t;
     
     // creating new threads
     a = s->workspace;
@@ -59,6 +60,8 @@ int start(t_span *s)
         
         a = a->next;
     }
+    if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
+        return (fail(s));
     
     // while (!s->is_over)
     // {
@@ -85,5 +88,6 @@ int start(t_span *s)
     pthread_mutex_lock(&s->mut);
     s->is_over = 1;
     pthread_mutex_unlock(&s->mut);
+    pthread_join(t, NULL);
     return (0);
 }
