@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/12 16:35:48 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/15 18:29:37 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,9 @@ int main()
 	pthread_cond_init(&s->cond_cod, NULL);
 	pthread_mutex_init(&s->mut, NULL);
 	// pthread_mutex_init(&s->mutex_cond, NULL);
-	s->n_coders = 3;
+	s->n_coders = 2;
 	s->d_cooldown = 500;
-	s->n_compiles = 1;
+	s->n_compiles = 2;
 	s->t_compile = 1000;
 	s->t_burnout = 10000;
 	s->t_refactor = 3000;

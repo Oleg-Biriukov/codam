@@ -68,7 +68,7 @@ void	*la_free(t_array *array)
 	return (NULL);
 }
 
-int	la_len(t_array *array)
+unsigned int	la_len(t_array *array)
 {
 	size_t	len;
 

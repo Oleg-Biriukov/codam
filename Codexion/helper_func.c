@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/12 13:43:37 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/15 17:52:17 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,9 @@ int	interval(struct timeval s, struct timeval c)
 
 void	la_sort(t_array *a, int (cond)(t_array *, t_array *))
 {
-	void	*tmp;
-	t_array *ar;
-	int     count;
+	unsigned int     count;
+	void			*tmp;
+	t_array 		*ar;
 
     ar = la_start(a);
     count = 0;
@@ -106,6 +106,22 @@ void	la_remove(t_array *a)
 //     pthread_mutex_unlock(&data->mutex);
 //     return (-1);
 // }
+
+int	wait_check(t_span *s, unsigned int how_many)
+{
+	struct timeval	current_time;
+	struct timeval	start_time;
+
+	gettimeofday(&current_time, NULL);
+	gettimeofday(&start_time, NULL);
+	while (current_time.tv_usec - start_time.tv_usec < how_many)
+	{
+		if (s->is_failed || s->is_over)
+			return (-1);
+		gettimeofday(&current_time, NULL);
+	}
+	return (0);
+}
 
 struct timespec	convert(struct timeval from, int b_out)
 {

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/12 15:18:26 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/15 18:27:57 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	set_to_null(t_coder *data)
 
 int start(t_span *s)
 {
-    int             counter;
+    unsigned int    counter;
     t_array         *a;
     t_coder         *c_data;
     t_dongle        *d_data;
@@ -63,8 +63,22 @@ int start(t_span *s)
     if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
         return (fail(s));
     
-    // while (!s->is_over)
-    // {
+    counter = 0;
+    while (s->n_compiles * s->n_coders > counter)
+    {
+        if (s->is_failed)
+            return (fail(s));
+        a = s->coders;
+        while (a != NULL)
+        {
+            c_data = (t_coder *) a->data;
+            counter += c_data->compiles;
+            a = a->next;
+        }
+    }
+    pthread_mutex_lock(&s->mut);
+    s->is_over = 1;
+    pthread_mutex_unlock(&s->mut);
     
     // awaiting for rest threads
     a = s->workspace;
@@ -85,9 +99,6 @@ int start(t_span *s)
         
         a = a->next;
     }
-    pthread_mutex_lock(&s->mut);
-    s->is_over = 1;
-    pthread_mutex_unlock(&s->mut);
     pthread_join(t, NULL);
     return (0);
 }

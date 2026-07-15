@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/12 15:41:08 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/15 17:19:32 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,8 +17,22 @@ void    dongle(t_dongle *data)
     t_span  *s;
 
     s = (t_span *) data->s;
-    // printf("[%d ms] Dongle id %d\n", s->time, data->id);
-    la_len(s->coders);
+    while (1)
+    {
+        pthread_mutex_lock(&s->mut);
+		while (data->is_cooldown == 0)
+			pthread_cond_wait(&data->cond, &s->mut);
+        printf("[%d] Waiting for cooldown for d%d\n", s->time, data->id);
+		pthread_mutex_unlock(&s->mut);
+        if (wait_check(s, s->d_cooldown) != 0)
+            return ;
+        pthread_mutex_lock(&s->mut);
+        data->is_cooldown = 0;
+        data->is_active = 1;
+        pthread_mutex_unlock(&s->mut);
+    }
+    usleep(10);
+    // la_len(s->coders);
 }
 
 int init_dongle(t_span *s)
@@ -34,6 +48,7 @@ int init_dongle(t_span *s)
         if (!data || !array)
             return (-1);
         gettimeofday(&data->start, NULL);
+        pthread_cond_init(&data->cond, NULL);
         data->id = la_len(la_start(array));
         data->s = (void *) s;
         data->is_active = 1;

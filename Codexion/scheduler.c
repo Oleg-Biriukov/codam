@@ -6,11 +6,23 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/12 16:09:40 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/15 17:52:45 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
+
+void	print_l(t_array *a)
+{
+	t_coder *data;
+
+	a = la_start(a);
+	while(a != NULL){
+		data = (t_coder *) a->data;
+		printf("%d", data->id);
+		a = a->next;
+	}
+}
 
 static int	fifo(t_array *a1, t_array *a2)
 {
@@ -39,11 +51,11 @@ static int	edf(t_array *a1, t_array *a2)
 
 static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 {
-	t_dongle	*ldata;
-	t_dongle	*rdata;
-	t_array		*a;
-	t_coder		*cdata;
-	int			i;
+	unsigned int	i;
+	t_dongle		*ldata;
+	t_dongle		*rdata;
+	t_array			*a;
+	t_coder			*cdata;
 
 	printf("[%d ms] Awaiting requests for dongles\n", s->time);
 	while (1)
@@ -62,7 +74,7 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 			ldata = (t_dongle *) (a->next)->data;
 			
 			pthread_mutex_lock(&s->mut);
-			if (rdata->is_active && ldata->is_active)
+			if (rdata->is_active && ldata->is_active && cdata->is_done == 0)
 			{
 				cdata->conn[0] = rdata;
 				cdata->conn[1] = ldata;
@@ -71,6 +83,7 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 				pthread_cond_broadcast(&cdata->cond);
 			}
 			pthread_mutex_unlock(&s->mut);
+			usleep(30);
 		}
 		
 	}

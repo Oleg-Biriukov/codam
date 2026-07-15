@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/12 13:44:28 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/15 17:51:33 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ typedef struct t_dongle
 	unsigned int	id;
 	unsigned int	is_cooldown;
 	void			*s;
+	pthread_cond_t	cond;
 	struct timeval	start;
 	pthread_t		t;
 	int				is_active;
@@ -62,20 +63,21 @@ typedef struct t_span
 	unsigned int	is_over;
 	unsigned int	is_ready;
 	unsigned int	is_failed;
+	unsigned int	n_compiles;
+	unsigned int 	n_coders;
+	unsigned int 	n_in_progress;
+	unsigned int	 	t_burnout;
+	unsigned int	 	t_compile;
+	unsigned int	 	t_refactor; 
+	unsigned int	 	d_cooldown;
+	unsigned int	 	t_debug;
 	t_array			*workspace;
 	t_array 		*coders;
 	t_array 		*dongle;
 	char 		 	*schdlr;
-	int 			n_coders;
-	int 			n_in_progress;
-	int			 	t_burnout;
-	int			 	t_compile;
-	int			 	t_refactor; 
-	int			 	n_compiles;
-	int			 	d_cooldown;
-	int			 	t_debug;
 } t_span;
 
+unsigned int	la_len(t_array *array);
 struct timespec	convert(struct timeval from, int b_out);
 t_array			*la_start(t_array *array);
 t_array			*la_append(t_array *array, void *content);
@@ -89,7 +91,6 @@ void			la_remove(t_array *a);
 void			coder(t_coder *data);
 void			dongle(t_dongle *data);
 int    			check_burnout(t_span *s);
-int				la_len(t_array *array);
 int 			fail(t_span *s);
 int    			cool_down_dongle(t_span *s);
 int				start(t_span *s);
@@ -98,7 +99,11 @@ int				proccess(t_array *array);
 int				init_arrays(t_span *s);
 int				init_dongle(t_span *s);
 int				scheduler(t_span *s);
+int				wait_check(t_span *s, unsigned int how_many);
 int				interval(struct timeval s, struct timeval c);
+
+
+void print_l(t_array *a);
 
 #endif
 
