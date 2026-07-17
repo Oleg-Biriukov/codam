@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/15 18:27:57 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/17 14:16:43 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,18 +63,19 @@ int start(t_span *s)
     if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
         return (fail(s));
     
-    counter = 0;
-    while (s->n_compiles * s->n_coders > counter)
+    // counter = 0;
+    // a = s->workspace;
+    while (la_len(s->coders) != 0)
     {
         if (s->is_failed)
             return (fail(s));
-        a = s->coders;
-        while (a != NULL)
-        {
-            c_data = (t_coder *) a->data;
-            counter += c_data->compiles;
-            a = a->next;
-        }
+        // c_data = (t_coder *) a->data;
+        // counter = 0;
+        // if (c_data->compiles >= s->n_compiles)
+        //     counter += s->n_compiles;
+        // else
+        //     counter += c_data->compiles;
+        // a = a->next->next;
     }
     pthread_mutex_lock(&s->mut);
     s->is_over = 1;

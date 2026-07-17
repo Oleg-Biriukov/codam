@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/15 18:29:37 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/17 16:46:29 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -103,7 +103,6 @@ int main()
 	s->n_in_progress = 0;
 	s->schdlr = "fifo";
 	s->workspace = NULL;
-
 	if (init_arrays(s) != 0)
 		return (printf("Error"), free_all(s));
 	if (init_dongle(s) != 0)

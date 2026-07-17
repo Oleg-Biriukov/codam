@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/15 17:52:17 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/17 16:59:19 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,11 +111,14 @@ int	wait_check(t_span *s, unsigned int how_many)
 {
 	struct timeval	current_time;
 	struct timeval	start_time;
+	unsigned int	c_time;
 
 	gettimeofday(&current_time, NULL);
 	gettimeofday(&start_time, NULL);
-	while (current_time.tv_usec - start_time.tv_usec < how_many)
+	c_time = (current_time.tv_sec * 1000000L + current_time.tv_usec) - (start_time.tv_sec * 1000000L + start_time.tv_usec);
+	while (c_time < how_many * 1000)
 	{
+		c_time = (current_time.tv_sec * 1000000L + current_time.tv_usec) - (start_time.tv_sec * 1000000L + start_time.tv_usec);
 		if (s->is_failed || s->is_over)
 			return (-1);
 		gettimeofday(&current_time, NULL);

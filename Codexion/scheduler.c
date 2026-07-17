@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/15 17:52:45 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/17 16:08:32 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ static int	fifo(t_array *a1, t_array *a2)
 
 	d1_t = ((t_coder *) a1->data)->req_t;
 	d2_t = ((t_coder *) a2->data)->req_t;
+// deciding who made first request for dongle and who made less count of compilations
 	if (d1_t.tv_sec * 1000000L + d1_t.tv_usec < d2_t.tv_sec * 1000000L + d2_t.tv_usec)
 		return (1);
 	return (-1);
@@ -66,15 +67,28 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 		pthread_mutex_lock(&s->mut);
 		la_sort(s->coders, _by);
 		pthread_mutex_unlock(&s->mut);
-		while (i < s->n_coders)
+		while (i < la_len(s->coders))
 		{	
 			a = find_elem(s->workspace, get_elem(s->coders, i++));
 			cdata = (t_coder *) a->data;
 			rdata = (t_dongle *) (a->prev)->data;
 			ldata = (t_dongle *) (a->next)->data;
-			
+
 			pthread_mutex_lock(&s->mut);
-			if (rdata->is_active && ldata->is_active && cdata->is_done == 0)
+			if (cdata->is_done == 1)
+			{
+				pthread_join(cdata->t, NULL);
+				a = get_elem(s->coders, i - 1);
+				if (a->next)
+					s->coders = a->next;
+				else if (a->prev)
+					s->coders = a->prev;
+				else
+					s->coders = NULL;
+				la_remove(a);
+				
+			}
+			else if (rdata->is_active == 1 && ldata->is_active == 1)
 			{
 				cdata->conn[0] = rdata;
 				cdata->conn[1] = ldata;
