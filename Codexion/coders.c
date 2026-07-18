@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/17 14:12:26 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/18 16:57:58 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,16 +19,19 @@ void	coder(t_coder *data)
     s = (t_span *) data->s;
 	while(data->compiles != s->n_compiles)
 	{
-		if (s->is_failed || s->is_over)
-			return;
 		pthread_mutex_lock(&s->mut);
 		while (!(data->conn[0] && data->conn[1]))
 			pthread_cond_wait(&data->cond, &s->mut);
-		pthread_mutex_unlock(&s->mut);
 		printf("[%d ms] Processing of %d coder\n", s->time, data->id);
-		sleep(3);
-		printf("[%d ms] Done for %d\n", s->time, data->id);
+		pthread_mutex_unlock(&s->mut);
+		usleep(500);
 		pthread_mutex_lock(&s->mut);
+		printf("[%d ms] Done for %d\n", s->time, data->id);
+		if (s->is_failed || s->is_over)
+		{
+			pthread_mutex_unlock(&s->mut);
+			return;
+		}
 		data->conn[0]->is_cooldown = 1;
 		data->conn[1]->is_cooldown = 1;
 		pthread_cond_broadcast(&data->conn[0]->cond);
@@ -37,6 +40,7 @@ void	coder(t_coder *data)
 		data->conn[1] = NULL;
 		data->compiles++;
 		pthread_mutex_unlock(&s->mut);
+		usleep(30);
 	}
 	pthread_mutex_lock(&s->mut);
 	data->is_done = 1;

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/17 16:59:19 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/18 14:55:38 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,9 +119,12 @@ int	wait_check(t_span *s, unsigned int how_many)
 	while (c_time < how_many * 1000)
 	{
 		c_time = (current_time.tv_sec * 1000000L + current_time.tv_usec) - (start_time.tv_sec * 1000000L + start_time.tv_usec);
+		pthread_mutex_lock(&s->mut);
 		if (s->is_failed || s->is_over)
-			return (-1);
+			return (pthread_mutex_unlock(&s->mut), -1);
+		pthread_mutex_unlock(&s->mut);
 		gettimeofday(&current_time, NULL);
+		usleep(30);
 	}
 	return (0);
 }

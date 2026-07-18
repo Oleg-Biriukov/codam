@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/17 16:08:32 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/18 16:56:16 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	print_l(t_array *a)
 	a = la_start(a);
 	while(a != NULL){
 		data = (t_coder *) a->data;
-		printf("%d", data->id);
+		printf("%d\n", data->id);
 		a = a->next;
 	}
 }
@@ -53,42 +53,35 @@ static int	edf(t_array *a1, t_array *a2)
 static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 {
 	unsigned int	i;
+	unsigned int	len_c;
 	t_dongle		*ldata;
 	t_dongle		*rdata;
 	t_array			*a;
 	t_coder			*cdata;
 
+	pthread_mutex_lock(&s->mut);
 	printf("[%d ms] Awaiting requests for dongles\n", s->time);
+	pthread_mutex_unlock(&s->mut);
 	while (1)
 	{
 		i = 0;
-		if (s->is_over || s->is_failed)
-			return;
 		pthread_mutex_lock(&s->mut);
 		la_sort(s->coders, _by);
+		len_c = la_len(s->coders);
 		pthread_mutex_unlock(&s->mut);
-		while (i < la_len(s->coders))
-		{	
+		while (i < len_c)
+		{
+			pthread_mutex_lock(&s->mut);
 			a = find_elem(s->workspace, get_elem(s->coders, i++));
 			cdata = (t_coder *) a->data;
 			rdata = (t_dongle *) (a->prev)->data;
 			ldata = (t_dongle *) (a->next)->data;
-
-			pthread_mutex_lock(&s->mut);
-			if (cdata->is_done == 1)
+			if (s->is_over || s->is_failed)
 			{
-				pthread_join(cdata->t, NULL);
-				a = get_elem(s->coders, i - 1);
-				if (a->next)
-					s->coders = a->next;
-				else if (a->prev)
-					s->coders = a->prev;
-				else
-					s->coders = NULL;
-				la_remove(a);
-				
+				pthread_mutex_unlock(&s->mut);
+				return ;
 			}
-			else if (rdata->is_active == 1 && ldata->is_active == 1)
+			if (rdata->is_active == 1 && ldata->is_active == 1 && cdata->is_done == 0)
 			{
 				cdata->conn[0] = rdata;
 				cdata->conn[1] = ldata;

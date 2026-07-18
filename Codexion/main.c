@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/17 16:46:29 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/18 16:42:34 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,15 +18,20 @@ static void	timer(t_span *s)
 	struct timeval	s_time;
 
 	gettimeofday(&s_time, NULL);
-	while (s->is_over != 1)
+	while (1)
 	{
-		if (s->is_failed == 1)
-			return ;
+		
 		gettimeofday(&c_time, NULL);
 		pthread_mutex_lock(&s->mut);
+		if (s->is_failed || s->is_over)
+		{
+			pthread_mutex_unlock(&s->mut);
+			return ;
+		}
 		s->time = (c_time.tv_sec * 1000000L + c_time.tv_usec) - (s_time.tv_sec * 1000000L + s_time.tv_usec);
 		s->time /= 1000;
 		pthread_mutex_unlock(&s->mut);
+		usleep(30);
 	}
 }
 

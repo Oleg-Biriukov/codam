@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/17 14:16:43 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/18 15:25:59 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,6 @@
 
 int fail(t_span *s)
 {
-    pthread_mutex_lock(&s->mut);
     s->is_failed = 1;
     return (pthread_mutex_unlock(&s->mut));
 }
@@ -48,34 +47,46 @@ int start(t_span *s)
         if (counter % 2 == 0)
         {
             d_data = (t_dongle *) a->data;
+            pthread_mutex_lock(&s->mut);
             if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
                 return(fail(s));
+            pthread_mutex_unlock(&s->mut);
         }
         else
         {
             c_data = (t_coder *) a->data;
+            pthread_mutex_lock(&s->mut);
             if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
                 return(fail(s));
+            pthread_mutex_unlock(&s->mut);
         }
         
         a = a->next;
     }
+    pthread_mutex_lock(&s->mut);
     if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
         return (fail(s));
+    pthread_mutex_unlock(&s->mut);
     
-    // counter = 0;
-    // a = s->workspace;
-    while (la_len(s->coders) != 0)
+    counter = 0;
+    a = s->workspace;
+    while (1)
     {
+        if (counter == s->n_coders * s->n_compiles)
+            break ;
+        if (a == s->workspace)
+            counter = 0;
+        pthread_mutex_lock(&s->mut);
         if (s->is_failed)
             return (fail(s));
-        // c_data = (t_coder *) a->data;
-        // counter = 0;
-        // if (c_data->compiles >= s->n_compiles)
-        //     counter += s->n_compiles;
-        // else
-        //     counter += c_data->compiles;
-        // a = a->next->next;
+        pthread_mutex_unlock(&s->mut);
+        c_data = (t_coder *) a->data;
+        if (c_data->compiles >= s->n_compiles)
+            counter += s->n_compiles;
+        else
+            counter += c_data->compiles;
+        a = a->next->next;
+        usleep(30);
     }
     pthread_mutex_lock(&s->mut);
     s->is_over = 1;
@@ -90,6 +101,9 @@ int start(t_span *s)
         if (counter % 2 == 0)
         {
             d_data = (t_dongle *) a->data;
+            pthread_mutex_lock(&s->mut);
+            pthread_cond_broadcast(&d_data->cond);
+            pthread_mutex_unlock(&s->mut);
             pthread_join(d_data->t, NULL);
         }
         else

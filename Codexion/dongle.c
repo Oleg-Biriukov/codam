@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/17 16:42:33 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/18 16:58:51 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,16 @@ void    dongle(t_dongle *data)
         pthread_mutex_lock(&s->mut);
 		while (data->is_cooldown == 0)
 			pthread_cond_wait(&data->cond, &s->mut);
-        printf("[%d] Waiting for cooldown for d%d\n", s->time, data->id);
+        printf("[%d ms] Waiting for cooldown for d%d\n", s->time, data->id);
 		pthread_mutex_unlock(&s->mut);
         if (wait_check(s, s->d_cooldown) != 0)
             return ;
-        printf("[%d] Cooldown finished for d%d\n", s->time, data->id);
         pthread_mutex_lock(&s->mut);
+        printf("[%d ms] Cooldown finished for d%d\n", s->time, data->id);
         data->is_cooldown = 0;
         data->is_active = 1;
         pthread_mutex_unlock(&s->mut);
+        usleep(30);
     }
     usleep(10);
     // la_len(s->coders);
