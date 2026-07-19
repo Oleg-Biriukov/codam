@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/18 16:57:58 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/19 15:08:31 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,14 +14,30 @@
 
 void	coder(t_coder *data)
 {
-	t_span  *s;
+	t_span  		*s;
+	unsigned int	n_comp;
+	struct timespec wait;
+    struct timeval  now;
 
-    s = (t_span *) data->s;
-	while(data->compiles != s->n_compiles)
+	s = (t_span *) data->s;
+    pthread_mutex_lock(&s->mut);
+	n_comp = s->n_compiles;
+	pthread_mutex_unlock(&s->mut);
+	while(data->compiles != n_comp)
 	{
 		pthread_mutex_lock(&s->mut);
 		while (!(data->conn[0] && data->conn[1]))
-			pthread_cond_wait(&data->cond, &s->mut);
+		{
+			gettimeofday(&now, NULL);
+            wait = convert(now, 300);
+			if (pthread_cond_timedwait(&data->cond, &s->mut, &wait) == ETIMEDOUT)
+            {
+                if (s->is_failed || s->is_over)
+                    return ((void) pthread_mutex_unlock(&s->mut));
+                continue ;
+            }
+           break ;
+		}
 		printf("[%d ms] Processing of %d coder\n", s->time, data->id);
 		pthread_mutex_unlock(&s->mut);
 		usleep(500);

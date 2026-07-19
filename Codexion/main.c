@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/18 16:42:34 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/19 15:23:35 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -96,9 +96,9 @@ int main()
 	pthread_cond_init(&s->cond_cod, NULL);
 	pthread_mutex_init(&s->mut, NULL);
 	// pthread_mutex_init(&s->mutex_cond, NULL);
-	s->n_coders = 2;
+	s->n_coders = 100;
 	s->d_cooldown = 500;
-	s->n_compiles = 2;
+	s->n_compiles = 100;
 	s->t_compile = 1000;
 	s->t_burnout = 10000;
 	s->t_refactor = 3000;
@@ -120,6 +120,12 @@ int main()
 		return(printf("Error"), free_all(s));
 	if (pthread_join(t, NULL) != 0)
 		return (printf("Error"), free_all(s));
+	
+	t_array *a = s->coders;
+	for (int i = 0; a != NULL; i++){
+		printf("%dc have %d compilations\n", ((t_coder *) a->data)->id,((t_coder *) a->data)->compiles);
+		a = a->next;
+	}
 	free_all(s);
 	return (0);
 	}

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/18 15:25:59 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/19 14:15:25 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,14 +32,20 @@ void	set_to_null(t_coder *data)
 int start(t_span *s)
 {
     unsigned int    counter;
+    unsigned int    total_c;
+    unsigned int    n_coders;
     t_array         *a;
+    t_array         *workspace;
     t_coder         *c_data;
     t_dongle        *d_data;
     pthread_t       t;
     
     // creating new threads
-    a = s->workspace;
+    pthread_mutex_lock(&s->mut);
+    workspace = s->workspace;
+    pthread_mutex_unlock(&s->mut);
     counter = 0;
+    a = workspace;
     while (counter != s->n_coders * 2)
     {
         counter++;
@@ -66,25 +72,27 @@ int start(t_span *s)
     pthread_mutex_lock(&s->mut);
     if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
         return (fail(s));
+    total_c = s->n_coders * s->n_compiles;
+    n_coders = s->n_coders;
     pthread_mutex_unlock(&s->mut);
     
     counter = 0;
-    a = s->workspace;
+    a = workspace;
     while (1)
     {
-        if (counter == s->n_coders * s->n_compiles)
+        if (counter == total_c)
             break ;
         if (a == s->workspace)
             counter = 0;
         pthread_mutex_lock(&s->mut);
         if (s->is_failed)
             return (fail(s));
-        pthread_mutex_unlock(&s->mut);
         c_data = (t_coder *) a->data;
         if (c_data->compiles >= s->n_compiles)
             counter += s->n_compiles;
         else
             counter += c_data->compiles;
+        pthread_mutex_unlock(&s->mut);
         a = a->next->next;
         usleep(30);
     }
@@ -93,17 +101,14 @@ int start(t_span *s)
     pthread_mutex_unlock(&s->mut);
     
     // awaiting for rest threads
-    a = s->workspace;
+    a = workspace;
     counter = 0;
-    while (counter != s->n_coders * 2)
+    while (counter != n_coders * 2)
     {
         counter++;
         if (counter % 2 == 0)
         {
             d_data = (t_dongle *) a->data;
-            pthread_mutex_lock(&s->mut);
-            pthread_cond_broadcast(&d_data->cond);
-            pthread_mutex_unlock(&s->mut);
             pthread_join(d_data->t, NULL);
         }
         else
