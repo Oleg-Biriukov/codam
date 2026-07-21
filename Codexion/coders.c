@@ -6,11 +6,30 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/19 15:08:31 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/21 19:29:03 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
+
+static void	detect_b(t_coder *data)
+{
+	t_span	*s;
+
+	s = (t_span *) data->s;
+	while (1)
+	{
+		pthread_mutex_lock(&s->mut);
+		if (s->is_over || s->is_over)
+			return ((void) pthread_mutex_unlock(&s->mut));
+		pthread_mutex_unlock(&s->mut);
+		pthread_mutex_lock(&s->mut);
+		gettimeofday(&data->b_interv_e, NULL);
+		if ((data->b_interv_e.tv_sec * 1000000L + data->b_interv_e.tv_usec) - (data->b_interv_s.tv_sec * 1000000L + data->b_interv_s.tv_usec) > s->t_burnout)
+			return ((void) pthread_mutex_unlock(&s->mut));
+		pthread_mutex_unlock(&s->mut);
+	}
+}
 
 void	coder(t_coder *data)
 {
@@ -20,6 +39,7 @@ void	coder(t_coder *data)
     struct timeval  now;
 
 	s = (t_span *) data->s;
+	if (pthread_create(&data->t_burnout, NULL, (void *) &detect_b, data))
     pthread_mutex_lock(&s->mut);
 	n_comp = s->n_compiles;
 	pthread_mutex_unlock(&s->mut);
@@ -38,23 +58,14 @@ void	coder(t_coder *data)
             }
            break ;
 		}
-		printf("[%d ms] Processing of %d coder\n", s->time, data->id);
+		printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time, data->id, data->conn[1]->id);
+		printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time, data->id, data->conn[0]->id);
 		pthread_mutex_unlock(&s->mut);
-		usleep(500);
+		if (stages(data) != 0)
+			break ;
 		pthread_mutex_lock(&s->mut);
-		printf("[%d ms] Done for %d\n", s->time, data->id);
 		if (s->is_failed || s->is_over)
-		{
-			pthread_mutex_unlock(&s->mut);
-			return;
-		}
-		data->conn[0]->is_cooldown = 1;
-		data->conn[1]->is_cooldown = 1;
-		pthread_cond_broadcast(&data->conn[0]->cond);
-		pthread_cond_broadcast(&data->conn[1]->cond);
-		data->conn[0] = NULL;
-		data->conn[1] = NULL;
-		data->compiles++;
+			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
 		usleep(30);
 	}
@@ -80,7 +91,7 @@ int init_arrays(t_span *s)
 		gettimeofday(&data->req_t, NULL);
 		data->s = (void *) s;
 		data->is_done = 0;
-		data->is_burnout = 0;
+		data->is_active = 1;
 		data->compiles = 0;
 		data->conn[0] = NULL;
 		data->conn[1] = NULL;

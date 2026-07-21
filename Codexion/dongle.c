@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/19 15:08:21 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/21 12:34:38 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,19 +34,16 @@ void    dongle(t_dongle *data)
             }
            break ;
         }   
-        printf("[%d ms] Waiting for cooldown for d%d\n", s->time, data->id);
 		pthread_mutex_unlock(&s->mut);
         if (wait_check(s, s->d_cooldown) != 0)
             return ;
         pthread_mutex_lock(&s->mut);
-        printf("[%d ms] Cooldown finished for d%d\n", s->time, data->id);
         data->is_cooldown = 0;
         data->is_active = 1;
         pthread_mutex_unlock(&s->mut);
         usleep(30);
     }
     usleep(10);
-    // la_len(s->coders);
 }
 
 int init_dongle(t_span *s)

@@ -6,56 +6,55 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/11 14:22:08 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/21 19:18:45 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-int	cool_down_check(t_coder *data, int proccess_t)
+
+int		stages(t_coder *data)
 {
-	struct timeval	current_time;
-	struct timeval	start_time;
 	t_span			*s;
 
 	s = (t_span *) data->s;
-	gettimeofday(&current_time, NULL);
-	gettimeofday(&start_time, NULL);
-	while (interval(start_time, current_time) < proccess_t * 1000)
-	{
-		pthread_mutex_lock(&s->mut);
-		if (data->is_burnout == 1)
-			return (pthread_mutex_unlock(&s->mut), -1);
-		pthread_mutex_unlock(&s->mut);
-		gettimeofday(&current_time, NULL);
-	}
-	return (0);
-}
 
-int		stages(t_array *array)
-{
-	t_coder			*data;
-	t_span			*s;
-
-	data = (t_coder *) array->data;
-	s = (t_span *) data->s;
+	pthread_mutex_lock(&s->mut);
+	data->is_active = 0;
 	printf("[%d ms] START_COMPILE\tC%d\n", s->time , data->id);
-	pthread_mutex_lock(&s->mut);
-	data->compiles += 1;
-	s->n_in_progress--;
+	gettimeofday(&data->b_interv_s, NULL);
 	pthread_mutex_unlock(&s->mut);
-	if (cool_down_check(data, s->t_compile) != 0)
+
+	if (wait_check(s, s->t_compile) != 0)
 		return (-1);
+
 	pthread_mutex_lock(&s->mut);
-	data->compiles += 1;
+	printf("[%d ms] RELEASE_DONGLE C%d D%d\n", s->time, data->id, data->conn[1]->id);
+	printf("[%d ms] RELEASE_DONGLE C%d D%d\n", s->time, data->id, data->conn[0]->id);
+	data->conn[0]->is_cooldown = 1;
+	data->conn[1]->is_cooldown = 1;
+	pthread_cond_broadcast(&data->conn[0]->cond);
+	pthread_cond_broadcast(&data->conn[1]->cond);
+	data->conn[0] = NULL;
+	data->conn[1] = NULL;
+	data->compiles++;
 	pthread_mutex_unlock(&s->mut);
+
+	pthread_mutex_lock(&s->mut);
 	printf("[%d ms] START_DEBUG\tC%d\n", s->time , data->id);
-	if (cool_down_check(data, s->t_debug) != 0)
+	pthread_mutex_unlock(&s->mut);
+
+	if (wait_check(s, s->t_debug) != 0)
 		return (-1);
+	
+	pthread_mutex_lock(&s->mut);
 	printf("[%d ms] START_REFACTOR\tC%d\n", s->time , data->id);
-	if (cool_down_check(data, s->t_refactor) != 0)
+	pthread_mutex_unlock(&s->mut);
+
+	if (wait_check(s, s->t_refactor) != 0)
 		return (-1);
-	// pthread_mutex_lock(&s->mut);
-	// data->is_done = 1;
-	// pthread_mutex_unlock(&s->mut);
+	
+	pthread_mutex_lock(&s->mut);
+	data->is_active = 1;
+	pthread_mutex_unlock(&s->mut);
 	return (0);
 }

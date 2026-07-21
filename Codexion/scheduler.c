@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/18 16:56:16 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/21 12:40:21 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,9 +59,6 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 	t_array			*a;
 	t_coder			*cdata;
 
-	pthread_mutex_lock(&s->mut);
-	printf("[%d ms] Awaiting requests for dongles\n", s->time);
-	pthread_mutex_unlock(&s->mut);
 	while (1)
 	{
 		i = 0;
@@ -77,11 +74,11 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 			rdata = (t_dongle *) (a->prev)->data;
 			ldata = (t_dongle *) (a->next)->data;
 			if (s->is_over || s->is_failed)
-			{
-				pthread_mutex_unlock(&s->mut);
-				return ;
-			}
-			if (rdata->is_active == 1 && ldata->is_active == 1 && cdata->is_done == 0)
+				return ((void) pthread_mutex_unlock(&s->mut));
+			if (rdata->is_active == 1 &&
+				ldata->is_active == 1 &&
+				cdata->is_done == 0 &&
+				cdata->is_active == 1)
 			{
 				cdata->conn[0] = rdata;
 				cdata->conn[1] = ldata;
@@ -92,7 +89,6 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 			pthread_mutex_unlock(&s->mut);
 			usleep(30);
 		}
-		
 	}
 }
 

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/17 13:45:16 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/21 19:17:55 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,12 +37,15 @@ typedef struct t_coder
 	void			*s;
 	t_dongle		*conn[2];
 	pthread_t		t;
+	pthread_t		t_burnout;
 	unsigned int 	id;
 	unsigned int	is_done;
-	unsigned int	is_burnout;
+	unsigned int	is_active;
 	unsigned int	compiles;
 	pthread_cond_t	cond;
 	struct timeval	req_t;
+	struct timeval	b_interv_s;
+	struct timeval	b_interv_e;
 	struct timeval	start;
 } t_coder;
 
@@ -94,7 +97,7 @@ int    			check_burnout(t_span *s);
 int 			fail(t_span *s);
 int    			cool_down_dongle(t_span *s);
 int				start(t_span *s);
-int				stages(t_array *array);
+int				stages(t_coder *data);
 int				proccess(t_array *array);
 int				init_arrays(t_span *s);
 int				init_dongle(t_span *s);
