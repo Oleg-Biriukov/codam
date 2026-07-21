@@ -64,6 +64,8 @@ int start(t_span *s)
             pthread_mutex_lock(&s->mut);
             if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
                 return(fail(s));
+            if (pthread_create(&c_data->t_burnout, NULL, (void *) detect_b, c_data) != 0)
+                return(fail(s));
             pthread_mutex_unlock(&s->mut);
         }
         
@@ -115,6 +117,7 @@ int start(t_span *s)
         {
             c_data = (t_coder *) a->data;
             pthread_join(c_data->t, NULL);
+            pthread_join(c_data->t_burnout, NULL);
         }
         
         a = a->next;

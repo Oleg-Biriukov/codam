@@ -12,7 +12,7 @@
 
 #include "codexion.h"
 
-static void	detect_b(t_coder *data)
+void	detect_b(t_coder *data)
 {
 	t_span	*s;
 
@@ -23,12 +23,16 @@ static void	detect_b(t_coder *data)
 		if (s->is_over || s->is_over)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
+
 		pthread_mutex_lock(&s->mut);
 		gettimeofday(&data->b_interv_e, NULL);
 		if ((data->b_interv_e.tv_sec * 1000000L + data->b_interv_e.tv_usec) - (data->b_interv_s.tv_sec * 1000000L + data->b_interv_s.tv_usec) > s->t_burnout)
-			return ((void) pthread_mutex_unlock(&s->mut));
+			break ;
 		pthread_mutex_unlock(&s->mut);
 	}
+	pthread_mutex_lock(&s->mut);
+	printf("[%d ms] C%d BURNOUT\n", s->time, data->id);
+	pthread_mutex_unlock(&s->mut);
 }
 
 void	coder(t_coder *data)
@@ -39,7 +43,7 @@ void	coder(t_coder *data)
     struct timeval  now;
 
 	s = (t_span *) data->s;
-	if (pthread_create(&data->t_burnout, NULL, (void *) &detect_b, data))
+
     pthread_mutex_lock(&s->mut);
 	n_comp = s->n_compiles;
 	pthread_mutex_unlock(&s->mut);
@@ -72,6 +76,7 @@ void	coder(t_coder *data)
 	pthread_mutex_lock(&s->mut);
 	data->is_done = 1;
 	pthread_mutex_unlock(&s->mut);
+
 }
 
 int init_arrays(t_span *s)
