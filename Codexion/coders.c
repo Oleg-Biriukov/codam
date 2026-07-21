@@ -26,11 +26,15 @@ void	detect_b(t_coder *data)
 
 		pthread_mutex_lock(&s->mut);
 		gettimeofday(&data->b_interv_e, NULL);
-		if ((data->b_interv_e.tv_sec * 1000000L + data->b_interv_e.tv_usec) - (data->b_interv_s.tv_sec * 1000000L + data->b_interv_s.tv_usec) > s->t_burnout)
+		if ((data->b_interv_e.tv_sec * 1000000L + data->b_interv_e.tv_usec) - (data->b_interv_s.tv_sec * 1000000L + data->b_interv_s.tv_usec) > s->t_burnout * 1000)
+		{
+			pthread_mutex_unlock(&s->mut);
 			break ;
+		}
 		pthread_mutex_unlock(&s->mut);
 	}
 	pthread_mutex_lock(&s->mut);
+	s->is_failed = 1;
 	printf("[%d ms] C%d BURNOUT\n", s->time, data->id);
 	pthread_mutex_unlock(&s->mut);
 }

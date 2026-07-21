@@ -53,27 +53,26 @@ int start(t_span *s)
         if (counter % 2 == 0)
         {
             d_data = (t_dongle *) a->data;
-            pthread_mutex_lock(&s->mut);
             if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
-                return(fail(s));
-            pthread_mutex_unlock(&s->mut);
+                return(-1);
         }
         else
         {
             c_data = (t_coder *) a->data;
-            pthread_mutex_lock(&s->mut);
             if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
-                return(fail(s));
-            if (pthread_create(&c_data->t_burnout, NULL, (void *) detect_b, c_data) != 0)
-                return(fail(s));
+                return(-1);
+            pthread_mutex_lock(&s->mut);
+            gettimeofday(&c_data->b_interv_s, NULL);
             pthread_mutex_unlock(&s->mut);
+            if (pthread_create(&c_data->t_burnout, NULL, (void *) detect_b, c_data) != 0)
+                return(-1);
         }
         
         a = a->next;
     }
-    pthread_mutex_lock(&s->mut);
     if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
-        return (fail(s));
+        return (-1);
+    pthread_mutex_lock(&s->mut);
     total_c = s->n_coders * s->n_compiles;
     n_coders = s->n_coders;
     pthread_mutex_unlock(&s->mut);
