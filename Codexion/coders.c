@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/21 19:29:03 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/24 15:06:38 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,8 @@ void	coder(t_coder *data)
 		if (s->is_failed || s->is_over)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
-		usleep(30);
+		if (RUNNING_ON_VALGRIND)
+            usleep(30);
 	}
 	pthread_mutex_lock(&s->mut);
 	data->is_done = 1;

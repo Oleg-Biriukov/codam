@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/21 17:37:03 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/24 15:06:29 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -124,7 +124,8 @@ int	wait_check(t_span *s, unsigned int how_many)
 			return (pthread_mutex_unlock(&s->mut), -1);
 		pthread_mutex_unlock(&s->mut);
 		gettimeofday(&current_time, NULL);
-		usleep(30);
+		if (RUNNING_ON_VALGRIND)
+            usleep(30);
 	}
 	return (0);
 }

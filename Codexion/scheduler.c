@@ -6,23 +6,11 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/21 12:40:21 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/24 15:14:44 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
-
-void	print_l(t_array *a)
-{
-	t_coder *data;
-
-	a = la_start(a);
-	while(a != NULL){
-		data = (t_coder *) a->data;
-		printf("%d\n", data->id);
-		a = a->next;
-	}
-}
 
 static int	fifo(t_array *a1, t_array *a2)
 {
@@ -41,12 +29,18 @@ static int	fifo(t_array *a1, t_array *a2)
 
 static int	edf(t_array *a1, t_array *a2)
 {
-	t_coder	*data1;
-	t_coder	*data2;
+	t_coder			*data1;
+	t_coder			*data2;
+	unsigned int	t_left1;
+	unsigned int	t_left2;
 
 	data1 = (t_coder *) a1->data;
 	data2 = (t_coder *) a2->data;
-	return (data1->id + data2->id);
+	t_left1 = (data1->b_interv_e.tv_sec * 1000000L + data1->b_interv_e.tv_usec) - (data1->b_interv_s.tv_sec * 1000000L + data1->b_interv_s.tv_usec);
+	t_left2 = (data2->b_interv_e.tv_sec * 1000000L + data2->b_interv_e.tv_usec) - (data2->b_interv_s.tv_sec * 1000000L + data2->b_interv_s.tv_usec);
+	if (t_left1 < t_left2)
+		return (1);
+	return (-1);
 }
 
 
@@ -75,6 +69,8 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 			ldata = (t_dongle *) (a->next)->data;
 			if (s->is_over || s->is_failed)
 				return ((void) pthread_mutex_unlock(&s->mut));
+			pthread_mutex_unlock(&s->mut);
+			pthread_mutex_lock(&s->mut);
 			if (rdata->is_active == 1 &&
 				ldata->is_active == 1 &&
 				cdata->is_done == 0 &&
@@ -87,7 +83,8 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 				pthread_cond_broadcast(&cdata->cond);
 			}
 			pthread_mutex_unlock(&s->mut);
-			usleep(30);
+			if (RUNNING_ON_VALGRIND)
+            	usleep(30);
 		}
 	}
 }

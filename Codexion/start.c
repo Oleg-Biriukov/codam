@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/19 14:15:25 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/24 15:06:03 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,8 @@ int start(t_span *s)
             counter += c_data->compiles;
         pthread_mutex_unlock(&s->mut);
         a = a->next->next;
-        usleep(30);
+        if (RUNNING_ON_VALGRIND)
+            usleep(30);
     }
     pthread_mutex_lock(&s->mut);
     s->is_over = 1;
