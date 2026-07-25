@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/24 15:14:44 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/25 15:21:44 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,7 +93,6 @@ int scheduler(t_span *s)
 {
 	if (!strcmp(s->schdlr, "fifo"))
 		return (scheduling(s, fifo), 0);
-	if (!strcmp(s->schdlr, "edf"))
+	else
 		return (scheduling(s, edf), 0);
-	return (-1);
 }
