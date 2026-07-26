@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/24 16:59:15 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/26 17:23:10 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,7 @@ typedef struct t_span
 
 struct timespec	convert(struct timeval from, int b_out);
 unsigned int	la_len(t_array *array);
+unsigned int	interval(struct timeval s, struct timeval c);
 t_array			*la_start(t_array *array);
 t_array			*la_append(t_array *array, void *content);
 t_array			*la_init(void *content);
@@ -100,6 +101,5 @@ bool			init_arrays(t_span *s);
 bool			init_dongle(t_span *s);
 bool			scheduler(t_span *s);
 bool			wait_check(t_span *s, unsigned int how_many);
-int				interval(struct timeval s, struct timeval c);
 
 #endif

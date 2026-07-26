@@ -30,7 +30,7 @@ static int	convert_to_num(t_span *s)
 		(*s->argv)++;
 // making sure that it is digit
 	if (is_ok(**s->argv) == -1)
-		s->is_failed = 1;
+		s->is_failed = true;
 	s->argc--;
 	if (**s->argv == '\0')
 		s->argv++;
@@ -42,8 +42,8 @@ void	take_out_arg(t_span *s, char **argv, int argc)
 {
 	s->argc = argc;
 	s->argv = argv;
-	s->is_failed = 0;
-	s->is_over = 0;
+	s->is_failed = false;
+	s->is_over = false;
 	s->workspace = NULL;
 	s->n_coders = convert_to_num(s);
 	s->t_burnout = convert_to_num(s);
@@ -55,13 +55,13 @@ void	take_out_arg(t_span *s, char **argv, int argc)
 	s->schdlr = *s->argv;
 
 	if (s->argc != 0 || !s->schdlr)
-		s->is_failed = 1;
+		s->is_failed = true;
 	if (s->schdlr)
 	{
 		if (!strcmp(s->schdlr, "fifo"))
 			return ;
 		if (!strcmp(s->schdlr, "edf"))
 			return ;
-		s->is_failed = 1;
+		s->is_failed = true;
 	}
 }

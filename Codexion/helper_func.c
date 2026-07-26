@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/25 16:02:58 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/26 17:23:24 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,7 @@ t_array	*find_elem(t_array *haystack, t_array *needle)
 	return (haystack);
 }
 
-int	interval(struct timeval s, struct timeval e)
+unsigned int	interval(struct timeval s, struct timeval e)
 {
 	int	diff;
 
@@ -65,7 +65,7 @@ void	la_sort(t_array *a, int (cond)(t_array *, t_array *))
 	}
 }
 
-int	wait_check(t_span *s, unsigned int how_many)
+bool	wait_check(t_span *s, unsigned int how_many)
 {
 	struct timeval	current_time;
 	struct timeval	start_time;
@@ -79,13 +79,13 @@ int	wait_check(t_span *s, unsigned int how_many)
 		c_time = interval(start_time, current_time);
 		pthread_mutex_lock(&s->mut);
 		if (s->is_failed || s->is_over)
-			return (pthread_mutex_unlock(&s->mut), -1);
+			return (pthread_mutex_unlock(&s->mut), false);
 		pthread_mutex_unlock(&s->mut);
 		gettimeofday(&current_time, NULL);
 		if (RUNNING_ON_VALGRIND)
             usleep(30);
 	}
-	return (0);
+	return (true);
 }
 
 struct timespec	convert(struct timeval from, int b_out)

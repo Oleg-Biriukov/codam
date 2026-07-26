@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/24 15:06:50 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/26 16:22:12 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ void    dongle(t_dongle *data)
     while (1)
     {
         pthread_mutex_lock(&s->mut);
-		while (data->is_cooldown == 0)
+		while (data->is_cooldown == false)
         {
             gettimeofday(&now, NULL);
             wait = convert(now, 1000);
@@ -35,18 +35,20 @@ void    dongle(t_dongle *data)
            break ;
         }   
 		pthread_mutex_unlock(&s->mut);
-        if (wait_check(s, s->d_cooldown) != 0)
+        if (!wait_check(s, s->d_cooldown))
             return ;
         pthread_mutex_lock(&s->mut);
-        data->is_cooldown = 0;
-        data->is_active = 1;
+        data->is_cooldown = false;
+        data->is_active = true;
         pthread_mutex_unlock(&s->mut);
         if (RUNNING_ON_VALGRIND)
+        {
             usleep(30);
+        }
     }
 }
 
-int init_dongle(t_span *s)
+bool init_dongle(t_span *s)
 {
     t_array         *array;
     t_dongle        *data;
@@ -57,14 +59,14 @@ int init_dongle(t_span *s)
         data = malloc(sizeof(t_dongle));
         array = la_append(array, data);
         if (!data || !array)
-            return (-1);
+            return (false);
         gettimeofday(&data->start, NULL);
         pthread_cond_init(&data->cond, NULL);
         data->id = la_len(la_start(array));
         data->s = (void *) s;
-        data->is_cooldown = 0;
-        data->is_active = 1;
+        data->is_cooldown = false;
+        data->is_active = true;
     }
     s->dongle = la_start(array);
-    return (0);
+    return (true);
 }

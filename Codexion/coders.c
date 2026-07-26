@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/24 15:06:38 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/26 18:07:32 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,11 @@ void	detect_b(t_coder *data)
 			break ;
 		}
 		pthread_mutex_unlock(&s->mut);
+		if (RUNNING_ON_VALGRIND)
+			usleep(30);
 	}
 	pthread_mutex_lock(&s->mut);
-	s->is_failed = 1;
+	s->is_failed = true;
 	printf("[%d ms] C%d BURNOUT\n", s->time, data->id);
 	pthread_mutex_unlock(&s->mut);
 }
@@ -69,7 +71,7 @@ void	coder(t_coder *data)
 		printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time, data->id, data->conn[1]->id);
 		printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time, data->id, data->conn[0]->id);
 		pthread_mutex_unlock(&s->mut);
-		if (stages(data) != 0)
+		if (!stages(data))
 			break ;
 		pthread_mutex_lock(&s->mut);
 		if (s->is_failed || s->is_over)
@@ -79,12 +81,12 @@ void	coder(t_coder *data)
             usleep(30);
 	}
 	pthread_mutex_lock(&s->mut);
-	data->is_done = 1;
+	data->is_done = true;
 	pthread_mutex_unlock(&s->mut);
 
 }
 
-int init_arrays(t_span *s)
+bool init_arrays(t_span *s)
 {
 	t_array	  		*array;
 	t_coder   		*data;
@@ -94,18 +96,18 @@ int init_arrays(t_span *s)
 		data = malloc(sizeof(t_coder));
 		array = la_append(array, data);
 		if (!array || !data)
-			return (-1);
+			return (false);
 		data->id = la_len(la_start(array));
 		pthread_cond_init(&data->cond, NULL);
 		gettimeofday(&data->start, NULL);
 		gettimeofday(&data->req_t, NULL);
 		data->s = (void *) s;
-		data->is_done = 0;
-		data->is_active = 1;
-		data->compiles = 0;
+		data->is_done = false;
+		data->is_active = true;
+		data->compiles = false;
 		data->conn[0] = NULL;
 		data->conn[1] = NULL;
 	}
 	s->coders = la_start(array);
-	return (0);
+	return (true);
 }

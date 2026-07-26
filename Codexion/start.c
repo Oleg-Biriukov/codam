@@ -6,79 +6,59 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/24 15:06:03 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/26 18:38:20 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-int fail(t_span *s)
+bool fail(t_span *s)
 {
-    s->is_failed = 1;
-    return (pthread_mutex_unlock(&s->mut));
+    s->is_failed = true;
+    return (pthread_mutex_unlock(&s->mut), false);
 }
 
-void	set_to_null(t_coder *data)
+static bool create_coders_t(t_array *a)
 {
-    if (data->conn[0])
-        data->conn[0]->is_active = 1;
-    if (data->conn[1])
-        data->conn[1]->is_active = 1;
-    data->conn[0] = NULL;
-    data->conn[1] = NULL;
+    t_coder *c_data;
+
+    c_data = (t_coder *) a->data;
+    if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
+        return (false);
+    gettimeofday(&c_data->b_interv_s, NULL);
+    if (pthread_create(&c_data->t_burnout, NULL, (void *) detect_b, c_data) != 0)
+        return (false);
+    return (true);
 }
 
-
-int start(t_span *s)
+static void create_threads(t_span *s, t_array *a)
 {
-    unsigned int    counter;
-    unsigned int    total_c;
-    unsigned int    n_coders;
-    t_array         *a;
-    t_array         *workspace;
-    t_coder         *c_data;
-    t_dongle        *d_data;
-    pthread_t       t;
-    
-    // creating new threads
-    pthread_mutex_lock(&s->mut);
-    workspace = s->workspace;
-    pthread_mutex_unlock(&s->mut);
+    unsigned int         counter;
+    t_dongle            *d_data;
+
     counter = 0;
-    a = workspace;
     while (counter != s->n_coders * 2)
     {
         counter++;
-        // if counter dividable to 2 then it is dongle
         if (counter % 2 == 0)
         {
             d_data = (t_dongle *) a->data;
             if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
-                return(-1);
+                return ((void) fail(s));
         }
         else
-        {
-            c_data = (t_coder *) a->data;
-            if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
-                return(-1);
-            pthread_mutex_lock(&s->mut);
-            gettimeofday(&c_data->b_interv_s, NULL);
-            pthread_mutex_unlock(&s->mut);
-            if (pthread_create(&c_data->t_burnout, NULL, (void *) detect_b, c_data) != 0)
-                return(-1);
-        }
-        
+            if (!create_coders_t(a))
+                return ;
         a = a->next;
     }
-    if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
-        return (-1);
-    pthread_mutex_lock(&s->mut);
-    total_c = s->n_coders * s->n_compiles;
-    n_coders = s->n_coders;
-    pthread_mutex_unlock(&s->mut);
-    
+}
+
+static void awaiting(t_span *s, t_array *a, unsigned int total_c)
+{
+    unsigned int    counter;
+    t_coder         *c_data;
+
     counter = 0;
-    a = workspace;
     while (1)
     {
         if (counter == total_c)
@@ -87,7 +67,7 @@ int start(t_span *s)
             counter = 0;
         pthread_mutex_lock(&s->mut);
         if (s->is_failed)
-            return (fail(s));
+            return ((void) pthread_mutex_unlock(&s->mut));
         c_data = (t_coder *) a->data;
         if (c_data->compiles >= s->n_compiles)
             counter += s->n_compiles;
@@ -98,12 +78,14 @@ int start(t_span *s)
         if (RUNNING_ON_VALGRIND)
             usleep(30);
     }
-    pthread_mutex_lock(&s->mut);
-    s->is_over = 1;
-    pthread_mutex_unlock(&s->mut);
-    
-    // awaiting for rest threads
-    a = workspace;
+}
+
+static void finish(t_array *a, unsigned int n_coders)
+{
+    t_coder         *c_data;
+    t_dongle        *d_data;
+    unsigned int    counter;
+
     counter = 0;
     while (counter != n_coders * 2)
     {
@@ -122,6 +104,29 @@ int start(t_span *s)
         
         a = a->next;
     }
+}
+
+bool start(t_span *s)
+{
+    
+    unsigned int    total_c;
+    unsigned int    n_coders;
+    t_array         *workspace;
+    pthread_t       t;
+    
+    // creating new threads
+    workspace = s->workspace;
+    create_threads(s, workspace);
+    pthread_mutex_lock(&s->mut);
+    total_c = s->n_coders * s->n_compiles;
+    n_coders = s->n_coders;
+    if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
+        fail(s);
+    pthread_mutex_unlock(&s->mut);
+    awaiting(s, workspace, total_c);
+    
+    // awaiting for rest threads
+    finish(workspace, n_coders);
     pthread_join(t, NULL);
-    return (0);
+    return (true);
 }

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/25 15:21:44 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/26 17:22:40 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,9 +20,8 @@ static int	fifo(t_array *a1, t_array *a2)
 
 	d1_t = ((t_coder *) a1->data)->req_t;
 	d2_t = ((t_coder *) a2->data)->req_t;
-// deciding who made first request for dongle and who made less count of compilations
-	if (d1_t.tv_sec * 1000000L + d1_t.tv_usec 
-		< d2_t.tv_sec * 1000000L + d2_t.tv_usec)
+// deciding who made first request for dongle
+	if (d1_t.tv_sec * 1000000L + d1_t.tv_usec < d2_t.tv_sec * 1000000L + d2_t.tv_usec)
 		return (1);
 	return (-1);
 }
@@ -53,15 +52,15 @@ static void	is_right_coder(t_array *a)
 	cdata = (t_coder *) a->data;
 	rdata = (t_dongle *) (a->prev)->data;
 	ldata = (t_dongle *) (a->next)->data;
-	if (rdata->is_active == 1 &&
-		ldata->is_active == 1 &&
-		cdata->is_done == 0 &&
-		cdata->is_active == 1)
+	if (rdata->is_active &&
+		ldata->is_active &&
+		!cdata->is_done &&
+		cdata->is_active)
 	{
 		cdata->conn[0] = rdata;
 		cdata->conn[1] = ldata;
-		rdata->is_active = 0;
-		ldata->is_active = 0;
+		rdata->is_active = false;
+		ldata->is_active = false;
 		pthread_cond_broadcast(&cdata->cond);
 	}
 }
@@ -95,10 +94,10 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 	}
 }
 
-int scheduler(t_span *s)
+bool scheduler(t_span *s)
 {
 	if (!strcmp(s->schdlr, "fifo"))
-		return (scheduling(s, fifo), 0);
+		return (scheduling(s, fifo), false);
 	else
-		return (scheduling(s, edf), 0);
+		return (scheduling(s, edf), false);
 }
