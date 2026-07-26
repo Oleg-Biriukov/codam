@@ -21,7 +21,8 @@ static int	fifo(t_array *a1, t_array *a2)
 	d1_t = ((t_coder *) a1->data)->req_t;
 	d2_t = ((t_coder *) a2->data)->req_t;
 // deciding who made first request for dongle and who made less count of compilations
-	if (d1_t.tv_sec * 1000000L + d1_t.tv_usec < d2_t.tv_sec * 1000000L + d2_t.tv_usec)
+	if (d1_t.tv_sec * 1000000L + d1_t.tv_usec 
+		< d2_t.tv_sec * 1000000L + d2_t.tv_usec)
 		return (1);
 	return (-1);
 }
@@ -36,22 +37,40 @@ static int	edf(t_array *a1, t_array *a2)
 
 	data1 = (t_coder *) a1->data;
 	data2 = (t_coder *) a2->data;
-	t_left1 = (data1->b_interv_e.tv_sec * 1000000L + data1->b_interv_e.tv_usec) - (data1->b_interv_s.tv_sec * 1000000L + data1->b_interv_s.tv_usec);
-	t_left2 = (data2->b_interv_e.tv_sec * 1000000L + data2->b_interv_e.tv_usec) - (data2->b_interv_s.tv_sec * 1000000L + data2->b_interv_s.tv_usec);
+	t_left1 = interval(data1->b_interv_s, data1->b_interv_e);
+	t_left2 = interval(data2->b_interv_s, data2->b_interv_e);
 	if (t_left1 < t_left2)
 		return (1);
 	return (-1);
 }
 
+static void	is_right_coder(t_array *a)
+{
+	t_dongle		*ldata;
+	t_dongle		*rdata;
+	t_coder			*cdata;
+
+	cdata = (t_coder *) a->data;
+	rdata = (t_dongle *) (a->prev)->data;
+	ldata = (t_dongle *) (a->next)->data;
+	if (rdata->is_active == 1 &&
+		ldata->is_active == 1 &&
+		cdata->is_done == 0 &&
+		cdata->is_active == 1)
+	{
+		cdata->conn[0] = rdata;
+		cdata->conn[1] = ldata;
+		rdata->is_active = 0;
+		ldata->is_active = 0;
+		pthread_cond_broadcast(&cdata->cond);
+	}
+}
 
 static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 {
 	unsigned int	i;
 	unsigned int	len_c;
-	t_dongle		*ldata;
-	t_dongle		*rdata;
 	t_array			*a;
-	t_coder			*cdata;
 
 	while (1)
 	{
@@ -64,24 +83,11 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 		{
 			pthread_mutex_lock(&s->mut);
 			a = find_elem(s->workspace, get_elem(s->coders, i++));
-			cdata = (t_coder *) a->data;
-			rdata = (t_dongle *) (a->prev)->data;
-			ldata = (t_dongle *) (a->next)->data;
 			if (s->is_over || s->is_failed)
 				return ((void) pthread_mutex_unlock(&s->mut));
 			pthread_mutex_unlock(&s->mut);
 			pthread_mutex_lock(&s->mut);
-			if (rdata->is_active == 1 &&
-				ldata->is_active == 1 &&
-				cdata->is_done == 0 &&
-				cdata->is_active == 1)
-			{
-				cdata->conn[0] = rdata;
-				cdata->conn[1] = ldata;
-				rdata->is_active = 0;
-				ldata->is_active = 0;
-				pthread_cond_broadcast(&cdata->cond);
-			}
+			is_right_coder(a);
 			pthread_mutex_unlock(&s->mut);
 			if (RUNNING_ON_VALGRIND)
             	usleep(30);

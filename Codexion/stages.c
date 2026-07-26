@@ -12,24 +12,22 @@
 
 #include "codexion.h"
 
-int		stages(t_coder *data)
+void	start_comp(t_span *s, t_coder *data)
 {
-	t_span			*s;
-
-	s = (t_span *) data->s;
-
 	pthread_mutex_lock(&s->mut);
 	data->is_active = 0;
-	printf("[%d ms] START_COMPILE\tC%d\n", s->time , data->id);
+	printf("[%d ms] START_COMPILE\tC%d\n", s->time, data->id);
 	gettimeofday(&data->b_interv_s, NULL);
 	pthread_mutex_unlock(&s->mut);
+}
 
-	if (wait_check(s, s->t_compile) != 0)
-		return (-1);
-
+void	finish_comp(t_span *s, t_coder *data)
+{
 	pthread_mutex_lock(&s->mut);
-	printf("[%d ms] RELEASE_DONGLE C%d D%d\n", s->time, data->id, data->conn[1]->id);
-	printf("[%d ms] RELEASE_DONGLE C%d D%d\n", s->time, data->id, data->conn[0]->id);
+	printf("[%d ms] RELEASE_DONGLE C%d D%d\n",
+		s->time, data->id, data->conn[1]->id);
+	printf("[%d ms] RELEASE_DONGLE C%d D%d\n",
+		s->time, data->id, data->conn[0]->id);
 	data->conn[0]->is_cooldown = 1;
 	data->conn[1]->is_cooldown = 1;
 	pthread_cond_broadcast(&data->conn[0]->cond);
@@ -38,23 +36,39 @@ int		stages(t_coder *data)
 	data->conn[1] = NULL;
 	data->compiles++;
 	pthread_mutex_unlock(&s->mut);
+}
 
+void	start_debug(t_span *s, t_coder *data)
+{
 	pthread_mutex_lock(&s->mut);
-	printf("[%d ms] START_DEBUG\tC%d\n", s->time , data->id);
+	printf("[%d ms] START_DEBUG\tC%d\n", s->time, data->id);
 	pthread_mutex_unlock(&s->mut);
+}
 
-	if (wait_check(s, s->t_debug) != 0)
-		return (-1);
-	
+void	start_refactor(t_span *s, t_coder *data)
+{
 	pthread_mutex_lock(&s->mut);
-	printf("[%d ms] START_REFACTOR\tC%d\n", s->time , data->id);
+	printf("[%d ms] START_REFACTOR\tC%d\n", s->time, data->id);
 	pthread_mutex_unlock(&s->mut);
+}
 
-	if (wait_check(s, s->t_refactor) != 0)
-		return (-1);
-	
+int	stages(t_coder *data)
+{
+	t_span			*s;
+
+	s = (t_span *) data->s;
+	start_comp(s, data);
+	if (!wait_check(s, s->t_compile))
+		return (false);
+	finish_comp(s, data);
+	start_debug(s, data);
+	if (!wait_check(s, s->t_debug))
+		return (false);
+	start_refactor(s, data);
+	if (!wait_check(s, s->t_refactor))
+		return (false);
 	pthread_mutex_lock(&s->mut);
-	data->is_active = 1;
+	data->is_active = true;
 	pthread_mutex_unlock(&s->mut);
-	return (0);
+	return (true);
 }

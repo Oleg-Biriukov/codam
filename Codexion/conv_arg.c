@@ -56,9 +56,12 @@ void	take_out_arg(t_span *s, char **argv, int argc)
 
 	if (s->argc != 0 || !s->schdlr)
 		s->is_failed = 1;
-	if (!strcmp(s->schdlr, "fifo"))
-		return ;
-	if (!strcmp(s->schdlr, "edf"))
-		return ;
-	s->is_failed = 1;
+	if (s->schdlr)
+	{
+		if (!strcmp(s->schdlr, "fifo"))
+			return ;
+		if (!strcmp(s->schdlr, "edf"))
+			return ;
+		s->is_failed = 1;
+	}
 }

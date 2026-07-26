@@ -20,7 +20,6 @@ static void	timer(t_span *s)
 	gettimeofday(&s_time, NULL);
 	while (1)
 	{
-		
 		gettimeofday(&c_time, NULL);
 		pthread_mutex_lock(&s->mut);
 		if (s->is_failed || s->is_over)
@@ -28,15 +27,16 @@ static void	timer(t_span *s)
 			pthread_mutex_unlock(&s->mut);
 			return ;
 		}
-		s->time = (c_time.tv_sec * 1000000L + c_time.tv_usec) - (s_time.tv_sec * 1000000L + s_time.tv_usec);
+		s->time = (c_time.tv_sec * 1000000L + c_time.tv_usec)
+			- (s_time.tv_sec * 1000000L + s_time.tv_usec);
 		s->time /= 1000;
 		pthread_mutex_unlock(&s->mut);
 		if (RUNNING_ON_VALGRIND)
-            usleep(30);
+			usleep(30);
 	}
 }
 
-int free_all(t_span *s)
+int	free_all(t_span *s)
 {
 	int		len_workspace;
 	t_array	*n_array;
@@ -58,7 +58,7 @@ int free_all(t_span *s)
 static int	workspace_init(t_span *s)
 {
 	t_array	*coders;
-	t_array *start;
+	t_array	*start;
 	t_array	*dongle;
 
 	coders = s->coders;
@@ -78,33 +78,33 @@ static int	workspace_init(t_span *s)
 	start->prev = s->workspace;
 	s->workspace->next = start;
 	s->workspace = start;
-	return (0);
+	return (true);
 }
 
-int main(int argc, char **argv)
+int	main(int argc, char **argv)
 {
-	t_span 		*s;
-	pthread_t 	t;
+	t_span		*s;
+	pthread_t	t;
 
 	s = malloc(sizeof(t_span));
 	if (!s || argc == 1)
-		return (printf("Error\n"));	
+		return (printf("Error\n"));
 	take_out_arg(s, ++argv, 7);
-	if (s->is_failed == 1)
+	if (s->is_failed)
 		return (printf("Error\n"), free(s), 0);
 	pthread_mutex_init(&s->mut, NULL);
-	if (init_arrays(s) != 0)
+	if (!init_arrays(s))
 		return (printf("Error"), free_all(s));
-	if (init_dongle(s) != 0)
+	if (!init_dongle(s))
 		return (printf("Error"), free_all(s));
-	if (workspace_init(s) !=0)
+	if (!workspace_init(s))
 		return (printf("Error"), free_all(s));
 	if (pthread_create(&t, NULL, (void *) &timer, s) != 0)
 		return (printf("Error"), free_all(s));
-	if (start(s) != 0)
-		return(printf("Error"), free_all(s));
+	if (!start(s))
+		return (printf("Error"), free_all(s));
 	if (pthread_join(t, NULL) != 0)
 		return (printf("Error"), free_all(s));
 	free_all(s);
 	return (0);
-	}
+}

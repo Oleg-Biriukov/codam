@@ -27,11 +27,11 @@ t_array	*find_elem(t_array *haystack, t_array *needle)
 	return (haystack);
 }
 
-int	interval(struct timeval s, struct timeval c)
+int	interval(struct timeval s, struct timeval e)
 {
 	int	diff;
 
-	diff = (c.tv_sec * 1000000L + c.tv_usec)
+	diff = (e.tv_sec * 1000000L + e.tv_usec)
 		- (s.tv_sec * 1000000L + s.tv_usec);
 	return (diff);
 }
@@ -73,12 +73,10 @@ int	wait_check(t_span *s, unsigned int how_many)
 
 	gettimeofday(&start_time, NULL);
 	gettimeofday(&current_time, NULL);
-	c_time = (current_time.tv_sec * 1000000L + current_time.tv_usec) -
-				(start_time.tv_sec * 1000000L + start_time.tv_usec);
+	c_time = interval(start_time, current_time);
 	while (c_time < how_many * 1000)
 	{
-		c_time = (current_time.tv_sec * 1000000L + current_time.tv_usec) -
-			(start_time.tv_sec * 1000000L + start_time.tv_usec);
+		c_time = interval(start_time, current_time);
 		pthread_mutex_lock(&s->mut);
 		if (s->is_failed || s->is_over)
 			return (pthread_mutex_unlock(&s->mut), -1);

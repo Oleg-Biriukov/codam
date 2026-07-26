@@ -21,93 +21,85 @@
 # include <sys/time.h>
 # include <string.h>
 # include <errno.h>
+# include <stdbool.h>
 
 typedef struct t_dongle
 {
-	unsigned int	id;
-	unsigned int	is_cooldown;
 	void			*s;
+	bool			is_active;
+	bool			is_cooldown;
+	pthread_t		t;
+	unsigned int	id;
 	pthread_cond_t	cond;
 	struct timeval	start;
-	pthread_t		t;
-	int				is_active;
-} t_dongle;
+}	t_dongle;
 
 typedef struct t_coder
 {
 	void			*s;
+	bool			is_done;
+	bool			is_active;
 	t_dongle		*conn[2];
 	pthread_t		t;
 	pthread_t		t_burnout;
-	unsigned int 	id;
-	unsigned int	is_done;
-	unsigned int	is_active;
+	unsigned int	id;
 	unsigned int	compiles;
 	pthread_cond_t	cond;
 	struct timeval	req_t;
 	struct timeval	b_interv_s;
 	struct timeval	b_interv_e;
 	struct timeval	start;
-} t_coder;
+}	t_coder;
 
 typedef struct t_array
 {
-	void	   	   *data;
-	struct t_array *next;
-	struct t_array *prev;
-} t_array;
+	void			*data;
+	struct t_array	*next;
+	struct t_array	*prev;
+}	t_array;
 
 typedef struct t_span
 {
 	pthread_mutex_t	mut;
 	unsigned int	time;
-	unsigned int	is_over;
-	unsigned int	is_failed;
 	unsigned int	n_compiles;
-	unsigned int 	n_coders;
-	unsigned int 	n_in_progress;
+	unsigned int	n_coders;
+	unsigned int	n_in_progress;
 	unsigned int	t_burnout;
 	unsigned int	t_compile;
-	unsigned int	t_refactor; 
+	unsigned int	t_refactor;
 	unsigned int	d_cooldown;
 	unsigned int	t_debug;
 	t_array			*workspace;
-	t_array 		*coders;
-	t_array 		*dongle;
-	char 		 	*schdlr;
+	t_array			*coders;
+	t_array			*dongle;
+	bool			is_over;
+	bool			is_failed;
+	char			*schdlr;
 	char			**argv;
 	int				argc;
-} t_span;
+}	t_span;
 
-unsigned int	la_len(t_array *array);
 struct timespec	convert(struct timeval from, int b_out);
+unsigned int	la_len(t_array *array);
 t_array			*la_start(t_array *array);
 t_array			*la_append(t_array *array, void *content);
 t_array			*la_init(void *content);
 t_array			*get_elem(t_array *stack, int num);
 t_array			*find_elem(t_array *haystack, t_array *needle);
 void			*la_free(t_array *array);
-void			set_to_null(t_coder *data);
 void			la_sort(t_array *a, int (cond)(t_array *, t_array *));
-void			la_remove(t_array *a);
 void			take_out_arg(t_span *s, char **argv, int argc);
 void			coder(t_coder *data);
 void			dongle(t_dongle *data);
 void			detect_b(t_coder *data);
-int    			check_burnout(t_span *s);
-int    			cool_down_dongle(t_span *s);
-int				start(t_span *s);
-int				fail(t_span *s);
-int				stages(t_coder *data);
-int				proccess(t_array *array);
-int				init_arrays(t_span *s);
-int				init_dongle(t_span *s);
-int				scheduler(t_span *s);
-int				wait_check(t_span *s, unsigned int how_many);
+bool			fail(t_span *s);
+bool			start(t_span *s);
+bool			stages(t_coder *data);
+bool			init_arrays(t_span *s);
+bool			init_dongle(t_span *s);
+bool			scheduler(t_span *s);
+bool			wait_check(t_span *s, unsigned int how_many);
 int				interval(struct timeval s, struct timeval c);
 
-
-void print_l(t_array *a);
-
 #endif
-

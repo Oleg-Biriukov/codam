@@ -26,7 +26,7 @@ void	detect_b(t_coder *data)
 
 		pthread_mutex_lock(&s->mut);
 		gettimeofday(&data->b_interv_e, NULL);
-		if ((data->b_interv_e.tv_sec * 1000000L + data->b_interv_e.tv_usec) - (data->b_interv_s.tv_sec * 1000000L + data->b_interv_s.tv_usec) > s->t_burnout * 1000)
+		if (interval(data->b_interv_s, data->b_interv_e) > s->t_burnout * 1000)
 		{
 			pthread_mutex_unlock(&s->mut);
 			break ;
