@@ -124,10 +124,13 @@ bool start(t_span *s)
     pthread_mutex_unlock(&s->mut);
     if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
         fail(s);
-    awaiting(s, workspace, total_c);
-    
+    if (!s->is_failed)
+        awaiting(s, workspace, total_c);
+    pthread_mutex_lock(&s->mut);
+    s->is_over = true;
+    pthread_mutex_unlock(&s->mut);
     // awaiting for rest threads
     finish(workspace, n_coders);
     pthread_join(t, NULL);
-    return (true);
+    return (false || s->is_failed);
 }

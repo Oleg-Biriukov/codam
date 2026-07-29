@@ -20,7 +20,7 @@ void	detect_b(t_coder *data)
 	while (1)
 	{
 		pthread_mutex_lock(&s->mut);
-		if (s->is_over || s->is_over)
+		if (s->is_over || s->is_failed || s->n_compiles == data->compiles)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
 
