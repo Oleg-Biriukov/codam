@@ -12,61 +12,71 @@
 
 #include "codexion.h"
 
-void    dongle(t_dongle *data)
+static bool	awaiting_for_connection(t_dongle *data)
 {
-    t_span  *s;
-    struct timespec wait;
-    struct timeval  now;
+	t_span			*s;
+	struct timespec	wait;
+	struct timeval	now;
 
-    s = (t_span *) data->s;
-    while (1)
-    {
-        pthread_mutex_lock(&s->mut);
-		while (data->is_cooldown == false)
-        {
-            gettimeofday(&now, NULL);
-            wait = convert(now, 1000);
-			if (pthread_cond_timedwait(&data->cond, &s->mut, &wait) == ETIMEDOUT)
-            {
-                if (s->is_failed || s->is_over)
-                    return ((void) pthread_mutex_unlock(&s->mut));
-                continue ;
-            }
-           break ;
-        }   
-		pthread_mutex_unlock(&s->mut);
-        if (!wait_check(s, s->d_cooldown))
-            return ;
-        pthread_mutex_lock(&s->mut);
-        data->is_cooldown = false;
-        data->is_active = true;
-        pthread_mutex_unlock(&s->mut);
-        if (RUNNING_ON_VALGRIND)
-        {
-            usleep(30);
-        }
-    }
+	s = (t_span *) data->s;
+	pthread_mutex_lock(&s->mut);
+	while (data->is_cooldown == false)
+	{
+		gettimeofday(&now, NULL);
+		wait = convert(now, 1000);
+		if (pthread_cond_timedwait(&data->cond, &s->mut, &wait) == ETIMEDOUT)
+		{
+			if (s->is_failed || s->is_over)
+				return (pthread_mutex_unlock(&s->mut), false);
+			continue ;
+		}
+		break ;
+	}
+	pthread_mutex_unlock(&s->mut);
+	return (true);
 }
 
-bool init_dongle(t_span *s)
+void	dongle(t_dongle *data)
 {
-    t_array         *array;
-    t_dongle        *data;
+	t_span	*s;
 
-    array = NULL;
-    while(la_len(la_start(array)) != s->n_coders)
-    {
-        data = malloc(sizeof(t_dongle));
-        array = la_append(array, data);
-        if (!data || !array)
-            return (false);
-        gettimeofday(&data->start, NULL);
-        pthread_cond_init(&data->cond, NULL);
-        data->id = la_len(la_start(array));
-        data->s = (void *) s;
-        data->is_cooldown = false;
-        data->is_active = true;
-    }
-    s->dongle = la_start(array);
-    return (true);
+	s = (t_span *) data->s;
+	while (1)
+	{
+		if (!awaiting_for_connection(data))
+			return ;
+		if (!wait_check(s, s->d_cooldown))
+			return ;
+		pthread_mutex_lock(&s->mut);
+		data->is_cooldown = false;
+		data->is_active = true;
+		pthread_mutex_unlock(&s->mut);
+		if (RUNNING_ON_VALGRIND)
+		{
+			usleep(30);
+		}
+	}
+}
+
+bool	init_dongle(t_span *s)
+{
+	t_array		*array;
+	t_dongle	*data;
+
+	array = NULL;
+	while (la_len(la_start(array)) != s->n_coders)
+	{
+		data = malloc(sizeof(t_dongle));
+		array = la_append(array, data);
+		if (!data || !array)
+			return (false);
+		gettimeofday(&data->start, NULL);
+		pthread_cond_init(&data->cond, NULL);
+		data->id = la_len(la_start(array));
+		data->s = (void *) s;
+		data->is_cooldown = false;
+		data->is_active = true;
+	}
+	s->dongle = la_start(array);
+	return (true);
 }

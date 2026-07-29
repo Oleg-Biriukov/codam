@@ -23,7 +23,6 @@ void	detect_b(t_coder *data)
 		if (s->is_over || s->is_failed || s->n_compiles == data->compiles)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
-
 		pthread_mutex_lock(&s->mut);
 		gettimeofday(&data->b_interv_e, NULL);
 		if (interval(data->b_interv_s, data->b_interv_e) > s->t_burnout * 1000)
@@ -41,36 +40,47 @@ void	detect_b(t_coder *data)
 	pthread_mutex_unlock(&s->mut);
 }
 
-void	coder(t_coder *data)
+static bool	awaiting_for_connection(t_coder	*data)
 {
-	t_span  		*s;
-	unsigned int	n_comp;
-	struct timespec wait;
-    struct timeval  now;
+	t_span			*s;
+	struct timespec	wait;
+	struct timeval	now;
 
 	s = (t_span *) data->s;
+	pthread_mutex_lock(&s->mut);
+	while (!(data->conn[0] && data->conn[1]))
+	{
+		gettimeofday(&now, NULL);
+		wait = convert(now, 300);
+		if (pthread_cond_timedwait(&data->cond, &s->mut, &wait) == ETIMEDOUT)
+		{
+			if (s->is_failed || s->is_over)
+				return ((void) pthread_mutex_unlock(&s->mut), false);
+			continue ;
+		}
+		break ;
+	}
+	printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time,
+		data->id, data->conn[1]->id);
+	printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time,
+		data->id, data->conn[0]->id);
+	pthread_mutex_unlock(&s->mut);
+	return (true);
+}
 
-    pthread_mutex_lock(&s->mut);
+void	coder(t_coder *data)
+{
+	unsigned int	n_comp;
+	t_span			*s;
+
+	s = (t_span *) data->s;
+	pthread_mutex_lock(&s->mut);
 	n_comp = s->n_compiles;
 	pthread_mutex_unlock(&s->mut);
-	while(data->compiles != n_comp)
+	while (data->compiles != n_comp)
 	{
-		pthread_mutex_lock(&s->mut);
-		while (!(data->conn[0] && data->conn[1]))
-		{
-			gettimeofday(&now, NULL);
-            wait = convert(now, 300);
-			if (pthread_cond_timedwait(&data->cond, &s->mut, &wait) == ETIMEDOUT)
-            {
-                if (s->is_failed || s->is_over)
-                    return ((void) pthread_mutex_unlock(&s->mut));
-                continue ;
-            }
-           break ;
-		}
-		printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time, data->id, data->conn[1]->id);
-		printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time, data->id, data->conn[0]->id);
-		pthread_mutex_unlock(&s->mut);
+		if (!awaiting_for_connection(data))
+			return ;
 		if (!stages(data))
 			break ;
 		pthread_mutex_lock(&s->mut);
@@ -78,21 +88,21 @@ void	coder(t_coder *data)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
 		if (RUNNING_ON_VALGRIND)
-            usleep(30);
+			usleep(30);
 	}
 	pthread_mutex_lock(&s->mut);
 	data->is_done = true;
 	pthread_mutex_unlock(&s->mut);
-
 }
 
-bool init_arrays(t_span *s)
+bool	init_arrays(t_span *s)
 {
-	t_array	  		*array;
-	t_coder   		*data;
+	t_array		*array;
+	t_coder		*data;
 
 	array = NULL;
-	while (la_len(la_start(array)) < s->n_coders){
+	while (la_len(la_start(array)) < s->n_coders)
+	{
 		data = malloc(sizeof(t_coder));
 		array = la_append(array, data);
 		if (!array || !data)

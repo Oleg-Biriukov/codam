@@ -1,5 +1,16 @@
-#include "codexion.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   conv_arg.c                                         :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: obirukov <obirukov@student.codam.nl>       #+#  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026-07-29 16:26:46 by obirukov          #+#    #+#             */
+/*   Updated: 2026-07-29 16:26:46 by obirukov         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "codexion.h"
 
 static int	is_ok(int c)
 {
@@ -8,7 +19,6 @@ static int	is_ok(int c)
 	return (-1);
 }
 
-
 static int	convert_to_num(t_span *s)
 {
 	int	return_num;
@@ -16,19 +26,17 @@ static int	convert_to_num(t_span *s)
 	if (s->argc == 0)
 		return (0);
 	return_num = atoi(*s->argv);
-// skipping spaces
 	while (**s->argv == ' ')
 		(*s->argv)++;
-// skipping numbers
 	while (**s->argv != '\0' && **s->argv != ' ')
+	{
 		if (is_ok(**s->argv) == -1)
-			break;
+			break ;
 		else
 			(*s->argv)++;
-// skipping spaces
+	}
 	while (**s->argv == ' ')
 		(*s->argv)++;
-// making sure that it is digit
 	if (is_ok(**s->argv) == -1)
 		s->is_failed = true;
 	s->argc--;
@@ -36,7 +44,6 @@ static int	convert_to_num(t_span *s)
 		s->argv++;
 	return (return_num);
 }
-
 
 void	take_out_arg(t_span *s, char **argv, int argc)
 {
@@ -53,7 +60,6 @@ void	take_out_arg(t_span *s, char **argv, int argc)
 	s->n_compiles = convert_to_num(s);
 	s->d_cooldown = convert_to_num(s);
 	s->schdlr = *s->argv;
-
 	if (s->argc != 0 || !s->schdlr)
 		s->is_failed = true;
 	if (s->schdlr)

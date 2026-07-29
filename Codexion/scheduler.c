@@ -16,16 +16,14 @@ static int	fifo(t_array *a1, t_array *a2)
 {
 	struct timeval	d1_t;
 	struct timeval	d2_t;
-	
 
 	d1_t = ((t_coder *) a1->data)->req_t;
 	d2_t = ((t_coder *) a2->data)->req_t;
-// deciding who made first request for dongle
-	if (d1_t.tv_sec * 1000000L + d1_t.tv_usec < d2_t.tv_sec * 1000000L + d2_t.tv_usec)
+	if (d1_t.tv_sec * 1000000L + d1_t.tv_usec
+		< d2_t.tv_sec * 1000000L + d2_t.tv_usec)
 		return (1);
 	return (-1);
 }
-
 
 static int	edf(t_array *a1, t_array *a2)
 {
@@ -50,12 +48,12 @@ static void	is_right_coder(t_array *a)
 	t_coder			*cdata;
 
 	cdata = (t_coder *) a->data;
-	rdata = (t_dongle *) (a->prev)->data;
-	ldata = (t_dongle *) (a->next)->data;
-	if (rdata->is_active &&
-		ldata->is_active &&
-		!cdata->is_done &&
-		cdata->is_active)
+	rdata = (t_dongle *)(a->prev)->data;
+	ldata = (t_dongle *)(a->next)->data;
+	if (rdata->is_active
+		&& ldata->is_active
+		&& !cdata->is_done
+		&& cdata->is_active)
 	{
 		cdata->conn[0] = rdata;
 		cdata->conn[1] = ldata;
@@ -89,12 +87,12 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 			is_right_coder(a);
 			pthread_mutex_unlock(&s->mut);
 			if (RUNNING_ON_VALGRIND)
-            	usleep(30);
+				usleep(30);
 		}
 	}
 }
 
-bool scheduler(t_span *s)
+bool	scheduler(t_span *s)
 {
 	if (!strcmp(s->schdlr, "fifo"))
 		return (scheduling(s, fifo), false);
