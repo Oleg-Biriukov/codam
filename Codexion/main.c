@@ -92,6 +92,14 @@ int	main(int argc, char **argv)
 	take_out_arg(s, ++argv, 7);
 	if (s->is_failed)
 		return (printf("Error\n"), free(s), 0);
+	printf("coders_n%d\n", s->n_coders);
+	printf("t_burnout %d\n", s->t_burnout);
+	printf("t_compile %d\n", s->t_compile);
+	printf("t_debug %d\n", s->t_debug);
+	printf("t_refactor %d\n", s->t_refactor);
+	printf("n_compiles %d\n", s->n_compiles);
+	printf("d_cooldown %d\n", s->d_cooldown);
+	printf("schdlr %s\n", s->schdlr);
 	pthread_mutex_init(&s->mut, NULL);
 	if (!init_arrays(s))
 		return (printf("Error"), free_all(s));

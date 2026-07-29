@@ -14,6 +14,7 @@
 
 bool fail(t_span *s)
 {
+    pthread_mutex_lock(&s->mut);
     s->is_failed = true;
     return (pthread_mutex_unlock(&s->mut), false);
 }
@@ -48,7 +49,7 @@ static void create_threads(t_span *s, t_array *a)
         }
         else
             if (!create_coders_t(a))
-                return ;
+                return ((void) fail(s));
         a = a->next;
     }
 }
@@ -120,9 +121,9 @@ bool start(t_span *s)
     pthread_mutex_lock(&s->mut);
     total_c = s->n_coders * s->n_compiles;
     n_coders = s->n_coders;
+    pthread_mutex_unlock(&s->mut);
     if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
         fail(s);
-    pthread_mutex_unlock(&s->mut);
     awaiting(s, workspace, total_c);
     
     // awaiting for rest threads
