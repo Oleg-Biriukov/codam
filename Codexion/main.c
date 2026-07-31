@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/26 17:14:42 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/31 17:15:58 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@ static void	timer(t_span *s)
 	{
 		gettimeofday(&c_time, NULL);
 		pthread_mutex_lock(&s->mut);
-		if (s->is_failed || s->is_over)
+		if (s->is_failed || s->is_over || s->is_burnout)
 		{
 			pthread_mutex_unlock(&s->mut);
 			return ;
@@ -67,10 +67,10 @@ static int	workspace_init(t_span *s)
 	{
 		s->workspace = la_append(s->workspace, coders->data);
 		if (!s->workspace)
-			return (-1);
+			return (false);
 		s->workspace = la_append(s->workspace, dongle->data);
 		if (!s->workspace)
-			return (-1);
+			return (false);
 		coders = coders->next;
 		dongle = dongle->next;
 	}
@@ -92,27 +92,18 @@ int	main(int argc, char **argv)
 	take_out_arg(s, ++argv, 7);
 	if (s->is_failed)
 		return (printf("Error\n"), free(s), 0);
-	printf("coders_n %d\n", s->n_coders);
-	printf("t_burnout %d\n", s->t_burnout);
-	printf("t_compile %d\n", s->t_compile);
-	printf("t_debug %d\n", s->t_debug);
-	printf("t_refactor %d\n", s->t_refactor);
-	printf("n_compiles %d\n", s->n_compiles);
-	printf("d_cooldown %d\n", s->d_cooldown);
-	printf("schdlr %s\n", s->schdlr);
 	pthread_mutex_init(&s->mut, NULL);
 	if (!init_arrays(s))
-		return (printf("Error"), free_all(s));
+		return (printf("Error\n"), free_all(s));
 	if (!init_dongle(s))
-		return (printf("Error"), free_all(s));
+		return (printf("Error\n"), free_all(s));
 	if (!workspace_init(s))
-		return (printf("Error"), free_all(s));
+		return (printf("Error\n"), free_all(s));
 	if (pthread_create(&t, NULL, (void *) &timer, s) != 0)
-		return (printf("Error"), free_all(s));
+		return (printf("Error\n"), free_all(s));
 	if (!start(s))
-		return (printf("Error"), free_all(s));
-	if (pthread_join(t, NULL) != 0)
-		return (printf("Error"), free_all(s));
+		return (printf("Error\n"), free_all(s));
+	pthread_join(t, NULL);
 	free_all(s);
 	return (0);
 }

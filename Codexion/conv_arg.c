@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   conv_arg.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: obirukov <obirukov@student.codam.nl>       #+#  +:+       +#+        */
+/*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026-07-29 16:26:46 by obirukov          #+#    #+#             */
-/*   Updated: 2026-07-29 16:26:46 by obirukov         ###   ########.fr       */
+/*   Created: 2026/07/29 16:26:46 by obirukov          #+#    #+#             */
+/*   Updated: 2026/07/31 16:52:17 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,6 +54,7 @@ void	take_out_arg(t_span *s, char **argv, int argc)
 	s->argv = argv;
 	s->is_failed = false;
 	s->is_over = false;
+	s->is_burnout = false;
 	s->workspace = NULL;
 	s->n_coders = convert_to_num(s);
 	s->t_burnout = convert_to_num(s);

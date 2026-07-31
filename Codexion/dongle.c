@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/26 16:22:12 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/31 17:06:02 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ static bool	awaiting_for_connection(t_dongle *data)
 		wait = convert(now, 1000);
 		if (pthread_cond_timedwait(&data->cond, &s->mut, &wait) == ETIMEDOUT)
 		{
-			if (s->is_failed || s->is_over)
+			if (s->is_failed || s->is_over || s->is_burnout)
 				return (pthread_mutex_unlock(&s->mut), false);
 			continue ;
 		}
@@ -52,9 +52,7 @@ void	dongle(t_dongle *data)
 		data->is_active = true;
 		pthread_mutex_unlock(&s->mut);
 		if (RUNNING_ON_VALGRIND)
-		{
 			usleep(30);
-		}
 	}
 }
 

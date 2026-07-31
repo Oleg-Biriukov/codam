@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/26 18:38:20 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/31 16:50:28 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ static void	awaiting(t_span *s, t_array *a, unsigned int total_c)
 		if (a == s->workspace)
 			counter = 0;
 		pthread_mutex_lock(&s->mut);
-		if (s->is_failed)
+		if (s->is_failed || s->is_burnout)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		c_data = (t_coder *) a->data;
 		if (c_data->compiles >= s->n_compiles)

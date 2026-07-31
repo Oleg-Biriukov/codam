@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/26 18:07:32 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/31 17:05:49 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,8 @@ void	detect_b(t_coder *data)
 	while (1)
 	{
 		pthread_mutex_lock(&s->mut);
-		if (s->is_over || s->is_failed || s->n_compiles == data->compiles)
+		if (s->is_over || s->is_failed
+			|| s->n_compiles == data->compiles || s->is_burnout)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
 		pthread_mutex_lock(&s->mut);
@@ -35,8 +36,8 @@ void	detect_b(t_coder *data)
 			usleep(30);
 	}
 	pthread_mutex_lock(&s->mut);
-	s->is_over = true;
-	printf("[%d ms] C%d BURNOUT\n", s->time, data->id);
+	s->is_burnout = true;
+	printf("%d %d burned out\n", s->time, data->id);
 	pthread_mutex_unlock(&s->mut);
 }
 
@@ -54,16 +55,14 @@ static bool	awaiting_for_connection(t_coder	*data)
 		wait = convert(now, 300);
 		if (pthread_cond_timedwait(&data->cond, &s->mut, &wait) == ETIMEDOUT)
 		{
-			if (s->is_failed || s->is_over)
+			if (s->is_failed || s->is_over || s->is_burnout)
 				return ((void) pthread_mutex_unlock(&s->mut), false);
 			continue ;
 		}
 		break ;
 	}
-	printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time,
-		data->id, data->conn[1]->id);
-	printf("[%d ms] TAKE DONGLE C%d D%d\n", s->time,
-		data->id, data->conn[0]->id);
+	printf("%d %d has taken a dongle\n", s->time, data->id);
+	printf("%d %d has taken a dongle\n", s->time, data->id);
 	pthread_mutex_unlock(&s->mut);
 	return (true);
 }
@@ -84,7 +83,7 @@ void	coder(t_coder *data)
 		if (!stages(data))
 			break ;
 		pthread_mutex_lock(&s->mut);
-		if (s->is_failed || s->is_over)
+		if (s->is_failed || s->is_over || s->is_burnout)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
 		if (RUNNING_ON_VALGRIND)

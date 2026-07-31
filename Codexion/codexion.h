@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/26 17:23:10 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/31 16:51:32 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ void			take_out_arg(t_span *s, char **argv, int argc);
 void			coder(t_coder *data);
 void			dongle(t_dongle *data);
 void			detect_b(t_coder *data);
+void			awaiting_for_signal(t_span *s);
 bool			fail(t_span *s);
 bool			start(t_span *s);
 bool			stages(t_coder *data);

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/26 17:23:24 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/31 16:50:55 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,7 @@ bool	wait_check(t_span *s, unsigned int how_many)
 	{
 		c_time = interval(start_time, current_time);
 		pthread_mutex_lock(&s->mut);
-		if (s->is_failed || s->is_over)
+		if (s->is_failed || s->is_over || s->is_burnout)
 			return (pthread_mutex_unlock(&s->mut), false);
 		pthread_mutex_unlock(&s->mut);
 		gettimeofday(&current_time, NULL);

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/26 17:22:40 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/07/31 16:41:03 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,7 +80,7 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 		{
 			pthread_mutex_lock(&s->mut);
 			a = find_elem(s->workspace, get_elem(s->coders, i++));
-			if (s->is_over || s->is_failed)
+			if (s->is_over || s->is_failed || s->is_burnout)
 				return ((void) pthread_mutex_unlock(&s->mut));
 			pthread_mutex_unlock(&s->mut);
 			pthread_mutex_lock(&s->mut);
