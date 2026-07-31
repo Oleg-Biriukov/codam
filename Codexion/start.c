@@ -122,5 +122,5 @@ bool	start(t_span *s)
 	pthread_mutex_unlock(&s->mut);
 	finish(workspace, n_coders);
 	pthread_join(t, NULL);
-	return (false || s->is_failed);
+	return (!s->is_failed);
 }

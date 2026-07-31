@@ -12,11 +12,11 @@
 
 #include "codexion.h"
 
-static int	is_ok(int c)
+static bool	is_ok(int c)
 {
 	if ((c >= '0' && c <= '9') || c == 0 || c == ' ')
-		return (1);
-	return (-1);
+		return (true);
+	return (false);
 }
 
 static int	convert_to_num(t_span *s)
@@ -26,20 +26,23 @@ static int	convert_to_num(t_span *s)
 	if (s->argc == 0)
 		return (0);
 	return_num = atoi(*s->argv);
+	if (return_num == 0 && !is_ok(**s->argv))
+		s->is_failed = true;
 	while (**s->argv == ' ')
 		(*s->argv)++;
 	while (**s->argv != '\0' && **s->argv != ' ')
 	{
-		if (is_ok(**s->argv) == -1)
+		if (!is_ok(**s->argv))
 			break ;
 		else
 			(*s->argv)++;
 	}
 	while (**s->argv == ' ')
 		(*s->argv)++;
-	if (is_ok(**s->argv) == -1)
+	if (!is_ok(**s->argv) && s->argc > 1)
 		s->is_failed = true;
-	s->argc--;
+	else
+		s->argc--;
 	if (**s->argv == '\0')
 		s->argv++;
 	return (return_num);

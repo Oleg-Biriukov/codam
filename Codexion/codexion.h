@@ -75,6 +75,7 @@ typedef struct t_span
 	t_array			*dongle;
 	bool			is_over;
 	bool			is_failed;
+	bool			is_burnout;
 	char			*schdlr;
 	char			**argv;
 	int				argc;

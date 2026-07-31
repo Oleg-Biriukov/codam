@@ -92,7 +92,7 @@ int	main(int argc, char **argv)
 	take_out_arg(s, ++argv, 7);
 	if (s->is_failed)
 		return (printf("Error\n"), free(s), 0);
-	printf("coders_n%d\n", s->n_coders);
+	printf("coders_n %d\n", s->n_coders);
 	printf("t_burnout %d\n", s->t_burnout);
 	printf("t_compile %d\n", s->t_compile);
 	printf("t_debug %d\n", s->t_debug);

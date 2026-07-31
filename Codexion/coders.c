@@ -35,7 +35,7 @@ void	detect_b(t_coder *data)
 			usleep(30);
 	}
 	pthread_mutex_lock(&s->mut);
-	s->is_failed = true;
+	s->is_over = true;
 	printf("[%d ms] C%d BURNOUT\n", s->time, data->id);
 	pthread_mutex_unlock(&s->mut);
 }
