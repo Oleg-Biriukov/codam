@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_array_extended.c                                :+:      :+:    :+:   */
+/*   ft_array_expanded.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: obirukov <obirukov@student.codam.nl>       #+#  +:+       +#+        */
+/*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026-07-29 16:15:43 by obirukov          #+#    #+#             */
-/*   Updated: 2026-07-29 16:15:43 by obirukov         ###   ########.fr       */
+/*   Created: 2026/07/29 16:15:43 by obirukov          #+#    #+#             */
+/*   Updated: 2026/08/01 16:06:02 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ void	la_sort(t_array *a, int (cond)(t_array *, t_array *))
 	void			*tmp;
 	t_array			*ar;
 
+	printf("sorting...\n");
 	ar = la_start(a);
 	count = 0;
 	while (1)

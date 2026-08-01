@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/31 17:05:49 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/01 13:40:42 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ void	detect_b(t_coder *data)
 	}
 	pthread_mutex_lock(&s->mut);
 	s->is_burnout = true;
-	printf("%d %d burned out\n", s->time, data->id);
+	printf("%d %d burned out\n", timer(s), data->id);
 	pthread_mutex_unlock(&s->mut);
 }
 
@@ -61,8 +61,8 @@ static bool	awaiting_for_connection(t_coder	*data)
 		}
 		break ;
 	}
-	printf("%d %d has taken a dongle\n", s->time, data->id);
-	printf("%d %d has taken a dongle\n", s->time, data->id);
+	printf("%d %d has taken a dongle\n", timer(s), data->id);
+	printf("%d %d has taken a dongle\n", timer(s), data->id);
 	pthread_mutex_unlock(&s->mut);
 	return (true);
 }

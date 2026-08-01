@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/01 12:55:59 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/01 15:52:08 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,7 +16,7 @@ void	start_comp(t_span *s, t_coder *data)
 {
 	pthread_mutex_lock(&s->mut);
 	data->is_active = false;
-	printf("%d %d is compiling\n", s->time, data->id);
+	printf("%d %d is compiling\n", timer(s), data->id);
 	gettimeofday(&data->b_interv_s, NULL);
 	pthread_mutex_unlock(&s->mut);
 }
@@ -37,14 +37,14 @@ void	finish_comp(t_span *s, t_coder *data)
 void	start_debug(t_span *s, t_coder *data)
 {
 	pthread_mutex_lock(&s->mut);
-	printf("%d %d is debugging\n", s->time, data->id);
+	printf("%d %d is debugging\n", timer(s), data->id);
 	pthread_mutex_unlock(&s->mut);
 }
 
 void	start_refactor(t_span *s, t_coder *data)
 {
 	pthread_mutex_lock(&s->mut);
-	printf("%d %d is refactoring\n", s->time, data->id);
+	printf("%d %d is refactoring\n", timer(s), data->id);
 	pthread_mutex_unlock(&s->mut);
 }
 
@@ -65,8 +65,9 @@ bool	stages(t_coder *data)
 		return (false);
 	pthread_mutex_lock(&s->mut);
 	data->is_active = true;
-	if (s->circle == 0)
-		gettimeofday(&data->req_t, NULL);
+	gettimeofday(&data->req_t, NULL);
+	s->to_schedule = true;
+	pthread_cond_broadcast(&s->c_to_schedule);
 	pthread_mutex_unlock(&s->mut);
 	return (true);
 }

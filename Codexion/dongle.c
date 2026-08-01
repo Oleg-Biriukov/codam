@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/31 17:06:02 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/01 15:39:54 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,8 @@ void	dongle(t_dongle *data)
 		pthread_mutex_lock(&s->mut);
 		data->is_cooldown = false;
 		data->is_active = true;
+		s->to_schedule = true;
+		pthread_cond_broadcast(&s->c_to_schedule);
 		pthread_mutex_unlock(&s->mut);
 		if (RUNNING_ON_VALGRIND)
 			usleep(30);
