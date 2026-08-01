@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/31 16:51:32 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/01 13:34:39 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,6 +62,7 @@ typedef struct t_span
 {
 	pthread_mutex_t	mut;
 	unsigned int	time;
+	unsigned int	circle;
 	unsigned int	n_compiles;
 	unsigned int	n_coders;
 	unsigned int	n_in_progress;
@@ -103,5 +104,6 @@ bool			init_arrays(t_span *s);
 bool			init_dongle(t_span *s);
 bool			scheduler(t_span *s);
 bool			wait_check(t_span *s, unsigned int how_many);
+int				timer(t_span *s);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:26:46 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/31 16:52:17 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/01 12:56:53 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,6 +63,7 @@ void	take_out_arg(t_span *s, char **argv, int argc)
 	s->t_refactor = convert_to_num(s);
 	s->n_compiles = convert_to_num(s);
 	s->d_cooldown = convert_to_num(s);
+	s->circle = 0;
 	s->schdlr = *s->argv;
 	if (s->argc != 0 || !s->schdlr)
 		s->is_failed = true;

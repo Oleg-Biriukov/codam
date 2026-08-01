@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/31 17:15:58 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/01 13:35:04 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ int	main(int argc, char **argv)
 	if (pthread_create(&t, NULL, (void *) &timer, s) != 0)
 		return (printf("Error\n"), free_all(s));
 	if (!start(s))
-		return (printf("Error\n"), free_all(s));
+		return (printf("Error\n"), pthread_join(t, NULL),free_all(s));
 	pthread_join(t, NULL);
 	free_all(s);
 	return (0);

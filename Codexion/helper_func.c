@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/31 16:50:55 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/01 13:13:17 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ bool	fail(t_span *s)
 
 unsigned int	interval(struct timeval s, struct timeval e)
 {
-	int	diff;
+	unsigned int	diff;
 
 	diff = (e.tv_sec * 1000000L + e.tv_usec)
 		- (s.tv_sec * 1000000L + s.tv_usec);
@@ -36,10 +36,10 @@ bool	wait_check(t_span *s, unsigned int how_many)
 
 	gettimeofday(&start_time, NULL);
 	gettimeofday(&current_time, NULL);
-	c_time = interval(start_time, current_time);
-	while (c_time < how_many * 1000)
+	c_time = interval(start_time, current_time) / 1000;
+	while (c_time < how_many)
 	{
-		c_time = interval(start_time, current_time);
+		c_time = interval(start_time, current_time) / 1000;
 		pthread_mutex_lock(&s->mut);
 		if (s->is_failed || s->is_over || s->is_burnout)
 			return (pthread_mutex_unlock(&s->mut), false);

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/31 15:27:35 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/01 12:55:59 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,8 @@ bool	stages(t_coder *data)
 		return (false);
 	pthread_mutex_lock(&s->mut);
 	data->is_active = true;
+	if (s->circle == 0)
+		gettimeofday(&data->req_t, NULL);
 	pthread_mutex_unlock(&s->mut);
 	return (true);
 }
