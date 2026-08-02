@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/01 16:11:41 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/02 15:44:57 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,12 +19,17 @@ bool	fail(t_span *s)
 	return (pthread_mutex_unlock(&s->mut), false);
 }
 
-unsigned long	interval(struct timeval s, struct timeval e)
+__int64_t	interval(struct timeval s, struct timeval e)
 {
-	unsigned int	diff;
+	__int64_t	diff;
 
-	diff = (e.tv_sec * 1000000L + e.tv_usec)
+	if ((e.tv_sec * 1000000L + e.tv_usec) > (s.tv_sec * 1000000L + s.tv_usec))
+		diff = (e.tv_sec * 1000000L + e.tv_usec)
 		- (s.tv_sec * 1000000L + s.tv_usec);
+	diff = (e.tv_sec * 1000000L + e.tv_usec)
+	- (s.tv_sec * 1000000L + s.tv_usec);
+	if (diff < 0)
+		diff = 0;
 	return (diff);
 }
 

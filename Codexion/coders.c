@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/01 13:40:42 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/02 16:06:41 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ void	detect_b(t_coder *data)
 	{
 		pthread_mutex_lock(&s->mut);
 		if (s->is_over || s->is_failed
-			|| s->n_compiles == data->compiles || s->is_burnout)
+			|| data->is_done || s->is_burnout)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
 		pthread_mutex_lock(&s->mut);

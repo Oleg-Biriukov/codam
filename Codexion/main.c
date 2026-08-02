@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/01 15:06:08 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/02 16:06:08 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	timer(t_span *s)
 
 	gettimeofday(&c_time, NULL);
 	time = interval(s->start, c_time) / 1000;
-	return (time);
+return (time);
 }
 
 int	free_all(t_span *s)

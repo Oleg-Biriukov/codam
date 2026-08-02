@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/01 16:11:53 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/02 16:06:15 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,8 +85,8 @@ typedef struct t_span
 }	t_span;
 
 struct timespec	convert(struct timeval from, int b_out);
-unsigned long	interval(struct timeval s, struct timeval c);
 unsigned int	la_len(t_array *array);
+__int64_t		interval(struct timeval s, struct timeval c);
 t_array			*la_start(t_array *array);
 t_array			*la_append(t_array *array, void *content);
 t_array			*la_init(void *content);
