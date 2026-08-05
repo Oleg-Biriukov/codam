@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/02 16:06:08 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/05 17:16:35 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,9 @@ int	timer(t_span *s)
 	struct timeval	c_time;
 
 	gettimeofday(&c_time, NULL);
+	pthread_mutex_lock(&s->mut_time);
 	time = interval(s->start, c_time) / 1000;
-return (time);
+	return (pthread_mutex_unlock(&s->mut_time), time);
 }
 
 int	free_all(t_span *s)
@@ -29,6 +30,9 @@ int	free_all(t_span *s)
 
 	len_workspace = s->n_coders * 2;
 	pthread_mutex_destroy(&s->mut);
+	pthread_mutex_destroy(&s->mut_prnt);
+	pthread_mutex_destroy(&s->mut_time);
+	pthread_mutex_destroy(&s->mut_array);
 	pthread_cond_destroy(&s->c_to_schedule);
 	la_free(s->dongle);
 	la_free(s->coders);
@@ -79,6 +83,9 @@ int	main(int argc, char **argv)
 	if (s->is_failed)
 		return (printf("Error\n"), free(s), 0);
 	pthread_mutex_init(&s->mut, NULL);
+	pthread_mutex_init(&s->mut_prnt, NULL);
+	pthread_mutex_init(&s->mut_time, NULL);
+	pthread_mutex_init(&s->mut_array, NULL);
 	pthread_cond_init(&s->c_to_schedule, NULL);
 	if (!init_arrays(s))
 		return (printf("Error\n"), free_all(s));
@@ -86,7 +93,6 @@ int	main(int argc, char **argv)
 		return (printf("Error\n"), free_all(s));
 	if (!workspace_init(s))
 		return (printf("Error\n"), free_all(s));
-	gettimeofday(&s->start, NULL);
 	if (!start(s))
 		return (printf("Error\n"), free_all(s));
 	free_all(s);

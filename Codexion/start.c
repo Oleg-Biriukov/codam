@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/07/31 16:50:28 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/05 17:18:30 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,12 +63,14 @@ static void	awaiting(t_span *s, t_array *a, unsigned int total_c)
 		pthread_mutex_lock(&s->mut);
 		if (s->is_failed || s->is_burnout)
 			return ((void) pthread_mutex_unlock(&s->mut));
+		pthread_mutex_unlock(&s->mut);
 		c_data = (t_coder *) a->data;
+		pthread_mutex_lock(&s->mut_array);
 		if (c_data->compiles >= s->n_compiles)
 			counter += s->n_compiles;
 		else
 			counter += c_data->compiles;
-		pthread_mutex_unlock(&s->mut);
+		pthread_mutex_unlock(&s->mut_array);
 		a = a->next->next;
 		if (RUNNING_ON_VALGRIND)
 			usleep(30);
@@ -109,12 +111,13 @@ bool	start(t_span *s)
 
 	workspace = s->workspace;
 	create_threads(s, workspace);
-	pthread_mutex_lock(&s->mut);
+	pthread_mutex_lock(&s->mut_array);
 	total_c = s->n_coders * s->n_compiles;
 	n_coders = s->n_coders;
-	pthread_mutex_unlock(&s->mut);
+	pthread_mutex_unlock(&s->mut_array);
 	if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
 		fail(s);
+	gettimeofday(&s->start, NULL);
 	if (!s->is_failed)
 		awaiting(s, workspace, total_c);
 	pthread_mutex_lock(&s->mut);

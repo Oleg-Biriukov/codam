@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/02 16:05:42 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/05 18:13:09 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,20 +19,23 @@ static bool	awaiting_for_connection(t_dongle *data)
 	struct timeval	now;
 
 	s = (t_span *) data->s;
-	pthread_mutex_lock(&s->mut);
+	pthread_mutex_lock(&s->mut_array);
 	while (data->is_cooldown == false)
 	{
 		gettimeofday(&now, NULL);
 		wait = convert(now, 1000);
-		if (pthread_cond_timedwait(&data->cond, &s->mut, &wait) == ETIMEDOUT)
+		if (pthread_cond_timedwait(&data->cond, &s->mut_array, &wait) == ETIMEDOUT)
 		{
+			pthread_mutex_lock(&s->mut);
 			if (s->is_failed || s->is_over || s->is_burnout)
-				return (pthread_mutex_unlock(&s->mut), false);
+				return (pthread_mutex_unlock(&s->mut), 
+					pthread_mutex_unlock(&s->mut_array), false);
+			pthread_mutex_unlock(&s->mut);
 			continue ;
 		}
 		break ;
 	}
-	pthread_mutex_unlock(&s->mut);
+	pthread_mutex_unlock(&s->mut_array);
 	return (true);
 }
 
@@ -47,12 +50,12 @@ void	dongle(t_dongle *data)
 			return ;
 		if (!wait_check(s, s->d_cooldown))
 			return ;
-		pthread_mutex_lock(&s->mut);
+		pthread_mutex_lock(&s->mut_array);
 		data->is_cooldown = false;
 		data->is_active = true;
 		s->to_schedule = true;
 		pthread_cond_broadcast(&s->c_to_schedule);
-		pthread_mutex_unlock(&s->mut);
+		pthread_mutex_unlock(&s->mut_array);
 		if (RUNNING_ON_VALGRIND)
 			usleep(30);
 	}
@@ -71,6 +74,7 @@ bool	init_dongle(t_span *s)
 		if (!data || !array)
 			return (false);
 		gettimeofday(&data->start, NULL);
+		pthread_mutex_init(&data->mutex, NULL);
 		pthread_cond_init(&data->cond, NULL);
 		data->id = la_len(la_start(array));
 		data->s = (void *) s;

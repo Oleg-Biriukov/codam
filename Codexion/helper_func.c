@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/02 15:44:57 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/05 12:37:37 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ __int64_t	interval(struct timeval s, struct timeval e)
 
 	if ((e.tv_sec * 1000000L + e.tv_usec) > (s.tv_sec * 1000000L + s.tv_usec))
 		diff = (e.tv_sec * 1000000L + e.tv_usec)
-		- (s.tv_sec * 1000000L + s.tv_usec);
+	- (s.tv_sec * 1000000L + s.tv_usec);
 	diff = (e.tv_sec * 1000000L + e.tv_usec)
 	- (s.tv_sec * 1000000L + s.tv_usec);
 	if (diff < 0)

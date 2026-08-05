@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/02 16:06:15 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/05 18:12:11 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,7 @@ typedef struct t_dongle
 	unsigned int	id;
 	pthread_cond_t	cond;
 	struct timeval	start;
+	pthread_mutex_t	mutex;
 }	t_dongle;
 
 typedef struct t_coder
@@ -49,6 +50,7 @@ typedef struct t_coder
 	struct timeval	b_interv_s;
 	struct timeval	b_interv_e;
 	struct timeval	start;
+	pthread_mutex_t	mutex;
 }	t_coder;
 
 typedef struct t_array
@@ -61,9 +63,10 @@ typedef struct t_array
 typedef struct t_span
 {
 	pthread_mutex_t	mut;
+	pthread_mutex_t	mut_prnt;
+	pthread_mutex_t	mut_time;
 	pthread_cond_t	c_to_schedule;
 	struct timeval	start;
-	unsigned int	time;
 	unsigned int	n_compiles;
 	unsigned int	n_coders;
 	unsigned int	n_in_progress;
@@ -93,7 +96,7 @@ t_array			*la_init(void *content);
 t_array			*get_elem(t_array *stack, int num);
 t_array			*find_elem(t_array *haystack, t_array *needle);
 void			*la_free(t_array *array);
-void			la_sort(t_array *a, int (cond)(t_array *, t_array *));
+void			la_sort(t_array *a, int (cond)(t_array *, t_array *), t_span *s);
 void			take_out_arg(t_span *s, char **argv, int argc);
 void			coder(t_coder *data);
 void			dongle(t_dongle *data);
