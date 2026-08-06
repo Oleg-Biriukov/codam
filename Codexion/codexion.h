@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/05 18:12:11 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/06 18:31:32 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,16 +23,17 @@
 # include <errno.h>
 # include <stdbool.h>
 
+typedef struct t_coder t_coder;
+
 typedef struct t_dongle
 {
 	void			*s;
 	bool			is_active;
 	bool			is_cooldown;
+	t_coder			*req_coders[2];
 	pthread_t		t;
 	unsigned int	id;
 	pthread_cond_t	cond;
-	struct timeval	start;
-	pthread_mutex_t	mutex;
 }	t_dongle;
 
 typedef struct t_coder
@@ -46,11 +47,9 @@ typedef struct t_coder
 	unsigned int	id;
 	unsigned int	compiles;
 	pthread_cond_t	cond;
-	struct timeval	req_t;
 	struct timeval	b_interv_s;
 	struct timeval	b_interv_e;
-	struct timeval	start;
-	pthread_mutex_t	mutex;
+	struct timeval	req_t;
 }	t_coder;
 
 typedef struct t_array
@@ -65,6 +64,7 @@ typedef struct t_span
 	pthread_mutex_t	mut;
 	pthread_mutex_t	mut_prnt;
 	pthread_mutex_t	mut_time;
+	pthread_mutex_t	mut_array;
 	pthread_cond_t	c_to_schedule;
 	struct timeval	start;
 	unsigned int	n_compiles;

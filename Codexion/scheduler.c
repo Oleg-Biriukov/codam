@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/05 18:08:11 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/06 18:38:36 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,6 +82,30 @@ static int	edf(t_array *a1, t_array *a2)
     return (by_comp);
 }
 
+static void take_left_dongle(t_span *s, t_coder	*cdata, t_dongle *ldata)
+{
+	if (ldata->is_active)
+	{
+		pthread_mutex_lock(&s->mut_prnt);
+		printf("%d %d has taken a dongle%d\n", timer(s), cdata->id, ldata->id);
+		pthread_mutex_unlock(&s->mut_prnt);
+		cdata->conn[0] = ldata;
+		ldata->is_active = false;
+	}
+}
+
+static void take_right_dongle(t_span *s, t_coder	*cdata, t_dongle *rdata)
+{
+	if (rdata->is_active)
+	{
+		pthread_mutex_lock(&s->mut_prnt);
+		printf("%d %d has taken a dongle%d\n", timer(s), cdata->id, rdata->id);
+		pthread_mutex_unlock(&s->mut_prnt);
+		cdata->conn[1] = rdata;
+		rdata->is_active = false;
+	}
+}
+
 static bool	is_right_coder(t_span *s, t_array *a)
 {
 	t_dongle		*ldata;
@@ -94,21 +118,28 @@ static bool	is_right_coder(t_span *s, t_array *a)
 	cdata = (t_coder *) a->data;
 	rdata = (t_dongle *)(a->prev)->data;
 	ldata = (t_dongle *)(a->next)->data;
-	if (rdata->is_active
-		&& ldata->is_active
+	if ((rdata->is_active
+		|| ldata->is_active)
 		&& !cdata->is_done
 		&& cdata->is_active
 		&& ldata != rdata)
 	{
 		assigned = true;
-		cdata->conn[0] = rdata;
-		cdata->conn[1] = ldata;
-		rdata->is_active = false;
-		ldata->is_active = false;
+		if (cdata->id % 2 == 0)
+		{
+			take_right_dongle(s, cdata, rdata);
+			take_left_dongle(s, cdata, ldata);
+		}
+		else
+		{
+			take_left_dongle(s, cdata, ldata);
+			take_right_dongle(s, cdata, rdata);
+		}
 		pthread_mutex_lock(&s->mut_time);
 		gettimeofday(&cdata->b_interv_s, NULL);
 		pthread_mutex_unlock(&s->mut_time);
-		pthread_cond_broadcast(&cdata->cond);
+		if (cdata->conn[1] && cdata->conn[0])
+			pthread_cond_broadcast(&cdata->cond);
 	}
 	pthread_mutex_unlock(&s->mut_array);
 	return (assigned);
@@ -119,17 +150,21 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 	unsigned int	i;
 	unsigned int	len_c;
 	t_array			*a;
+	t_dongle		*data;
 	struct timeval	now;
 	struct timespec	wait;
 
+	len_c = s->n_coders;
 	while (1)
 	{
 		i = 0;
 		pthread_mutex_lock(&s->mut_array);
+		pthread_mutex_unlock(&s->mut_array);
+		pthread_mutex_lock(&s->mut_array);
 		while (s->to_schedule != true)
 		{
 			gettimeofday(&now, NULL);
-			wait = convert(now, 300);
+			wait = convert(now, 100);
 			if (pthread_cond_timedwait(&s->c_to_schedule, &s->mut_array, &wait) == ETIMEDOUT)
 			{
 				pthread_mutex_lock(&s->mut);
@@ -141,20 +176,12 @@ static void	scheduling(t_span *s, int (_by)(t_array *, t_array *))
 			break ;
 		}
 		s->to_schedule = false;
-		len_c = s->n_coders;
 		pthread_mutex_unlock(&s->mut_array);
-		la_sort(s->coders, _by, s);
-		while (i < len_c)
+		a = s->dongle;
+		while (a)
 		{
-			a = find_elem(s->workspace, get_elem(s->coders, i++));
-			pthread_mutex_lock(&s->mut);
-			if (s->is_over || s->is_failed || s->is_burnout)
-				return ((void) pthread_mutex_unlock(&s->mut));
-			pthread_mutex_unlock(&s->mut);
-			if (is_right_coder(s, a))
-				break ;
-			if (RUNNING_ON_VALGRIND)
-				usleep(30);
+			data = (t_dongle *) a->data;
+			if (_by(data->req_coders[0], data->req_coders[1]))
 		}
 	}
 }
@@ -166,3 +193,17 @@ bool	scheduler(t_span *s)
 	else
 		return (scheduling(s, edf), false);
 }
+
+
+// la_sort(s->coders, _by, s);
+// 		while (i < len_c)
+// 		{
+// 			a = find_elem(s->workspace, get_elem(s->coders, i++));
+// 			pthread_mutex_lock(&s->mut);
+// 			if (s->is_over || s->is_failed || s->is_burnout)
+// 				return ((void) pthread_mutex_unlock(&s->mut));
+// 			pthread_mutex_unlock(&s->mut);
+// 			is_right_coder(s, a);
+// 			if (RUNNING_ON_VALGRIND)
+// 				usleep(30);
+// 		}

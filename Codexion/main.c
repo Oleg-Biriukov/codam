@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:22 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/05 17:16:35 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/06 13:32:32 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -78,7 +78,7 @@ int	main(int argc, char **argv)
 
 	s = malloc(sizeof(t_span));
 	if (!s || argc == 1)
-		return (printf("Error\n"));
+		return (printf("Error\n"), free(s), 1);
 	take_out_arg(s, ++argv, 7);
 	if (s->is_failed)
 		return (printf("Error\n"), free(s), 0);

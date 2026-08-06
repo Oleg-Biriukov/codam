@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/05 18:13:09 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/06 18:22:56 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ static bool	awaiting_for_connection(t_dongle *data)
 	while (data->is_cooldown == false)
 	{
 		gettimeofday(&now, NULL);
-		wait = convert(now, 1000);
+		wait = convert(now, 100);
 		if (pthread_cond_timedwait(&data->cond, &s->mut_array, &wait) == ETIMEDOUT)
 		{
 			pthread_mutex_lock(&s->mut);
@@ -67,14 +67,16 @@ bool	init_dongle(t_span *s)
 	t_dongle	*data;
 
 	array = NULL;
+	pthread_mutex_lock(&s->mut_array);
+	pthread_mutex_unlock(&s->mut_array);
 	while (la_len(la_start(array)) != s->n_coders)
 	{
 		data = malloc(sizeof(t_dongle));
 		array = la_append(array, data);
 		if (!data || !array)
 			return (false);
-		gettimeofday(&data->start, NULL);
-		pthread_mutex_init(&data->mutex, NULL);
+		data->req_coders[0] = NULL;
+		data->req_coders[1] = NULL;
 		pthread_cond_init(&data->cond, NULL);
 		data->id = la_len(la_start(array));
 		data->s = (void *) s;

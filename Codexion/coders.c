@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/05 18:15:09 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/06 17:46:17 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,10 +24,10 @@ void	detect_b(t_coder *data)
 			|| s->is_burnout)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
-		pthread_mutex_lock(&data->mutex);
+		pthread_mutex_lock(&s->mut_array);
 		if (data->is_done)
-			return ((void) pthread_mutex_unlock(&data->mutex));
-		pthread_mutex_unlock(&data->mutex);
+			return ((void) pthread_mutex_unlock(&s->mut_array));
+		pthread_mutex_unlock(&s->mut_array);
 		pthread_mutex_lock(&s->mut_time);
 		gettimeofday(&data->b_interv_e, NULL);
 		if (interval(data->b_interv_s, data->b_interv_e) > s->t_burnout * 1000)
@@ -54,27 +54,23 @@ static bool	awaiting_for_connection(t_coder	*data)
 	struct timeval	now;
 
 	s = (t_span *) data->s;
-	pthread_mutex_lock(&data->mutex);
+	pthread_mutex_lock(&s->mut_array);
 	while (!(data->conn[0] && data->conn[1]))
 	{
 		gettimeofday(&now, NULL);
-		wait = convert(now, 300);
-		if (pthread_cond_timedwait(&data->cond, &data->mutex, &wait) == ETIMEDOUT)
+		wait = convert(now, 100);
+		if (pthread_cond_timedwait(&data->cond, &s->mut_array, &wait) == ETIMEDOUT)
 		{
 			pthread_mutex_lock(&s->mut);
 			if (s->is_failed || s->is_over || s->is_burnout)
 				return (pthread_mutex_unlock(&s->mut),
-					pthread_mutex_unlock(&data->mutex), false);
+					pthread_mutex_unlock(&s->mut_array), false);
 			pthread_mutex_unlock(&s->mut);
 			continue ;
 		}
 		break ;
 	}
-	pthread_mutex_unlock(&data->mutex);
-	pthread_mutex_lock(&s->mut_prnt);
-	printf("%d %d has taken a dongle\n", timer(s), data->id);
-	printf("%d %d has taken a dongle\n", timer(s), data->id);
-	return (pthread_mutex_unlock(&s->mut_prnt), true);
+	return (pthread_mutex_unlock(&s->mut_array), true);
 }
 
 void	coder(t_coder *data)
@@ -84,15 +80,15 @@ void	coder(t_coder *data)
 	t_span			*s;
 
 	s = (t_span *) data->s;
-	pthread_mutex_lock(&data->mutex);
+	pthread_mutex_lock(&s->mut_array);
 	n_comp = s->n_compiles;
 	c_comp = data->compiles;
-	pthread_mutex_unlock(&data->mutex);
+	pthread_mutex_unlock(&s->mut_array);
 	while (c_comp != n_comp)
 	{
-		pthread_mutex_lock(&data->mutex);
+		pthread_mutex_lock(&s->mut_array);
 		c_comp = data->compiles;
-		pthread_mutex_unlock(&data->mutex);
+		pthread_mutex_unlock(&s->mut_array);
 		if (!awaiting_for_connection(data))
 			return ;
 		if (!stages(data))
@@ -104,9 +100,9 @@ void	coder(t_coder *data)
 		if (RUNNING_ON_VALGRIND)
 			usleep(30);
 	}
-	pthread_mutex_lock(&data->mutex);
+	pthread_mutex_lock(&s->mut_array);
 	data->is_done = true;
-	pthread_mutex_unlock(&data->mutex);
+	pthread_mutex_unlock(&s->mut_array);
 }
 
 bool	init_arrays(t_span *s)
@@ -123,9 +119,6 @@ bool	init_arrays(t_span *s)
 			return (false);
 		data->id = la_len(la_start(array));
 		pthread_cond_init(&data->cond, NULL);
-		pthread_mutex_init(&data->mutex, NULL);
-		gettimeofday(&data->start, NULL);
-		gettimeofday(&data->req_t, NULL);
 		gettimeofday(&data->b_interv_s, NULL);
 		data->s = (void *) s;
 		data->is_done = false;
