@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/06 19:27:12 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/07 16:17:04 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,18 +23,19 @@ static int	fifo(t_coder *data1, t_coder *data2)
 	s = (t_span *) data1->s; 
 	pthread_mutex_lock(&s->mut_time);
 	if (d1_t.tv_sec < d2_t.tv_sec)
-		return (pthread_mutex_unlock(&s->mut_time), 1);
-	else if (d1_t.tv_sec > d2_t.tv_sec)
 		return (pthread_mutex_unlock(&s->mut_time), 0);
+	else if (d1_t.tv_sec > d2_t.tv_sec)
+		return (pthread_mutex_unlock(&s->mut_time), 1);
 	else if (d1_t.tv_sec == d2_t.tv_sec)
 	{
 		if (d1_t.tv_usec < d2_t.tv_usec)
-			return (pthread_mutex_unlock(&s->mut_time), 1);
-		else if (d1_t.tv_usec > d2_t.tv_usec)
 			return (pthread_mutex_unlock(&s->mut_time), 0);
+		else if (d1_t.tv_usec > d2_t.tv_usec)
+			return (pthread_mutex_unlock(&s->mut_time), 1);
 	}
-	return (pthread_mutex_unlock(&s->mut_time), 1);
+	return (pthread_mutex_unlock(&s->mut_time), data1->id < data2->id);
 }
+
 static int	edf(t_coder *data1, t_coder *data2)
 {
     __int64_t		deadline1;
@@ -73,7 +74,7 @@ static int	edf(t_coder *data1, t_coder *data2)
         return (0);
     if (deadline1 > deadline2)
         return (1);
-    return (by_comp);
+    return (fifo(data1, data2));
 }
 
 static void take_left_dongle(t_span *s, t_coder	*cdata, t_dongle *ldata)
@@ -100,7 +101,7 @@ static void take_right_dongle(t_span *s, t_coder	*cdata, t_dongle *rdata)
 	}
 }
 
-static bool	is_right_coder(t_span *s, t_array *a)
+static bool	is_right_coder(t_span *s, t_array *c, t_array *d)
 {
 	t_dongle		*ldata;
 	t_dongle		*rdata;
@@ -109,9 +110,9 @@ static bool	is_right_coder(t_span *s, t_array *a)
 
 	pthread_mutex_lock(&s->mut_array);
 	assigned = false;
-	cdata = (t_coder *) a->data;
-	rdata = (t_dongle *)(a->prev)->data;
-	ldata = (t_dongle *)(a->next)->data;
+	cdata = (t_coder *) c->data;
+	rdata = (t_dongle *)(c->prev)->data;
+	ldata = (t_dongle *)(c->next)->data;
 	if ((rdata->is_active
 		|| ldata->is_active)
 		&& !cdata->is_done
@@ -119,19 +120,13 @@ static bool	is_right_coder(t_span *s, t_array *a)
 		&& ldata != rdata)
 	{
 		assigned = true;
-		if (cdata->id % 2 == 0)
-		{
-			take_right_dongle(s, cdata, rdata);
-			take_left_dongle(s, cdata, ldata);
-		}
-		else
-		{
-			take_left_dongle(s, cdata, ldata);
-			take_right_dongle(s, cdata, rdata);
-		}
-		pthread_mutex_lock(&s->mut_time);
-		gettimeofday(&cdata->b_interv_s, NULL);
-		pthread_mutex_unlock(&s->mut_time);
+		if (d == c->prev && !cdata->conn[1])
+    		take_right_dongle(s, cdata, rdata);
+		else if (d == c->next && !cdata->conn[0])
+    		take_left_dongle(s, cdata, ldata);
+		// pthread_mutex_lock(&s->mut_time);
+		// gettimeofday(&cdata->b_interv_s, NULL);
+		// pthread_mutex_unlock(&s->mut_time);
 		if (cdata->conn[1] && cdata->conn[0])
 			pthread_cond_broadcast(&cdata->cond);
 	}
@@ -179,10 +174,13 @@ static void	scheduling(t_span *s, int (_by)(t_coder *, t_coder *))
 				return ((void) pthread_mutex_unlock(&s->mut));
 			pthread_mutex_unlock(&s->mut);
 			data = (t_dongle *) a->data;
-			if (_by(data->req_coders[0], data->req_coders[1]))
-				is_right_coder(s, a->next);
-			else
-				is_right_coder(s, a->prev);
+			if (data->is_active && data->req_coders[0]->id % 2 != 0)
+			{
+				if (_by(data->req_coders[0], data->req_coders[1]))
+					is_right_coder(s, a->next, a);
+				else
+					is_right_coder(s, a->prev, a);
+			}
 			a = a->next->next;
 		}
 	}

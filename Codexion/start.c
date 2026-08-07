@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/06 18:32:07 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/07 16:59:00 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,11 @@ static bool	create_coders_t(t_array *a)
 		return (false);
 	gettimeofday(&c_data->b_interv_s, NULL);
 	gettimeofday(&c_data->req_t, NULL);
-	if (pthread_create(&c_data->t_burnout,
-			NULL, (void *) detect_b, c_data) != 0)
-		return (false);
+	if (c_data->id % 2 != 0)
+		c_data->req_t.tv_usec += 10;
+	// if (pthread_create(&c_data->t_burnout,
+	// 		NULL, (void *) detect_b, c_data) != 0)
+		// return (false);
 	return (true);
 }
 
@@ -44,8 +46,8 @@ static void	create_threads(t_span *s, t_array *a)
 			d_data = (t_dongle *) a->data;
 			if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
 				return ((void) fail(s));
-			d_data->req_coders[0] = (t_coder *) a->prev;
-			d_data->req_coders[1] = (t_coder *) a->next;
+			// d_data->req_coders[0] = (t_coder *) a->prev->data;
+			// d_data->req_coders[1] = (t_coder *) a->next->data;
 		}
 		else
 			if (!create_coders_t(a))
@@ -102,7 +104,7 @@ static void	finish(t_array *a, unsigned int n_coders)
 		{
 			c_data = (t_coder *) a->data;
 			pthread_join(c_data->t, NULL);
-			pthread_join(c_data->t_burnout, NULL);
+			// pthread_join(c_data->t_burnout, NULL);
 		}
 		a = a->next;
 	}
