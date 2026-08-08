@@ -1,27 +1,61 @@
 #include "codexion.h"
 
-t_array	*create_heapq(int size)
+static void	swap(void **a, void **b)
 {
-	t_array	*heap;
+	void	*temp;
 
-	heap = NULL;
-	if (size <= 0)
-		return (NULL);
-	while (size--)
-		heap = la_append(heap, NULL);
-	return (la_start(heap));
-}
-void	enq_heapq(t_array *heap, void *data, int (_prioriy)(t_array *, t_array))
-{
-	while (heap && heap->data != NULL)
-		heap = heap->next;
-	if (!heap)
-		return ;
-	heap->data = data;
-	la_sort(heap, _prioriy);
+	temp = *a;
+	*a = *b;
+	*b = temp;
 }
 
-void	*denq_heapq(t_array *heap)
+static void heapify_up(t_heapq *h, int index, int (_prioriy)(void *, void *))
 {
-	
+    void *root;
+
+    root = h->items[(index-1)/2];
+    if (index-- && _prioriy(root, h->items[index]))
+        return (swap(root, h->items[index]), heapify_up(h, index, _prioriy));
+}
+
+void	enq_heapq(t_heapq *heap, void *data, int (_prioriy)(void *, void *))
+{
+    if (heap->size == MAX)
+        return ;
+    heap->items[heap->size++] = data;
+    heapify_up(heap, heap->size, _prioriy);
+}
+
+static void heapify_down(t_heapq *heap, int index, int (_prioriy)(void *, void *))
+{
+    int smallest;
+    int left;
+    int right;
+
+    smallest = index;
+    left = 2 * index + 1;
+    right = 2 * index + 2;
+    if (left < heap->size
+        && _prioriy(heap->items[smallest], heap->items[left]))
+        smallest = left;
+    if (right < heap->size
+        && _prioriy(heap->items[smallest], heap->items[right]))
+        smallest = right;
+    if (smallest != index)
+    {
+        swap(heap->items[smallest], heap->items[index]);
+        heapify_down(heap, index - 1, _prioriy);
+    }
+}
+
+void	*deq_heapq(t_heapq *heap, int (_prioriy)(void *, void *))
+{
+    void    *data;
+
+    if (!heap->size)
+        return (NULL);
+    data = heap->items[0];
+    heap->items[0] = heap->items[--heap->size];
+    heapify_down(heap, 0, _prioriy);
+	return (data);
 }

@@ -6,21 +6,21 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/07 16:17:04 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/08 17:06:14 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-static int	fifo(t_coder *data1, t_coder *data2)
+int	fifo(void	*data1, void	*data2)
 {
 	struct timeval	d1_t;
 	struct timeval	d2_t;
 	t_span			*s;
 
-	d1_t = data1->req_t;
-	d2_t = data2->req_t;
-	s = (t_span *) data1->s; 
+	d1_t = ((t_coder *) data1)->req_t;
+	d2_t = ((t_coder *) data2)->req_t;
+	s = (t_span *) ((t_coder *) data1)->s; 
 	pthread_mutex_lock(&s->mut_time);
 	if (d1_t.tv_sec < d2_t.tv_sec)
 		return (pthread_mutex_unlock(&s->mut_time), 0);
@@ -33,10 +33,11 @@ static int	fifo(t_coder *data1, t_coder *data2)
 		else if (d1_t.tv_usec > d2_t.tv_usec)
 			return (pthread_mutex_unlock(&s->mut_time), 1);
 	}
-	return (pthread_mutex_unlock(&s->mut_time), data1->id < data2->id);
+	return (pthread_mutex_unlock(&s->mut_time),
+		((t_coder *) data1)->id < ((t_coder *) data2)->id);
 }
 
-static int	edf(t_coder *data1, t_coder *data2)
+int	edf(void *data1, void *data2)
 {
     __int64_t		deadline1;
     __int64_t		deadline2;
@@ -45,18 +46,22 @@ static int	edf(t_coder *data1, t_coder *data2)
     struct timeval	now;
     t_span			*s;
 	bool			by_comp;
+	t_coder			*d1;
+	t_coder			*d2;
 
-    s = (t_span *) data1->s;
+	d1 = (t_coder *) data1;
+	d2 = (t_coder *) data2;
+	s = (t_span *) d1->s;
     gettimeofday(&now, NULL);
 	pthread_mutex_lock(&s->mut_array);
-	by_comp = data1->compiles > data2->compiles;
+	by_comp = d1->compiles > d2->compiles;
 	pthread_mutex_unlock(&s->mut_array);
 	pthread_mutex_lock(&s->mut_time);
-	wait1 = interval(data1->b_interv_s, data1->b_interv_e) / 1000;
-    wait2 = interval(data2->b_interv_s, data2->b_interv_e) / 1000;
-    deadline1 = (data1->b_interv_s.tv_sec * 1000000LL + data1->b_interv_s.tv_usec)
+	wait1 = interval(d1->b_interv_s, d1->b_interv_e) / 1000;
+    wait2 = interval(d2->b_interv_s, d2->b_interv_e) / 1000;
+    deadline1 = (d1->b_interv_s.tv_sec * 1000000LL + d1->b_interv_s.tv_usec)
         + wait1;
-    deadline2 = (data2->b_interv_s.tv_sec * 1000000LL + data2->b_interv_s.tv_usec)
+    deadline2 = (d2->b_interv_s.tv_sec * 1000000LL + d2->b_interv_s.tv_usec)
         + wait2;
 	pthread_mutex_unlock(&s->mut_time);
     if (wait1 > (s->t_burnout / 2) && wait2 > (s->t_burnout / 2))
@@ -101,7 +106,7 @@ static void take_right_dongle(t_span *s, t_coder	*cdata, t_dongle *rdata)
 	}
 }
 
-static bool	is_right_coder(t_span *s, t_array *c, t_array *d)
+static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
 {
 	t_dongle		*ldata;
 	t_dongle		*rdata;
@@ -134,14 +139,15 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d)
 	return (assigned);
 }
 
-static void	scheduling(t_span *s, int (_by)(t_coder *, t_coder *))
+static void	scheduling(t_span *s, int (_by)(void *, void *))
 {
 	unsigned int	i;
 	unsigned int	len_c;
 	t_array			*a;
 	t_dongle		*data;
-	struct timeval	now;
-	struct timespec	wait;
+	void			*coder;
+	// struct timeval	now;
+	// struct timespec	wait;
 
 	len_c = s->n_coders;
 	while (1)
@@ -149,23 +155,23 @@ static void	scheduling(t_span *s, int (_by)(t_coder *, t_coder *))
 		i = 0;
 		pthread_mutex_lock(&s->mut_array);
 		pthread_mutex_unlock(&s->mut_array);
-		pthread_mutex_lock(&s->mut_array);
-		while (s->to_schedule != true)
-		{
-			gettimeofday(&now, NULL);
-			wait = convert(now, 100);
-			if (pthread_cond_timedwait(&s->c_to_schedule, &s->mut_array, &wait) == ETIMEDOUT)
-			{
-				pthread_mutex_lock(&s->mut);
-				if (s->is_failed || s->is_over || s->is_burnout)
-					return (pthread_mutex_unlock(&s->mut), (void) pthread_mutex_unlock(&s->mut_array));
-				pthread_mutex_unlock(&s->mut);
-				continue ;
-			}
-			break ;
-		}
-		s->to_schedule = false;
-		pthread_mutex_unlock(&s->mut_array);
+		// pthread_mutex_lock(&s->mut_array);
+		// while (s->to_schedule != true)
+		// {
+		// 	gettimeofday(&now, NULL);
+		// 	wait = convert(now, 100);
+		// 	if (pthread_cond_timedwait(&s->c_to_schedule, &s->mut_array, &wait) == ETIMEDOUT)
+		// 	{
+		// 		pthread_mutex_lock(&s->mut);
+		// 		if (s->is_failed || s->is_over || s->is_burnout)
+		// 			return (pthread_mutex_unlock(&s->mut), (void) pthread_mutex_unlock(&s->mut_array));
+		// 		pthread_mutex_unlock(&s->mut);
+		// 		continue ;
+		// 	}
+		// 	break ;
+		// }
+		// s->to_schedule = false;
+		// pthread_mutex_unlock(&s->mut_array);
 		a = s->workspace->next;
 		while (a)
 		{
@@ -174,13 +180,13 @@ static void	scheduling(t_span *s, int (_by)(t_coder *, t_coder *))
 				return ((void) pthread_mutex_unlock(&s->mut));
 			pthread_mutex_unlock(&s->mut);
 			data = (t_dongle *) a->data;
-			if (data->is_active && data->req_coders[0]->id % 2 != 0)
-			{
-				if (_by(data->req_coders[0], data->req_coders[1]))
-					is_right_coder(s, a->next, a);
-				else
-					is_right_coder(s, a->prev, a);
-			}
+			coder = deq_heapq(&data->h, _by);
+			if (coder == a->next->data)
+				coder = a->next;
+			else
+				coder = a->prev;
+			if (data->is_active)
+				is_right_coder(s, coder, a);
 			a = a->next->next;
 		}
 	}

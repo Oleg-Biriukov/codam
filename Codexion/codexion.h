@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/06 18:31:32 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/08 16:50:13 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,15 +22,22 @@
 # include <string.h>
 # include <errno.h>
 # include <stdbool.h>
+# define MAX 100
 
 typedef struct t_coder t_coder;
+
+typedef struct t_heapq
+{
+    void 	*items[MAX];
+    int     size;
+} t_heapq;
 
 typedef struct t_dongle
 {
 	void			*s;
 	bool			is_active;
 	bool			is_cooldown;
-	t_coder			*req_coders[2];
+	t_heapq			h;
 	pthread_t		t;
 	unsigned int	id;
 	pthread_cond_t	cond;
@@ -102,6 +109,8 @@ void			coder(t_coder *data);
 void			dongle(t_dongle *data);
 void			detect_b(t_coder *data);
 void			awaiting_for_signal(t_span *s);
+void			enq_heapq(t_heapq *heap, void *data, int (_prioriy)(void *, void *));
+void			*deq_heapq(t_heapq *heap, int (_prioriy)(void *, void *));
 bool			fail(t_span *s);
 bool			start(t_span *s);
 bool			stages(t_coder *data);
@@ -110,5 +119,6 @@ bool			init_dongle(t_span *s);
 bool			scheduler(t_span *s);
 bool			wait_check(t_span *s, unsigned int how_many);
 int				timer(t_span *s);
+int				fifo(void	*data1, void	*data2);
 
 #endif
