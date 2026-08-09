@@ -14,25 +14,25 @@
 
 int	fifo(void	*data1, void	*data2)
 {
-	struct timeval	d1_t;
-	struct timeval	d2_t;
+	// struct timeval	d1_t;
+	// struct timeval	d2_t;
 	t_span			*s;
 
-	d1_t = ((t_coder *) data1)->req_t;
-	d2_t = ((t_coder *) data2)->req_t;
+	// d1_t = ((t_coder *) data1)->req_t;
+	// d2_t = ((t_coder *) data2)->req_t;
 	s = (t_span *) ((t_coder *) data1)->s; 
 	pthread_mutex_lock(&s->mut_time);
-	if (d1_t.tv_sec < d2_t.tv_sec)
-		return (pthread_mutex_unlock(&s->mut_time), 0);
-	else if (d1_t.tv_sec > d2_t.tv_sec)
-		return (pthread_mutex_unlock(&s->mut_time), 1);
-	else if (d1_t.tv_sec == d2_t.tv_sec)
-	{
-		if (d1_t.tv_usec < d2_t.tv_usec)
-			return (pthread_mutex_unlock(&s->mut_time), 0);
-		else if (d1_t.tv_usec > d2_t.tv_usec)
-			return (pthread_mutex_unlock(&s->mut_time), 1);
-	}
+	// if (d1_t.tv_sec < d2_t.tv_sec)
+	// 	return (pthread_mutex_unlock(&s->mut_time), 1);
+	// else if (d1_t.tv_sec > d2_t.tv_sec)
+	// 	return (pthread_mutex_unlock(&s->mut_time), 0);
+	// else if (d1_t.tv_sec == d2_t.tv_sec)
+	// {
+	// 	if (d1_t.tv_usec < d2_t.tv_usec)
+	// 		return (pthread_mutex_unlock(&s->mut_time), 1);
+	// 	else if (d1_t.tv_usec > d2_t.tv_usec)
+	// 		return (pthread_mutex_unlock(&s->mut_time), 0);
+	// }
 	return (pthread_mutex_unlock(&s->mut_time),
 		((t_coder *) data1)->id < ((t_coder *) data2)->id);
 }
@@ -45,7 +45,6 @@ int	edf(void *data1, void *data2)
     __int64_t		wait2;
     struct timeval	now;
     t_span			*s;
-	bool			by_comp;
 	t_coder			*d1;
 	t_coder			*d2;
 
@@ -53,9 +52,6 @@ int	edf(void *data1, void *data2)
 	d2 = (t_coder *) data2;
 	s = (t_span *) d1->s;
     gettimeofday(&now, NULL);
-	pthread_mutex_lock(&s->mut_array);
-	by_comp = d1->compiles > d2->compiles;
-	pthread_mutex_unlock(&s->mut_array);
 	pthread_mutex_lock(&s->mut_time);
 	wait1 = interval(d1->b_interv_s, d1->b_interv_e) / 1000;
     wait2 = interval(d2->b_interv_s, d2->b_interv_e) / 1000;
@@ -118,16 +114,14 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
 	cdata = (t_coder *) c->data;
 	rdata = (t_dongle *)(c->prev)->data;
 	ldata = (t_dongle *)(c->next)->data;
-	if ((rdata->is_active
-		|| ldata->is_active)
-		&& !cdata->is_done
+	if (!cdata->is_done
 		&& cdata->is_active
 		&& ldata != rdata)
 	{
 		assigned = true;
 		if (d == c->prev && !cdata->conn[1])
     		take_right_dongle(s, cdata, rdata);
-		else if (d == c->next && !cdata->conn[0])
+		if (d == c->next && !cdata->conn[0])
     		take_left_dongle(s, cdata, ldata);
 		// pthread_mutex_lock(&s->mut_time);
 		// gettimeofday(&cdata->b_interv_s, NULL);
@@ -141,18 +135,18 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
 
 static void	scheduling(t_span *s, int (_by)(void *, void *))
 {
-	unsigned int	i;
-	unsigned int	len_c;
+	// unsigned int	i;
+	// unsigned int	len_c;
 	t_array			*a;
 	t_dongle		*data;
 	void			*coder;
 	// struct timeval	now;
 	// struct timespec	wait;
 
-	len_c = s->n_coders;
+	// len_c = s->n_coders;
 	while (1)
 	{
-		i = 0;
+		// i = 0;
 		pthread_mutex_lock(&s->mut_array);
 		pthread_mutex_unlock(&s->mut_array);
 		// pthread_mutex_lock(&s->mut_array);

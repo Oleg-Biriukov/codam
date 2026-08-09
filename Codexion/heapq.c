@@ -14,16 +14,16 @@ static void heapify_up(t_heapq *h, int index, int (_prioriy)(void *, void *))
     void *root;
 
     root = h->items[(index-1)/2];
-    if (index-- && _prioriy(root, h->items[index]))
-        return (swap(root, h->items[index]), heapify_up(h, index, _prioriy));
+    if (index > 0 && _prioriy(root, h->items[index]))
+        return (swap(root, h->items[index]), heapify_up(h, (index - 1) / 2, _prioriy));
 }
 
 void	enq_heapq(t_heapq *heap, void *data, int (_prioriy)(void *, void *))
 {
     if (heap->size == MAX)
         return ;
-    heap->items[heap->size++] = data;
-    heapify_up(heap, heap->size, _prioriy);
+    heap->items[heap->size] = data;
+    heapify_up(heap, heap->size-1, _prioriy);
 }
 
 static void heapify_down(t_heapq *heap, int index, int (_prioriy)(void *, void *))
@@ -44,7 +44,7 @@ static void heapify_down(t_heapq *heap, int index, int (_prioriy)(void *, void *
     if (smallest != index)
     {
         swap(heap->items[smallest], heap->items[index]);
-        heapify_down(heap, index - 1, _prioriy);
+        heapify_down(heap, smallest, _prioriy);
     }
 }
 

@@ -14,18 +14,15 @@
 
 static bool	create_coders_t(t_array *a)
 {
-	t_dongle	*dongles[2];
 	t_coder		*c_data;
 
 	c_data = (t_coder *) a->data;
-	dongles[0] = (t_dongle *) a->next->data;
-	dongles[1] = (t_dongle *) a->prev->data;
 	if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
 		return (false);
 	gettimeofday(&c_data->b_interv_s, NULL);
 	gettimeofday(&c_data->req_t, NULL);
 	if (c_data->id % 2 != 0)
-		c_data->req_t.tv_sec -= 10;
+		c_data->req_t.tv_usec -= 10;
 	// if (pthread_create(&c_data->t_burnout,
 	// 		NULL, (void *) detect_b, c_data) != 0)
 		// return (false);

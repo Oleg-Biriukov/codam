@@ -24,9 +24,6 @@ void	start_comp(t_span *s, t_coder *data)
 
 void	finish_comp(t_span *s, t_coder *data)
 {
-	t_dongle	*dongle;
-
-	dongle = data->conn[0];
 	pthread_mutex_lock(&s->mut_array);
 	if (data->conn[0])
 		data->conn[0]->is_cooldown = true;
