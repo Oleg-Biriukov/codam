@@ -6,49 +6,49 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/08 17:04:44 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/09 14:41:48 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-static bool	create_coders_t(t_array *a)
+static void	create_coders(t_span *s, t_array *a)
 {
 	t_coder		*c_data;
+	t_dongle	*ld_data;
+	t_dongle	*rd_data;
 
-	c_data = (t_coder *) a->data;
-	if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
-		return (false);
-	gettimeofday(&c_data->b_interv_s, NULL);
-	gettimeofday(&c_data->req_t, NULL);
-	if (c_data->id % 2 != 0)
-		c_data->req_t.tv_usec -= 10;
-	// if (pthread_create(&c_data->t_burnout,
-	// 		NULL, (void *) detect_b, c_data) != 0)
-		// return (false);
-	return (true);
+	while (a)
+	{
+		c_data = (t_coder *) a->data;
+		rd_data = (t_dongle *) find_elem(s->workspace, a)->prev->data;
+		ld_data = (t_dongle *) find_elem(s->workspace, a)->next->data;
+		if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
+			return ((void) fail(s));
+		gettimeofday(&c_data->b_interv_s, NULL);
+		// gettimeofday(&c_data->req_t, NULL);
+		c_data->req_t.tv_sec = 0;
+		c_data->req_t.tv_usec = 0;
+		if (c_data->id % 2 == 0)
+			c_data->req_t.tv_usec += 10;
+		enq_heapq(&rd_data->h, a->data, fifo);
+		enq_heapq(&ld_data->h, a->data, fifo);
+		// if (pthread_create(&c_data->t_burnout,
+		// 		NULL, (void *) detect_b, c_data) != 0)
+			// return ((void) fail(s));
+		a = a->next;
+	}
 }
 
-static void	create_threads(t_span *s, t_array *a)
+static void	create_dongle(t_span *s, t_array *a)
 {
-	unsigned int		counter;
 	t_dongle			*d_data;
 
-	counter = 0;
-	while (counter != s->n_coders * 2)
+	while (a)
 	{
-		counter++;
-		if (counter % 2 == 0)
-		{
-			d_data = (t_dongle *) a->data;
-			if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
-				return ((void) fail(s));
-			enq_heapq(&d_data->h, a->next->data, fifo);
-			enq_heapq(&d_data->h, a->prev->data, fifo);
-		}
-		else
-			if (!create_coders_t(a))
-				return ((void) fail(s));
+		d_data = (t_dongle *) a->data;
+		if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
+			return ((void) fail(s));
 		a = a->next;
 	}
 }
@@ -116,7 +116,8 @@ bool	start(t_span *s)
 
 	workspace = s->workspace;
 	pthread_mutex_lock(&s->mut_array);
-	create_threads(s, workspace);
+	create_coders(s, s->coders);
+	create_dongle(s, s->dongle);
 	total_c = s->n_coders * s->n_compiles;
 	n_coders = s->n_coders;
 	if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)

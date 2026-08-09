@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/08 17:06:14 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/09 18:20:10 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,25 +14,25 @@
 
 int	fifo(void	*data1, void	*data2)
 {
-	// struct timeval	d1_t;
-	// struct timeval	d2_t;
+	struct timeval	d1_t;
+	struct timeval	d2_t;
 	t_span			*s;
 
-	// d1_t = ((t_coder *) data1)->req_t;
-	// d2_t = ((t_coder *) data2)->req_t;
+	d1_t = ((t_coder *) data1)->req_t;
+	d2_t = ((t_coder *) data2)->req_t;
 	s = (t_span *) ((t_coder *) data1)->s; 
 	pthread_mutex_lock(&s->mut_time);
-	// if (d1_t.tv_sec < d2_t.tv_sec)
-	// 	return (pthread_mutex_unlock(&s->mut_time), 1);
-	// else if (d1_t.tv_sec > d2_t.tv_sec)
-	// 	return (pthread_mutex_unlock(&s->mut_time), 0);
-	// else if (d1_t.tv_sec == d2_t.tv_sec)
-	// {
-	// 	if (d1_t.tv_usec < d2_t.tv_usec)
-	// 		return (pthread_mutex_unlock(&s->mut_time), 1);
-	// 	else if (d1_t.tv_usec > d2_t.tv_usec)
-	// 		return (pthread_mutex_unlock(&s->mut_time), 0);
-	// }
+	if (d1_t.tv_sec < d2_t.tv_sec)
+		return (pthread_mutex_unlock(&s->mut_time), 1);
+	else if (d1_t.tv_sec > d2_t.tv_sec)
+		return (pthread_mutex_unlock(&s->mut_time), 0);
+	else if (d1_t.tv_sec == d2_t.tv_sec)
+	{
+		if (d1_t.tv_usec < d2_t.tv_usec)
+			return (pthread_mutex_unlock(&s->mut_time), 1);
+		else if (d1_t.tv_usec > d2_t.tv_usec)
+			return (pthread_mutex_unlock(&s->mut_time), 0);
+	}
 	return (pthread_mutex_unlock(&s->mut_time),
 		((t_coder *) data1)->id < ((t_coder *) data2)->id);
 }
@@ -109,7 +109,6 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
 	t_coder			*cdata;
 	bool			assigned;
 
-	pthread_mutex_lock(&s->mut_array);
 	assigned = false;
 	cdata = (t_coder *) c->data;
 	rdata = (t_dongle *)(c->prev)->data;
@@ -129,7 +128,6 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
 		if (cdata->conn[1] && cdata->conn[0])
 			pthread_cond_broadcast(&cdata->cond);
 	}
-	pthread_mutex_unlock(&s->mut_array);
 	return (assigned);
 }
 
@@ -144,11 +142,11 @@ static void	scheduling(t_span *s, int (_by)(void *, void *))
 	// struct timespec	wait;
 
 	// len_c = s->n_coders;
+	pthread_mutex_lock(&s->mut_array);
+	pthread_mutex_unlock(&s->mut_array);
 	while (1)
 	{
 		// i = 0;
-		pthread_mutex_lock(&s->mut_array);
-		pthread_mutex_unlock(&s->mut_array);
 		// pthread_mutex_lock(&s->mut_array);
 		// while (s->to_schedule != true)
 		// {
@@ -174,13 +172,17 @@ static void	scheduling(t_span *s, int (_by)(void *, void *))
 				return ((void) pthread_mutex_unlock(&s->mut));
 			pthread_mutex_unlock(&s->mut);
 			data = (t_dongle *) a->data;
+			pthread_mutex_lock(&s->mut_array);
 			coder = deq_heapq(&data->h, _by);
+			pthread_mutex_unlock(&s->mut_array);
 			if (coder == a->next->data)
 				coder = a->next;
 			else
 				coder = a->prev;
+			pthread_mutex_lock(&s->mut_array);
 			if (data->is_active)
 				is_right_coder(s, coder, a);
+			pthread_mutex_unlock(&s->mut_array);
 			a = a->next->next;
 		}
 	}

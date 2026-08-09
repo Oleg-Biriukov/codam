@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/08 16:50:13 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/09 12:09:19 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,7 @@
 # include <string.h>
 # include <errno.h>
 # include <stdbool.h>
-# define MAX 100
+# define MAX 2
 
 typedef struct t_coder t_coder;
 

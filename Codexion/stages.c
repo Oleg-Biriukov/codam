@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/06 15:31:34 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/09 18:18:58 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ void	finish_comp(t_span *s, t_coder *data)
 	if (data->conn[0])
 		pthread_cond_broadcast(&data->conn[0]->cond);
 	if (data->conn[1])
-		pthread_cond_broadcast(&data->conn[1]->cond);
+		pthread_cond_broadcast(&data->conn[1]->cond); // unlock mutex
 	if (data->conn[0])
 		data->conn[0] = NULL;
 	if (data->conn[1])
@@ -58,8 +58,11 @@ void	start_refactor(t_span *s, t_coder *data)
 bool	stages(t_coder *data)
 {
 	t_span			*s;
+	t_dongle		*adj_dongles[2];
 
 	s = (t_span *) data->s;
+	adj_dongles[0] = data->conn[0];
+	adj_dongles[1] = data->conn[1];
 	start_comp(s, data);
 	if (!wait_check(s, s->t_compile))
 		return (false);
@@ -70,13 +73,14 @@ bool	stages(t_coder *data)
 	start_refactor(s, data);
 	if (!wait_check(s, s->t_refactor))
 		return (false);
+	pthread_mutex_lock(&s->mut_array);
 	pthread_mutex_lock(&s->mut_time);
 	gettimeofday(&data->req_t, NULL);
 	pthread_mutex_unlock(&s->mut_time);
-	pthread_mutex_lock(&s->mut_array);
+	enq_heapq(&adj_dongles[0]->h, (void *) data, fifo);
+	enq_heapq(&adj_dongles[1]->h, (void *) data, fifo);
 	data->is_active = true;
 	s->to_schedule = true;
-	pthread_cond_broadcast(&s->c_to_schedule);
 	pthread_mutex_unlock(&s->mut_array);
 	return (true);
 }
