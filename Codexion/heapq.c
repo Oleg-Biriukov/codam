@@ -1,14 +1,5 @@
 #include "codexion.h"
 
-static void	swap(void **a, void **b)
-{
-	void	*temp;
-
-	temp = *a;
-	*a = *b;
-	*b = temp;
-}
-
 static void heapify_up(t_heapq *h, int index, t_schdl _prioriy)
 {
     void *root;
@@ -58,4 +49,11 @@ void	*deq_heapq(t_heapq *heap, t_schdl _prioriy)
     heap->items[0] = heap->items[--heap->size];
     heapify_down(heap, 0, _prioriy);
 	return (data);
+}
+
+void    *peek(t_heapq *heap)
+{
+    if (!heap->size)
+        return (NULL);
+    return (heap->items[0]);
 }

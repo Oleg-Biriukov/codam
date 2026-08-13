@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 15:57:56 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/13 18:04:31 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -114,6 +114,8 @@ void			monitor(t_span *s);
 void			enq_heapq(t_heapq *heap, void *data, t_schdl _prioriy);
 void			*deq_heapq(t_heapq *heap, t_schdl _prioriy);
 void			scheduling(t_span *s);
+void			swap(void **a, void **b);
+void			*peek(t_heapq *heap);
 bool			fail(t_span *s);
 bool			start(t_span *s);
 bool			stages(t_coder *data);

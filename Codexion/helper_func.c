@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/05 12:37:37 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/13 17:35:20 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,4 +68,13 @@ struct timespec	convert(struct timeval from, int b_out)
 		to.tv_nsec -= 1000000000L;
 	}
 	return (to);
+}
+
+void	swap(void **a, void **b)
+{
+	void	*temp;
+
+	temp = *a;
+	*a = *b;
+	*b = temp;
 }

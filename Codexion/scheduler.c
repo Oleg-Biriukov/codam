@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 16:24:20 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/13 18:05:30 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,6 +77,7 @@ static void take_left_dongle(t_span *s, t_coder	*cdata, t_dongle *ldata)
 		pthread_mutex_unlock(&s->mut_prnt);
 		cdata->conn[0] = ldata;
 		ldata->is_active = false;
+		deq_heapq(&ldata->h, s->_by);
 	}
 }
 
@@ -89,6 +90,7 @@ static void take_right_dongle(t_span *s, t_coder	*cdata, t_dongle *rdata)
 		pthread_mutex_unlock(&s->mut_prnt);
 		cdata->conn[1] = rdata;
 		rdata->is_active = false;
+		deq_heapq(&rdata->h, s->_by);
 	}
 }
 
@@ -111,11 +113,13 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
     		take_right_dongle(s, cdata, rdata);
 		if (d == c->next && !cdata->conn[0])
     		take_left_dongle(s, cdata, ldata);
-		pthread_mutex_lock(&s->mut_time);
-		gettimeofday(&cdata->b_interv_s, NULL);
-		pthread_mutex_unlock(&s->mut_time);
 		if (cdata->conn[1] && cdata->conn[0])
+		{	
+			pthread_mutex_lock(&s->mut_time);
+			gettimeofday(&cdata->b_interv_s, NULL);
+			pthread_mutex_unlock(&s->mut_time);
 			return(pthread_cond_broadcast(&cdata->cond), true);
+		}
 	}
 	return (assigned);
 }
@@ -160,7 +164,7 @@ void	scheduling(t_span *s)
 			data = (t_dongle *) a->data;
 			pthread_mutex_lock(&s->mut_array);
 			if (data->is_active)
-				coder = deq_heapq(&data->h, s->_by);
+				coder = peek(&data->h);
 			else
 				coder = NULL;
 			pthread_mutex_unlock(&s->mut_array);
@@ -170,10 +174,11 @@ void	scheduling(t_span *s)
 				coder = a->prev;
 			pthread_mutex_lock(&s->mut_array);
 			if (coder)
-				if (is_right_coder(s, coder, a))
-					a = s->workspace->next;
+				is_right_coder(s, coder, a);
 			pthread_mutex_unlock(&s->mut_array);
 			a = a->next->next;
+			if (RUNNING_ON_VALGRIND)
+				usleep(30);
 			// if (a->data == s->dongle->data)
 			// 	break ;
 		}
