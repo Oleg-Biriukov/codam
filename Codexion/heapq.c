@@ -9,16 +9,16 @@ static void	swap(void **a, void **b)
 	*b = temp;
 }
 
-static void heapify_up(t_heapq *h, int index, int (_prioriy)(void *, void *))
+static void heapify_up(t_heapq *h, int index, t_schdl _prioriy)
 {
     void *root;
 
     root = h->items[(index-1)/2];
-    if (index > 0 && _prioriy(h->items[index], root))
+    if (index && _prioriy(h->items[index], root))
         return (swap(&h->items[(index-1)/2], &h->items[index]), heapify_up(h, (index - 1) / 2, _prioriy));
 }
 
-void	enq_heapq(t_heapq *heap, void *data, int (_prioriy)(void *, void *))
+void	enq_heapq(t_heapq *heap, void *data, t_schdl _prioriy)
 {
     if (heap->size == MAX)
         return ;
@@ -26,7 +26,7 @@ void	enq_heapq(t_heapq *heap, void *data, int (_prioriy)(void *, void *))
     heapify_up(heap, heap->size-1, _prioriy);
 }
 
-static void heapify_down(t_heapq *heap, int index, int (_prioriy)(void *, void *))
+static void heapify_down(t_heapq *heap, int index, t_schdl _prioriy)
 {
     int smallest;
     int left;
@@ -48,7 +48,7 @@ static void heapify_down(t_heapq *heap, int index, int (_prioriy)(void *, void *
     }
 }
 
-void	*deq_heapq(t_heapq *heap, int (_prioriy)(void *, void *))
+void	*deq_heapq(t_heapq *heap, t_schdl _prioriy)
 {
     void    *data;
 

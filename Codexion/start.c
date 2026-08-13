@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/09 14:41:48 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/13 15:58:08 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,16 +26,11 @@ static void	create_coders(t_span *s, t_array *a)
 		if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
 			return ((void) fail(s));
 		gettimeofday(&c_data->b_interv_s, NULL);
-		// gettimeofday(&c_data->req_t, NULL);
-		c_data->req_t.tv_sec = 0;
-		c_data->req_t.tv_usec = 0;
+		gettimeofday(&c_data->req_t, NULL);
 		if (c_data->id % 2 == 0)
-			c_data->req_t.tv_usec += 10;
-		enq_heapq(&rd_data->h, a->data, fifo);
-		enq_heapq(&ld_data->h, a->data, fifo);
-		// if (pthread_create(&c_data->t_burnout,
-		// 		NULL, (void *) detect_b, c_data) != 0)
-			// return ((void) fail(s));
+			c_data->req_t.tv_sec += 10;
+		enq_heapq(&rd_data->h, a->data, s->_by);
+		enq_heapq(&ld_data->h, a->data, s->_by);
 		a = a->next;
 	}
 }
@@ -112,7 +107,7 @@ bool	start(t_span *s)
 	unsigned int	total_c;
 	unsigned int	n_coders;
 	t_array			*workspace;
-	pthread_t		t;
+	pthread_t		t[2];
 
 	workspace = s->workspace;
 	pthread_mutex_lock(&s->mut_array);
@@ -120,8 +115,10 @@ bool	start(t_span *s)
 	create_dongle(s, s->dongle);
 	total_c = s->n_coders * s->n_compiles;
 	n_coders = s->n_coders;
-	if (pthread_create(&t, NULL, (void *) &scheduler, s) != 0)
+	if (pthread_create(&t[0], NULL, (void *) &scheduling, s) != 0)
 		fail(s);
+	if (pthread_create(&t[1], NULL, (void *) monitor, s) != 0)
+		return (fail(s));
 	gettimeofday(&s->start, NULL);
 	pthread_mutex_unlock(&s->mut_array);
 	if (!s->is_failed)
@@ -130,6 +127,7 @@ bool	start(t_span *s)
 	s->is_over = true;
 	pthread_mutex_unlock(&s->mut);
 	finish(workspace, n_coders);
-	pthread_join(t, NULL);
+	pthread_join(t[0], NULL);
+	pthread_join(t[1], NULL);
 	return (!s->is_failed);
 }

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/09 18:18:58 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/13 15:39:03 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,8 +77,9 @@ bool	stages(t_coder *data)
 	pthread_mutex_lock(&s->mut_time);
 	gettimeofday(&data->req_t, NULL);
 	pthread_mutex_unlock(&s->mut_time);
-	enq_heapq(&adj_dongles[0]->h, (void *) data, fifo);
-	enq_heapq(&adj_dongles[1]->h, (void *) data, fifo);
+	enq_heapq(&adj_dongles[0]->h, (void *) data, s->_by);
+	enq_heapq(&adj_dongles[1]->h, (void *) data, s->_by);
+	pthread_cond_broadcast(&s->c_to_schedule);
 	data->is_active = true;
 	s->to_schedule = true;
 	pthread_mutex_unlock(&s->mut_array);

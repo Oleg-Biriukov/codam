@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/09 18:20:10 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/13 16:24:20 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,42 +39,32 @@ int	fifo(void	*data1, void	*data2)
 
 int	edf(void *data1, void *data2)
 {
-    __int64_t		deadline1;
-    __int64_t		deadline2;
-    __int64_t		wait1;
-    __int64_t		wait2;
-    struct timeval	now;
-    t_span			*s;
-	t_coder			*d1;
-	t_coder			*d2;
+    struct timeval		deadline1;
+    struct timeval		deadline2;
+    t_span				*s;
+	t_coder				*d1;
+	t_coder				*d2;
 
 	d1 = (t_coder *) data1;
 	d2 = (t_coder *) data2;
 	s = (t_span *) d1->s;
-    gettimeofday(&now, NULL);
 	pthread_mutex_lock(&s->mut_time);
-	wait1 = interval(d1->b_interv_s, d1->b_interv_e) / 1000;
-    wait2 = interval(d2->b_interv_s, d2->b_interv_e) / 1000;
-    deadline1 = (d1->b_interv_s.tv_sec * 1000000LL + d1->b_interv_s.tv_usec)
-        + wait1;
-    deadline2 = (d2->b_interv_s.tv_sec * 1000000LL + d2->b_interv_s.tv_usec)
-        + wait2;
+    deadline1.tv_sec = d1->b_interv_s.tv_sec + (s->t_burnout / 1000);
+	deadline1.tv_usec = d1->b_interv_s.tv_sec + ((s->t_burnout % 1000) * 1000);
+    deadline2.tv_sec = d2->b_interv_s.tv_sec + (s->t_burnout / 1000);
+	deadline2.tv_usec = d2->b_interv_s.tv_sec + ((s->t_burnout % 1000) * 1000);
 	pthread_mutex_unlock(&s->mut_time);
-    if (wait1 > (s->t_burnout / 2) && wait2 > (s->t_burnout / 2))
-    {
-        if (wait1 > wait2)
-            return (0);
-        if (wait1 < wait2)
-            return (1);
-    }
-    else if (wait1 > (s->t_burnout / 2))
-        return (0);
-    else if (wait2 > (s->t_burnout / 2))
-        return (1);
-    if (deadline1 < deadline2)
-        return (0);
-    if (deadline1 > deadline2)
-        return (1);
+	if (deadline1.tv_sec < deadline2.tv_sec)
+		return (1);
+	else if (deadline1.tv_sec > deadline2.tv_sec)
+		return (0);
+	else if (deadline1.tv_sec == deadline2.tv_sec)
+	{
+		if (deadline1.tv_usec < deadline2.tv_usec)
+			return (1);
+		else if (deadline1.tv_usec > deadline2.tv_usec)
+			return (0);
+	}
     return (fifo(data1, data2));
 }
 
@@ -83,7 +73,7 @@ static void take_left_dongle(t_span *s, t_coder	*cdata, t_dongle *ldata)
 	if (ldata->is_active)
 	{
 		pthread_mutex_lock(&s->mut_prnt);
-		printf("%d %d has taken a dongle%d\n", timer(s), cdata->id, ldata->id);
+		printf("%d %d has taken a dongle\n", timer(s), cdata->id);
 		pthread_mutex_unlock(&s->mut_prnt);
 		cdata->conn[0] = ldata;
 		ldata->is_active = false;
@@ -95,7 +85,7 @@ static void take_right_dongle(t_span *s, t_coder	*cdata, t_dongle *rdata)
 	if (rdata->is_active)
 	{
 		pthread_mutex_lock(&s->mut_prnt);
-		printf("%d %d has taken a dongle%d\n", timer(s), cdata->id, rdata->id);
+		printf("%d %d has taken a dongle\n", timer(s), cdata->id);
 		pthread_mutex_unlock(&s->mut_prnt);
 		cdata->conn[1] = rdata;
 		rdata->is_active = false;
@@ -117,24 +107,21 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
 		&& cdata->is_active
 		&& ldata != rdata)
 	{
-		assigned = true;
 		if (d == c->prev && !cdata->conn[1])
     		take_right_dongle(s, cdata, rdata);
 		if (d == c->next && !cdata->conn[0])
     		take_left_dongle(s, cdata, ldata);
-		// pthread_mutex_lock(&s->mut_time);
-		// gettimeofday(&cdata->b_interv_s, NULL);
-		// pthread_mutex_unlock(&s->mut_time);
+		pthread_mutex_lock(&s->mut_time);
+		gettimeofday(&cdata->b_interv_s, NULL);
+		pthread_mutex_unlock(&s->mut_time);
 		if (cdata->conn[1] && cdata->conn[0])
-			pthread_cond_broadcast(&cdata->cond);
+			return(pthread_cond_broadcast(&cdata->cond), true);
 	}
 	return (assigned);
 }
 
-static void	scheduling(t_span *s, int (_by)(void *, void *))
+void	scheduling(t_span *s)
 {
-	// unsigned int	i;
-	// unsigned int	len_c;
 	t_array			*a;
 	t_dongle		*data;
 	void			*coder;
@@ -146,7 +133,6 @@ static void	scheduling(t_span *s, int (_by)(void *, void *))
 	pthread_mutex_unlock(&s->mut_array);
 	while (1)
 	{
-		// i = 0;
 		// pthread_mutex_lock(&s->mut_array);
 		// while (s->to_schedule != true)
 		// {
@@ -173,27 +159,25 @@ static void	scheduling(t_span *s, int (_by)(void *, void *))
 			pthread_mutex_unlock(&s->mut);
 			data = (t_dongle *) a->data;
 			pthread_mutex_lock(&s->mut_array);
-			coder = deq_heapq(&data->h, _by);
+			if (data->is_active)
+				coder = deq_heapq(&data->h, s->_by);
+			else
+				coder = NULL;
 			pthread_mutex_unlock(&s->mut_array);
 			if (coder == a->next->data)
 				coder = a->next;
-			else
+			if (coder == a->prev->data)
 				coder = a->prev;
 			pthread_mutex_lock(&s->mut_array);
-			if (data->is_active)
-				is_right_coder(s, coder, a);
+			if (coder)
+				if (is_right_coder(s, coder, a))
+					a = s->workspace->next;
 			pthread_mutex_unlock(&s->mut_array);
 			a = a->next->next;
+			// if (a->data == s->dongle->data)
+			// 	break ;
 		}
 	}
-}
-
-bool	scheduler(t_span *s)
-{
-	if (!strcmp(s->schdlr, "fifo"))
-		return (scheduling(s, fifo), false);
-	else
-		return (scheduling(s, edf), false);
 }
 
 

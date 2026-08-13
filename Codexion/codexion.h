@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/09 12:09:19 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/13 15:57:56 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@
 # define MAX 2
 
 typedef struct t_coder t_coder;
+
+typedef int	(*t_schdl)(void *, void *);
 
 typedef struct t_heapq
 {
@@ -85,6 +87,7 @@ typedef struct t_span
 	t_array			*workspace;
 	t_array			*coders;
 	t_array			*dongle;
+	t_schdl			_by;
 	bool			is_over;
 	bool			to_schedule;
 	bool			is_failed;
@@ -107,18 +110,18 @@ void			la_sort(t_array *a, int (cond)(t_array *, t_array *), t_span *s);
 void			take_out_arg(t_span *s, char **argv, int argc);
 void			coder(t_coder *data);
 void			dongle(t_dongle *data);
-void			detect_b(t_coder *data);
-void			awaiting_for_signal(t_span *s);
-void			enq_heapq(t_heapq *heap, void *data, int (_prioriy)(void *, void *));
-void			*deq_heapq(t_heapq *heap, int (_prioriy)(void *, void *));
+void			monitor(t_span *s);
+void			enq_heapq(t_heapq *heap, void *data, t_schdl _prioriy);
+void			*deq_heapq(t_heapq *heap, t_schdl _prioriy);
+void			scheduling(t_span *s);
 bool			fail(t_span *s);
 bool			start(t_span *s);
 bool			stages(t_coder *data);
 bool			init_arrays(t_span *s);
 bool			init_dongle(t_span *s);
-bool			scheduler(t_span *s);
 bool			wait_check(t_span *s, unsigned int how_many);
 int				timer(t_span *s);
 int				fifo(void	*data1, void	*data2);
+int				edf(void	*data1, void	*data2);
 
 #endif

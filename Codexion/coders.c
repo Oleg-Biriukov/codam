@@ -6,27 +6,34 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/06 17:46:17 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/13 16:24:35 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void	detect_b(t_coder *data)
+void	monitor(t_span	*s)
 {
-	t_span	*s;
+	t_array	*a;
+	t_coder	*data;
 
-	s = (t_span *) data->s;
-	while (1)
+	pthread_mutex_lock(&s->mut_array);
+	pthread_mutex_unlock(&s->mut_array);
+	a = s->workspace;
+	while (a)
 	{
+		data = (t_coder *) a->data;
 		pthread_mutex_lock(&s->mut);
-		if (s->is_over || s->is_failed
-			|| s->is_burnout)
+		if (s->is_over || s->is_failed)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
 		pthread_mutex_lock(&s->mut_array);
 		if (data->is_done)
-			return ((void) pthread_mutex_unlock(&s->mut_array));
+		{
+			pthread_mutex_unlock(&s->mut_array);
+			a = a->next->next;
+			continue ;
+		}
 		pthread_mutex_unlock(&s->mut_array);
 		pthread_mutex_lock(&s->mut_time);
 		gettimeofday(&data->b_interv_e, NULL);
@@ -36,6 +43,7 @@ void	detect_b(t_coder *data)
 			break ;
 		}
 		pthread_mutex_unlock(&s->mut_time);
+		a = a->next->next;
 		if (RUNNING_ON_VALGRIND)
 			usleep(30);
 	}
