@@ -14,6 +14,8 @@ void	enq_heapq(t_heapq *heap, void *data, t_schdl _prioriy)
     if (heap->size == MAX)
         return ;
     heap->items[heap->size++] = data;
+    if (heap->size - 1 < 1)
+        return ;
     heapify_up(heap, heap->size-1, _prioriy);
 }
 
@@ -29,6 +31,7 @@ static void heapify_down(t_heapq *heap, int index, t_schdl _prioriy)
     if (left < heap->size
         && _prioriy(heap->items[left], heap->items[smallest]))
         smallest = left;
+
     if (right < heap->size
         && _prioriy(heap->items[right], heap->items[smallest]))
         smallest = right;
@@ -45,6 +48,8 @@ void	*deq_heapq(t_heapq *heap, t_schdl _prioriy)
 
     if (!heap->size)
         return (NULL);
+    if (heap->size == 1)
+        return (heap->items[--heap->size]);
     data = heap->items[0];
     heap->items[0] = heap->items[--heap->size];
     heapify_down(heap, 0, _prioriy);

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 18:05:34 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/14 16:44:35 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,7 +76,7 @@ bool	init_dongle(t_span *s)
 		if (!data || !array)
 			return (false);
 		
-		pthread_cond_init(&data->cond, NULL);
+		pthread_mutex_init(&data->mutex, NULL);
 		data->id = la_len(la_start(array));
 		data->s = (void *) s;
 		data->h = (t_heapq) {{}, 0};

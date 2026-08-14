@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 18:05:30 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/14 16:18:35 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,10 +18,10 @@ int	fifo(void	*data1, void	*data2)
 	struct timeval	d2_t;
 	t_span			*s;
 
-	d1_t = ((t_coder *) data1)->req_t;
-	d2_t = ((t_coder *) data2)->req_t;
 	s = (t_span *) ((t_coder *) data1)->s; 
 	pthread_mutex_lock(&s->mut_time);
+	d1_t = ((t_coder *) data1)->req_t;
+	d2_t = ((t_coder *) data2)->req_t;
 	if (d1_t.tv_sec < d2_t.tv_sec)
 		return (pthread_mutex_unlock(&s->mut_time), 1);
 	else if (d1_t.tv_sec > d2_t.tv_sec)
@@ -114,7 +114,7 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
 		if (d == c->next && !cdata->conn[0])
     		take_left_dongle(s, cdata, ldata);
 		if (cdata->conn[1] && cdata->conn[0])
-		{	
+		{
 			pthread_mutex_lock(&s->mut_time);
 			gettimeofday(&cdata->b_interv_s, NULL);
 			pthread_mutex_unlock(&s->mut_time);
@@ -124,36 +124,36 @@ static bool	is_right_coder(t_span *s, t_array *c, t_array *d) // ?
 	return (assigned);
 }
 
+
 void	scheduling(t_span *s)
 {
 	t_array			*a;
 	t_dongle		*data;
 	void			*coder;
-	// struct timeval	now;
-	// struct timespec	wait;
+	struct timeval	now;
+	struct timespec	wait;
 
-	// len_c = s->n_coders;
 	pthread_mutex_lock(&s->mut_array);
 	pthread_mutex_unlock(&s->mut_array);
 	while (1)
 	{
-		// pthread_mutex_lock(&s->mut_array);
-		// while (s->to_schedule != true)
-		// {
-		// 	gettimeofday(&now, NULL);
-		// 	wait = convert(now, 100);
-		// 	if (pthread_cond_timedwait(&s->c_to_schedule, &s->mut_array, &wait) == ETIMEDOUT)
-		// 	{
-		// 		pthread_mutex_lock(&s->mut);
-		// 		if (s->is_failed || s->is_over || s->is_burnout)
-		// 			return (pthread_mutex_unlock(&s->mut), (void) pthread_mutex_unlock(&s->mut_array));
-		// 		pthread_mutex_unlock(&s->mut);
-		// 		continue ;
-		// 	}
-		// 	break ;
-		// }
-		// s->to_schedule = false;
-		// pthread_mutex_unlock(&s->mut_array);
+		pthread_mutex_lock(&s->mut_array);
+		while (s->to_schedule != true)
+		{
+			gettimeofday(&now, NULL);
+			wait = convert(now, 100);
+			if (pthread_cond_timedwait(&s->c_to_schedule, &s->mut_array, &wait) == ETIMEDOUT)
+			{
+				pthread_mutex_lock(&s->mut);
+				if (s->is_failed || s->is_over || s->is_burnout)
+					return (pthread_mutex_unlock(&s->mut), (void) pthread_mutex_unlock(&s->mut_array));
+				pthread_mutex_unlock(&s->mut);
+				continue ;
+			}
+			break ;
+		}
+		s->to_schedule = false;
+		pthread_mutex_unlock(&s->mut_array);
 		a = s->workspace->next;
 		while (a)
 		{
@@ -179,8 +179,8 @@ void	scheduling(t_span *s)
 			a = a->next->next;
 			if (RUNNING_ON_VALGRIND)
 				usleep(30);
-			// if (a->data == s->dongle->data)
-			// 	break ;
+			if (a->data == s->dongle->data)
+				break ;
 		}
 	}
 }

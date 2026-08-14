@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 15:58:08 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/14 15:59:39 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,8 +27,8 @@ static void	create_coders(t_span *s, t_array *a)
 			return ((void) fail(s));
 		gettimeofday(&c_data->b_interv_s, NULL);
 		gettimeofday(&c_data->req_t, NULL);
-		if (c_data->id % 2 == 0)
-			c_data->req_t.tv_sec += 10;
+		if (c_data->id % 2 != 0)
+			c_data->req_t.tv_sec -= 10;
 		enq_heapq(&rd_data->h, a->data, s->_by);
 		enq_heapq(&ld_data->h, a->data, s->_by);
 		a = a->next;
@@ -117,7 +117,7 @@ bool	start(t_span *s)
 	n_coders = s->n_coders;
 	if (pthread_create(&t[0], NULL, (void *) &scheduling, s) != 0)
 		fail(s);
-	if (pthread_create(&t[1], NULL, (void *) monitor, s) != 0)
+	if (pthread_create(&t[1], NULL, (void *) &monitor, s) != 0)
 		return (fail(s));
 	gettimeofday(&s->start, NULL);
 	pthread_mutex_unlock(&s->mut_array);

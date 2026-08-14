@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 18:04:31 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/14 16:44:52 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ typedef struct t_dongle
 	t_heapq			h;
 	pthread_t		t;
 	unsigned int	id;
-	pthread_cond_t	cond;
+	pthread_mutex_t	mutex;
 }	t_dongle;
 
 typedef struct t_coder
