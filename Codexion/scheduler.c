@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/14 16:18:35 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/14 17:20:30 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,26 +70,28 @@ int	edf(void *data1, void *data2)
 
 static void take_left_dongle(t_span *s, t_coder	*cdata, t_dongle *ldata)
 {
-	if (ldata->is_active)
+	if (ldata->is_active && !is_cooldown(ldata))
 	{
 		pthread_mutex_lock(&s->mut_prnt);
 		printf("%d %d has taken a dongle\n", timer(s), cdata->id);
 		pthread_mutex_unlock(&s->mut_prnt);
 		cdata->conn[0] = ldata;
 		ldata->is_active = false;
+		pthread_mutex_lock(&ldata->mutex);
 		deq_heapq(&ldata->h, s->_by);
 	}
 }
 
 static void take_right_dongle(t_span *s, t_coder	*cdata, t_dongle *rdata)
 {
-	if (rdata->is_active)
+	if (rdata->is_active && !is_cooldown(rdata))
 	{
 		pthread_mutex_lock(&s->mut_prnt);
 		printf("%d %d has taken a dongle\n", timer(s), cdata->id);
 		pthread_mutex_unlock(&s->mut_prnt);
 		cdata->conn[1] = rdata;
 		rdata->is_active = false;
+		pthread_mutex_lock(&rdata->mutex);
 		deq_heapq(&rdata->h, s->_by);
 	}
 }
@@ -163,7 +165,7 @@ void	scheduling(t_span *s)
 			pthread_mutex_unlock(&s->mut);
 			data = (t_dongle *) a->data;
 			pthread_mutex_lock(&s->mut_array);
-			if (data->is_active)
+			if (!is_cooldown(data) && data->is_active)
 				coder = peek(&data->h);
 			else
 				coder = NULL;

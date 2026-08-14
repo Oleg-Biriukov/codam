@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/14 16:44:52 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/14 17:14:25 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,11 +38,10 @@ typedef struct t_dongle
 {
 	void			*s;
 	bool			is_active;
-	bool			is_cooldown;
 	t_heapq			h;
-	pthread_t		t;
 	unsigned int	id;
 	pthread_mutex_t	mutex;
+	struct timeval	s_cooldown;
 }	t_dongle;
 
 typedef struct t_coder
@@ -109,7 +108,6 @@ void			*la_free(t_array *array);
 void			la_sort(t_array *a, int (cond)(t_array *, t_array *), t_span *s);
 void			take_out_arg(t_span *s, char **argv, int argc);
 void			coder(t_coder *data);
-void			dongle(t_dongle *data);
 void			monitor(t_span *s);
 void			enq_heapq(t_heapq *heap, void *data, t_schdl _prioriy);
 void			*deq_heapq(t_heapq *heap, t_schdl _prioriy);
@@ -119,6 +117,7 @@ void			*peek(t_heapq *heap);
 bool			fail(t_span *s);
 bool			start(t_span *s);
 bool			stages(t_coder *data);
+bool			is_cooldown(t_dongle *data);
 bool			init_arrays(t_span *s);
 bool			init_dongle(t_span *s);
 bool			wait_check(t_span *s, unsigned int how_many);

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 18:05:45 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/14 17:17:21 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,17 +26,23 @@ void	finish_comp(t_span *s, t_coder *data)
 {
 	pthread_mutex_lock(&s->mut_array);
 	if (data->conn[0])
-		data->conn[0]->is_cooldown = true;
-	if (data->conn[1])
-		data->conn[1]->is_cooldown = true;
-	if (data->conn[0])
-		pthread_cond_broadcast(&data->conn[0]->cond);
-	if (data->conn[1])
-		pthread_cond_broadcast(&data->conn[1]->cond); // unlock mutex
-	if (data->conn[0])
+	{
+		pthread_mutex_lock(&s->mut_time);
+		gettimeofday(&data->conn[0]->s_cooldown, NULL);
+		pthread_mutex_unlock(&s->mut_time);
+		pthread_mutex_unlock(&data->conn[0]->mutex);
+		data->conn[0]->is_active = true;
 		data->conn[0] = NULL;
+	}
 	if (data->conn[1])
+	{
+		pthread_mutex_lock(&s->mut_time);
+		gettimeofday(&data->conn[1]->s_cooldown, NULL);
+		pthread_mutex_unlock(&s->mut_time);
+		pthread_mutex_unlock(&data->conn[1]->mutex);
+		data->conn[1]->is_active = true;
 		data->conn[1] = NULL;
+	}
 	data->compiles++;
 	pthread_mutex_unlock(&s->mut_array);
 }

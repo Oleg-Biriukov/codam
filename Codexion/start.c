@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/14 15:59:39 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/14 16:54:41 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,18 +35,18 @@ static void	create_coders(t_span *s, t_array *a)
 	}
 }
 
-static void	create_dongle(t_span *s, t_array *a)
-{
-	t_dongle			*d_data;
+// static void	create_dongle(t_span *s, t_array *a)
+// {
+// 	t_dongle			*d_data;
 
-	while (a)
-	{
-		d_data = (t_dongle *) a->data;
-		if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
-			return ((void) fail(s));
-		a = a->next;
-	}
-}
+// 	while (a)
+// 	{
+// 		d_data = (t_dongle *) a->data;
+// 		if (pthread_create(&d_data->t, NULL, (void *) dongle, d_data) != 0)
+// 			return ((void) fail(s));
+// 		a = a->next;
+// 	}
+// }
 
 static void	awaiting(t_span *s, t_array *a, unsigned int total_c)
 {
@@ -77,27 +77,21 @@ static void	awaiting(t_span *s, t_array *a, unsigned int total_c)
 	}
 }
 
-static void	finish(t_array *a, unsigned int n_coders)
+static void	finish(t_array *a)
 {
 	t_coder			*c_data;
-	t_dongle		*d_data;
-	unsigned int	counter;
 
-	counter = 0;
-	while (counter != n_coders * 2)
+	while (a)
 	{
-		counter++;
-		if (counter % 2 == 0)
-		{
-			d_data = (t_dongle *) a->data;
-			pthread_join(d_data->t, NULL);
-		}
-		else
-		{
-			c_data = (t_coder *) a->data;
-			pthread_join(c_data->t, NULL);
-			// pthread_join(c_data->t_burnout, NULL);
-		}
+		// counter++;
+		// if (counter % 2 == 0)
+		// {
+		// 	d_data = (t_dongle *) a->data;
+		// 	pthread_join(d_data->t, NULL);
+		// }
+		c_data = (t_coder *) a->data;
+		pthread_join(c_data->t, NULL);
+
 		a = a->next;
 	}
 }
@@ -112,7 +106,7 @@ bool	start(t_span *s)
 	workspace = s->workspace;
 	pthread_mutex_lock(&s->mut_array);
 	create_coders(s, s->coders);
-	create_dongle(s, s->dongle);
+	// create_dongle(s, s->dongle);
 	total_c = s->n_coders * s->n_compiles;
 	n_coders = s->n_coders;
 	if (pthread_create(&t[0], NULL, (void *) &scheduling, s) != 0)
@@ -126,7 +120,7 @@ bool	start(t_span *s)
 	pthread_mutex_lock(&s->mut);
 	s->is_over = true;
 	pthread_mutex_unlock(&s->mut);
-	finish(workspace, n_coders);
+	finish(s->coders);
 	pthread_join(t[0], NULL);
 	pthread_join(t[1], NULL);
 	return (!s->is_failed);
