@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/14 17:17:21 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/15 15:00:56 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,8 +29,7 @@ void	finish_comp(t_span *s, t_coder *data)
 	{
 		pthread_mutex_lock(&s->mut_time);
 		gettimeofday(&data->conn[0]->s_cooldown, NULL);
-		pthread_mutex_unlock(&s->mut_time);
-		pthread_mutex_unlock(&data->conn[0]->mutex);
+		pthread_mutex_unlock(&s->mut_time);;
 		data->conn[0]->is_active = true;
 		data->conn[0] = NULL;
 	}
@@ -39,7 +38,6 @@ void	finish_comp(t_span *s, t_coder *data)
 		pthread_mutex_lock(&s->mut_time);
 		gettimeofday(&data->conn[1]->s_cooldown, NULL);
 		pthread_mutex_unlock(&s->mut_time);
-		pthread_mutex_unlock(&data->conn[1]->mutex);
 		data->conn[1]->is_active = true;
 		data->conn[1] = NULL;
 	}

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/14 17:20:11 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/15 15:01:08 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,8 +21,8 @@ bool	is_cooldown(t_dongle *data)
 	gettimeofday(&now, NULL);
 	pthread_mutex_lock(&s->mut_time);
 	if (data->s_cooldown.tv_sec == 0 && data->s_cooldown.tv_usec == 0)
-		return (false);
-	if (interval(data->s_cooldown, now) > s->d_cooldown)
+		return (pthread_mutex_unlock(&s->mut_time), false);
+	if (interval(data->s_cooldown, now) > s->d_cooldown * 1000)
 		return (pthread_mutex_unlock(&s->mut_time), false);
 	pthread_mutex_unlock(&s->mut_time);
 	return (true);
@@ -43,7 +43,6 @@ bool	init_dongle(t_span *s)
 		if (!data || !array)
 			return (false);
 		
-		pthread_mutex_init(&data->mutex, NULL);
 		data->id = la_len(la_start(array));
 		data->s = (void *) s;
 		data->h = (t_heapq) {{}, 0};

@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/14 17:20:30 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/15 14:13:43 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,7 +77,6 @@ static void take_left_dongle(t_span *s, t_coder	*cdata, t_dongle *ldata)
 		pthread_mutex_unlock(&s->mut_prnt);
 		cdata->conn[0] = ldata;
 		ldata->is_active = false;
-		pthread_mutex_lock(&ldata->mutex);
 		deq_heapq(&ldata->h, s->_by);
 	}
 }
@@ -91,7 +90,6 @@ static void take_right_dongle(t_span *s, t_coder	*cdata, t_dongle *rdata)
 		pthread_mutex_unlock(&s->mut_prnt);
 		cdata->conn[1] = rdata;
 		rdata->is_active = false;
-		pthread_mutex_lock(&rdata->mutex);
 		deq_heapq(&rdata->h, s->_by);
 	}
 }
@@ -132,30 +130,30 @@ void	scheduling(t_span *s)
 	t_array			*a;
 	t_dongle		*data;
 	void			*coder;
-	struct timeval	now;
-	struct timespec	wait;
+	// struct timeval	now;
+	// struct timespec	wait;
 
 	pthread_mutex_lock(&s->mut_array);
 	pthread_mutex_unlock(&s->mut_array);
 	while (1)
 	{
-		pthread_mutex_lock(&s->mut_array);
-		while (s->to_schedule != true)
-		{
-			gettimeofday(&now, NULL);
-			wait = convert(now, 100);
-			if (pthread_cond_timedwait(&s->c_to_schedule, &s->mut_array, &wait) == ETIMEDOUT)
-			{
-				pthread_mutex_lock(&s->mut);
-				if (s->is_failed || s->is_over || s->is_burnout)
-					return (pthread_mutex_unlock(&s->mut), (void) pthread_mutex_unlock(&s->mut_array));
-				pthread_mutex_unlock(&s->mut);
-				continue ;
-			}
-			break ;
-		}
-		s->to_schedule = false;
-		pthread_mutex_unlock(&s->mut_array);
+		// pthread_mutex_lock(&s->mut_array);
+		// while (s->to_schedule != true)
+		// {
+		// 	gettimeofday(&now, NULL);
+		// 	wait = convert(now, 100);
+		// 	if (pthread_cond_timedwait(&s->c_to_schedule, &s->mut_array, &wait) == ETIMEDOUT)
+		// 	{
+		// 		pthread_mutex_lock(&s->mut);
+		// 		if (s->is_failed || s->is_over || s->is_burnout)
+		// 			return (pthread_mutex_unlock(&s->mut), (void) pthread_mutex_unlock(&s->mut_array));
+		// 		pthread_mutex_unlock(&s->mut);
+		// 		continue ;
+		// 	}
+		// 	break ;
+		// }
+		// s->to_schedule = false;
+		// pthread_mutex_unlock(&s->mut_array);
 		a = s->workspace->next;
 		while (a)
 		{

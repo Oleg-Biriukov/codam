@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 16:24:35 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/15 15:01:52 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,13 +66,12 @@ static bool	awaiting_for_connection(t_coder	*data)
 	while (!(data->conn[0] && data->conn[1]))
 	{
 		gettimeofday(&now, NULL);
-		wait = convert(now, 100);
+		wait = convert(now, 10);
 		if (pthread_cond_timedwait(&data->cond, &s->mut_array, &wait) == ETIMEDOUT)
 		{
 			pthread_mutex_lock(&s->mut);
 			if (s->is_failed || s->is_over || s->is_burnout)
-				return (pthread_mutex_unlock(&s->mut),
-					pthread_mutex_unlock(&s->mut_array), false);
+				return (pthread_mutex_unlock(&s->mut), pthread_mutex_unlock(&s->mut_array), false);
 			pthread_mutex_unlock(&s->mut);
 			continue ;
 		}

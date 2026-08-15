@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/14 17:14:25 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/15 15:01:12 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,6 @@ typedef struct t_dongle
 	bool			is_active;
 	t_heapq			h;
 	unsigned int	id;
-	pthread_mutex_t	mutex;
 	struct timeval	s_cooldown;
 }	t_dongle;
 
