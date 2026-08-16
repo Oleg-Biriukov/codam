@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 12:33:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/15 14:28:46 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/16 17:18:10 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,8 @@ static void	create_coders(t_span *s, t_array *a)
 		ld_data = (t_dongle *) find_elem(s->workspace, a)->next->data;
 		if (pthread_create(&c_data->t, NULL, (void *) coder, c_data) != 0)
 			return ((void) fail(s));
-		gettimeofday(&c_data->b_interv_s, NULL);
+		c_data->b_interv_s.tv_sec = s->start.tv_sec;
+		c_data->b_interv_s.tv_usec = s->start.tv_usec;
 		gettimeofday(&c_data->req_t, NULL);
 		if (c_data->id % 2 != 0)
 			c_data->req_t.tv_sec -= 10;
@@ -85,6 +86,7 @@ bool	start(t_span *s)
 
 	workspace = s->workspace;
 	pthread_mutex_lock(&s->mut_array);
+	gettimeofday(&s->start, NULL);
 	create_coders(s, s->coders);
 	total_c = s->n_coders * s->n_compiles;
 	n_coders = s->n_coders;
@@ -92,7 +94,6 @@ bool	start(t_span *s)
 		fail(s);
 	if (pthread_create(&t[1], NULL, (void *) &monitor, s) != 0)
 		fail(s);
-	gettimeofday(&s->start, NULL);
 	pthread_mutex_unlock(&s->mut_array);
 	if (!s->is_failed)
 		awaiting(s, workspace, total_c);

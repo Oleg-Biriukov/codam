@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/16 12:09:26 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/16 17:38:49 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,55 +17,61 @@ int	fifo(void	*data1, void	*data2)
 	struct timeval	d1_t;
 	struct timeval	d2_t;
 	t_span			*s;
+	int result;
 
 	s = (t_span *) ((t_coder *) data1)->s; 
 	pthread_mutex_lock(&s->mut_time);
 	d1_t = ((t_coder *) data1)->req_t;
 	d2_t = ((t_coder *) data2)->req_t;
+	result = 0;
 	if (d1_t.tv_sec < d2_t.tv_sec)
-		return (pthread_mutex_unlock(&s->mut_time), 1);
+		result = 1;
 	else if (d1_t.tv_sec > d2_t.tv_sec)
-		return (pthread_mutex_unlock(&s->mut_time), 0);
+		result =  0;
 	else if (d1_t.tv_sec == d2_t.tv_sec)
 	{
 		if (d1_t.tv_usec < d2_t.tv_usec)
-			return (pthread_mutex_unlock(&s->mut_time), 1);
+			result = 1;
 		else if (d1_t.tv_usec > d2_t.tv_usec)
-			return (pthread_mutex_unlock(&s->mut_time), 0);
+			result = 0;
+		else
+			result = ((t_coder *) data1)->id < ((t_coder *) data2)->id;
 	}
-	return (pthread_mutex_unlock(&s->mut_time),
-		((t_coder *) data1)->id < ((t_coder *) data2)->id);
+	pthread_mutex_unlock(&s->mut_time);
+	return (result);
 }
 
 int	edf(void *data1, void *data2)
 {
-    struct timeval		deadline1;
-    struct timeval		deadline2;
-    t_span				*s;
-	t_coder				*d1;
-	t_coder				*d2;
+    struct timeval	d1_t;
+	struct timeval	d2_t;
+	t_span			*s;
+	int				result;
 
-	d1 = (t_coder *) data1;
-	d2 = (t_coder *) data2;
-	s = (t_span *) d1->s;
+	s = (t_span *) ((t_coder *) data1)->s; 
 	pthread_mutex_lock(&s->mut_time);
-    deadline1.tv_sec = d1->b_interv_s.tv_sec;
-	deadline1.tv_usec = d1->b_interv_s.tv_sec;
-    deadline2.tv_sec = d2->b_interv_s.tv_sec;
-	deadline2.tv_usec = d2->b_interv_s.tv_sec ;
-	pthread_mutex_unlock(&s->mut_time);
-	if (deadline1.tv_sec < deadline2.tv_sec)
-		return (1);
-	else if (deadline1.tv_sec > deadline2.tv_sec)
-		return (0);
-	else if (deadline1.tv_sec == deadline2.tv_sec)
+	d1_t = ((t_coder *) data1)->b_interv_s;
+	d2_t = ((t_coder *) data2)->b_interv_s;
+	result = 0;
+	if (d1_t.tv_sec < d2_t.tv_sec)
+		result = 0;
+	else if (d1_t.tv_sec > d2_t.tv_sec)
+		result =  1;
+	else if (d1_t.tv_sec == d2_t.tv_sec)
 	{
-		if (deadline1.tv_usec < deadline2.tv_usec)
-			return (1);
-		else if (deadline1.tv_usec > deadline2.tv_usec)
-			return (0);
+		if (d1_t.tv_usec < d2_t.tv_usec)
+			result = 0;
+		else if (d1_t.tv_usec > d2_t.tv_usec)
+			result = 1;
+		else
+		{
+			pthread_mutex_unlock(&s->mut_time);
+			result = fifo(data1, data2);
+			pthread_mutex_lock(&s->mut_time);
+		}
 	}
-    return (fifo(data1, data2));
+	pthread_mutex_unlock(&s->mut_time);
+    return (result);
 }
 
 static void take_left_dongle(t_span *s, t_coder	*cdata, t_dongle *ldata)
