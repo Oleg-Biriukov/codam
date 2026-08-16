@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/23 13:12:15 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/15 14:13:43 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/16 12:09:26 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,10 +49,10 @@ int	edf(void *data1, void *data2)
 	d2 = (t_coder *) data2;
 	s = (t_span *) d1->s;
 	pthread_mutex_lock(&s->mut_time);
-    deadline1.tv_sec = d1->b_interv_s.tv_sec + (s->t_burnout / 1000);
-	deadline1.tv_usec = d1->b_interv_s.tv_sec + ((s->t_burnout % 1000) * 1000);
-    deadline2.tv_sec = d2->b_interv_s.tv_sec + (s->t_burnout / 1000);
-	deadline2.tv_usec = d2->b_interv_s.tv_sec + ((s->t_burnout % 1000) * 1000);
+    deadline1.tv_sec = d1->b_interv_s.tv_sec;
+	deadline1.tv_usec = d1->b_interv_s.tv_sec;
+    deadline2.tv_sec = d2->b_interv_s.tv_sec;
+	deadline2.tv_usec = d2->b_interv_s.tv_sec ;
 	pthread_mutex_unlock(&s->mut_time);
 	if (deadline1.tv_sec < deadline2.tv_sec)
 		return (1);
