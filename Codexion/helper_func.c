@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 14:37:21 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/13 17:35:20 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/20 04:16:05 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,9 +25,9 @@ __int64_t	interval(struct timeval s, struct timeval e)
 
 	if ((e.tv_sec * 1000000L + e.tv_usec) > (s.tv_sec * 1000000L + s.tv_usec))
 		diff = (e.tv_sec * 1000000L + e.tv_usec)
-	- (s.tv_sec * 1000000L + s.tv_usec);
+			- (s.tv_sec * 1000000L + s.tv_usec);
 	diff = (e.tv_sec * 1000000L + e.tv_usec)
-	- (s.tv_sec * 1000000L + s.tv_usec);
+		- (s.tv_sec * 1000000L + s.tv_usec);
 	if (diff < 0)
 		diff = 0;
 	return (diff);
@@ -42,7 +42,7 @@ bool	wait_check(t_span *s, unsigned int how_many)
 	gettimeofday(&start_time, NULL);
 	gettimeofday(&current_time, NULL);
 	c_time = interval(start_time, current_time) / 1000;
-	while (c_time < how_many)
+	while (c_time <= how_many)
 	{
 		c_time = interval(start_time, current_time) / 1000;
 		pthread_mutex_lock(&s->mut);

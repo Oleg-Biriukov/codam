@@ -6,11 +6,21 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/18 10:16:37 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/15 15:01:08 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/20 04:16:48 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
+
+void	requests_for_dongles(t_span *s, t_coder *data, t_dongle *adj_dngl[])
+{
+	pthread_mutex_lock(&s->mut_array);
+	enq_heapq(&adj_dngl[0]->h, (void *) data, s->_by);
+	pthread_mutex_unlock(&s->mut_array);
+	pthread_mutex_lock(&s->mut_array);
+	enq_heapq(&adj_dngl[1]->h, (void *) data, s->_by);
+	pthread_mutex_unlock(&s->mut_array);
+}
 
 bool	is_cooldown(t_dongle *data)
 {
@@ -42,10 +52,9 @@ bool	init_dongle(t_span *s)
 		array = la_append(array, data);
 		if (!data || !array)
 			return (false);
-		
 		data->id = la_len(la_start(array));
 		data->s = (void *) s;
-		data->h = (t_heapq) {{}, 0};
+		data->h = (t_heapq){{}, 0};
 		data->is_active = true;
 		data->s_cooldown.tv_sec = 0;
 		data->s_cooldown.tv_usec = 0;

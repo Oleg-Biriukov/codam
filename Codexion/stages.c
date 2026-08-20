@@ -6,13 +6,13 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 13:05:07 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/15 15:00:56 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/20 04:10:09 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void	start_comp(t_span *s, t_coder *data)
+static void	start_comp(t_span *s, t_coder *data)
 {
 	pthread_mutex_lock(&s->mut_prnt);
 	printf("%d %d is compiling\n", timer(s), data->id);
@@ -22,14 +22,14 @@ void	start_comp(t_span *s, t_coder *data)
 	pthread_mutex_unlock(&s->mut_array);
 }
 
-void	finish_comp(t_span *s, t_coder *data)
+static void	finish_comp(t_span *s, t_coder *data)
 {
 	pthread_mutex_lock(&s->mut_array);
 	if (data->conn[0])
 	{
 		pthread_mutex_lock(&s->mut_time);
 		gettimeofday(&data->conn[0]->s_cooldown, NULL);
-		pthread_mutex_unlock(&s->mut_time);;
+		pthread_mutex_unlock(&s->mut_time);
 		data->conn[0]->is_active = true;
 		data->conn[0] = NULL;
 	}
@@ -45,14 +45,14 @@ void	finish_comp(t_span *s, t_coder *data)
 	pthread_mutex_unlock(&s->mut_array);
 }
 
-void	start_debug(t_span *s, t_coder *data)
+static void	start_debug(t_span *s, t_coder *data)
 {
 	pthread_mutex_lock(&s->mut_prnt);
 	printf("%d %d is debugging\n", timer(s), data->id);
 	pthread_mutex_unlock(&s->mut_prnt);
 }
 
-void	start_refactor(t_span *s, t_coder *data)
+static void	start_refactor(t_span *s, t_coder *data)
 {
 	pthread_mutex_lock(&s->mut_prnt);
 	printf("%d %d is refactoring\n", timer(s), data->id);
@@ -62,11 +62,11 @@ void	start_refactor(t_span *s, t_coder *data)
 bool	stages(t_coder *data)
 {
 	t_span			*s;
-	t_dongle		*adj_dongles[2];
+	t_dongle		*adj_dngl[2];
 
 	s = (t_span *) data->s;
-	adj_dongles[0] = data->conn[0];
-	adj_dongles[1] = data->conn[1];
+	adj_dngl[0] = data->conn[0];
+	adj_dngl[1] = data->conn[1];
 	start_comp(s, data);
 	if (!wait_check(s, s->t_compile))
 		return (false);
@@ -77,15 +77,13 @@ bool	stages(t_coder *data)
 	start_refactor(s, data);
 	if (!wait_check(s, s->t_refactor))
 		return (false);
-	pthread_mutex_lock(&s->mut_array);
 	pthread_mutex_lock(&s->mut_time);
 	gettimeofday(&data->req_t, NULL);
 	pthread_mutex_unlock(&s->mut_time);
-	enq_heapq(&adj_dongles[0]->h, (void *) data, s->_by);
-	enq_heapq(&adj_dongles[1]->h, (void *) data, s->_by);
+	requests_for_dongles(s, data, adj_dngl);
+	pthread_mutex_lock(&s->mut_array);
 	pthread_cond_broadcast(&s->c_to_schedule);
 	data->is_active = true;
 	s->to_schedule = true;
-	pthread_mutex_unlock(&s->mut_array);
-	return (true);
+	return (pthread_mutex_unlock(&s->mut_array), true);
 }

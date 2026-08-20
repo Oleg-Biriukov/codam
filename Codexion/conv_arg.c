@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/07/29 16:26:46 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/01 15:08:33 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/20 04:35:19 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,26 +19,31 @@ static bool	is_ok(int c)
 	return (false);
 }
 
+static void	skip_spaces(t_span *s)
+{
+	while (**s->argv == ' ')
+		(*s->argv)++;
+}
+
 static int	convert_to_num(t_span *s)
 {
 	int	return_num;
 
 	if (s->argc == 0)
 		return (0);
+	if (!*s->argv)
+		return (0);
 	return_num = atoi(*s->argv);
 	if (return_num == 0 && !is_ok(**s->argv))
 		s->is_failed = true;
-	while (**s->argv == ' ')
-		(*s->argv)++;
+	skip_spaces(s);
 	while (**s->argv != '\0' && **s->argv != ' ')
 	{
 		if (!is_ok(**s->argv))
 			break ;
-		else
-			(*s->argv)++;
-	}
-	while (**s->argv == ' ')
 		(*s->argv)++;
+	}
+	skip_spaces(s);
 	if (!is_ok(**s->argv) && s->argc > 1)
 		s->is_failed = true;
 	else
@@ -65,13 +70,13 @@ void	take_out_arg(t_span *s, char **argv, int argc)
 	s->d_cooldown = convert_to_num(s);
 	s->to_schedule = true;
 	s->schdlr = *s->argv;
-	if (s->argc != 0 || !s->schdlr)
+	if (!*s->argv || s->argc != 0 || !s->schdlr || s->n_coders > 500)
 		s->is_failed = true;
 	if (s->schdlr)
 	{
-		if (!strcmp(s->schdlr, "fifo"))
+		if (!strcmp(s->schdlr, FIFO))
 			return ;
-		if (!strcmp(s->schdlr, "edf"))
+		if (!strcmp(s->schdlr, EDF))
 			return ;
 		s->is_failed = true;
 	}

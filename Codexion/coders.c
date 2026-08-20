@@ -6,26 +6,20 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 14:35:19 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/15 15:01:52 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/20 03:47:47 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "codexion.h"
 
-void	monitor(t_span	*s)
+static int	is_burnout(t_span *s, t_array *a, t_coder *data)
 {
-	t_array	*a;
-	t_coder	*data;
-
-	pthread_mutex_lock(&s->mut_array);
-	pthread_mutex_unlock(&s->mut_array);
-	a = s->workspace;
 	while (a)
 	{
 		data = (t_coder *) a->data;
 		pthread_mutex_lock(&s->mut);
 		if (s->is_over || s->is_failed)
-			return ((void) pthread_mutex_unlock(&s->mut));
+			return ((void) pthread_mutex_unlock(&s->mut), 0);
 		pthread_mutex_unlock(&s->mut);
 		pthread_mutex_lock(&s->mut_array);
 		if (data->is_done)
@@ -38,20 +32,28 @@ void	monitor(t_span	*s)
 		pthread_mutex_lock(&s->mut_time);
 		gettimeofday(&data->b_interv_e, NULL);
 		if (interval(data->b_interv_s, data->b_interv_e) > s->t_burnout * 1000)
-		{
-			pthread_mutex_unlock(&s->mut_time);
-			break ;
-		}
+			return (pthread_mutex_unlock(&s->mut_time), data->id);
 		pthread_mutex_unlock(&s->mut_time);
 		a = a->next->next;
-		if (RUNNING_ON_VALGRIND)
-			usleep(30);
+		usleep(1);
 	}
+	return (0);
+}
+
+void	monitor(t_span	*s)
+{
+	int	coder_id;
+
+	pthread_mutex_lock(&s->mut_array);
+	pthread_mutex_unlock(&s->mut_array);
+	coder_id = is_burnout(s, s->workspace, NULL);
+	if (!coder_id)
+		return ;
 	pthread_mutex_lock(&s->mut);
 	s->is_burnout = true;
 	pthread_mutex_unlock(&s->mut);
 	pthread_mutex_lock(&s->mut_prnt);
-	printf("%d %d burned out\n", timer(s), data->id);
+	printf("%d %d burned out\n", timer(s), coder_id);
 	pthread_mutex_unlock(&s->mut_prnt);
 }
 
@@ -66,12 +68,14 @@ static bool	awaiting_for_connection(t_coder	*data)
 	while (!(data->conn[0] && data->conn[1]))
 	{
 		gettimeofday(&now, NULL);
-		wait = convert(now, 10);
-		if (pthread_cond_timedwait(&data->cond, &s->mut_array, &wait) == ETIMEDOUT)
+		wait = convert(now, 200);
+		if (pthread_cond_timedwait(&data->cond,
+				&s->mut_array, &wait) == ETIMEDOUT)
 		{
 			pthread_mutex_lock(&s->mut);
 			if (s->is_failed || s->is_over || s->is_burnout)
-				return (pthread_mutex_unlock(&s->mut), pthread_mutex_unlock(&s->mut_array), false);
+				return (pthread_mutex_unlock(&s->mut),
+					pthread_mutex_unlock(&s->mut_array), false);
 			pthread_mutex_unlock(&s->mut);
 			continue ;
 		}
@@ -82,16 +86,14 @@ static bool	awaiting_for_connection(t_coder	*data)
 
 void	coder(t_coder *data)
 {
-	unsigned int	n_comp;
 	unsigned int	c_comp;
 	t_span			*s;
 
 	s = (t_span *) data->s;
 	pthread_mutex_lock(&s->mut_array);
-	n_comp = s->n_compiles;
 	c_comp = data->compiles;
 	pthread_mutex_unlock(&s->mut_array);
-	while (c_comp != n_comp)
+	while (c_comp != s->n_compiles)
 	{
 		pthread_mutex_lock(&s->mut_array);
 		c_comp = data->compiles;
@@ -104,8 +106,7 @@ void	coder(t_coder *data)
 		if (s->is_failed || s->is_over || s->is_burnout)
 			return ((void) pthread_mutex_unlock(&s->mut));
 		pthread_mutex_unlock(&s->mut);
-		if (RUNNING_ON_VALGRIND)
-			usleep(30);
+		usleep(1);
 	}
 	pthread_mutex_lock(&s->mut_array);
 	data->is_done = true;

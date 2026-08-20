@@ -3,7 +3,7 @@ CC = cc
 CFLAGS = -Wall -Werror -Wextra -g -pthread
 #  -fsanitize=thread
 SRC = coders.c dongle.c helper_func.c scheduler.c start.c heapq.c \
-	  conv_arg.c ft_array.c main.c stages.c ft_array_expanded.c
+	  conv_arg.c ft_array.c main.c stages.c ft_array_expanded.c priority.c
 
 OBJ = $(SRC:.c=.o)
 

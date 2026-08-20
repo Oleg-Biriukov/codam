@@ -6,7 +6,7 @@
 /*   By: obirukov <obirukov@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/15 12:14:06 by obirukov          #+#    #+#             */
-/*   Updated: 2026/08/15 15:01:12 by obirukov         ###   ########.fr       */
+/*   Updated: 2026/08/20 04:09:33 by obirukov         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,17 +22,18 @@
 # include <string.h>
 # include <errno.h>
 # include <stdbool.h>
-# define MAX 2
+# define M_HEAP 2
+# define FIFO "fifo"
+# define EDF "edf"
 
-typedef struct t_coder t_coder;
-
-typedef int	(*t_schdl)(void *, void *);
+typedef struct t_coder	t_coder;
+typedef bool			(*t_schdl)(void *, void *);
 
 typedef struct t_heapq
 {
-    void 	*items[MAX];
-    int     size;
-} t_heapq;
+	void	*items[M_HEAP];
+	int		size;
+}	t_heapq;
 
 typedef struct t_dongle
 {
@@ -90,6 +91,7 @@ typedef struct t_span
 	bool			to_schedule;
 	bool			is_failed;
 	bool			is_burnout;
+	bool			is_begging;
 	char			*schdlr;
 	char			**argv;
 	int				argc;
@@ -104,14 +106,15 @@ t_array			*la_init(void *content);
 t_array			*get_elem(t_array *stack, int num);
 t_array			*find_elem(t_array *haystack, t_array *needle);
 void			*la_free(t_array *array);
-void			la_sort(t_array *a, int (cond)(t_array *, t_array *), t_span *s);
 void			take_out_arg(t_span *s, char **argv, int argc);
 void			coder(t_coder *data);
 void			monitor(t_span *s);
 void			enq_heapq(t_heapq *heap, void *data, t_schdl _prioriy);
 void			*deq_heapq(t_heapq *heap, t_schdl _prioriy);
-void			scheduling(t_span *s);
+void			scheduling(t_span *s, t_array *a);
 void			swap(void **a, void **b);
+void			requests_for_dongles(t_span *s, t_coder *data,
+					t_dongle *adj_dngl[]);
 void			*peek(t_heapq *heap);
 bool			fail(t_span *s);
 bool			start(t_span *s);
@@ -120,8 +123,8 @@ bool			is_cooldown(t_dongle *data);
 bool			init_arrays(t_span *s);
 bool			init_dongle(t_span *s);
 bool			wait_check(t_span *s, unsigned int how_many);
+bool			fifo(void	*data1, void	*data2);
+bool			edf(void	*data1, void	*data2);
 int				timer(t_span *s);
-int				fifo(void	*data1, void	*data2);
-int				edf(void	*data1, void	*data2);
 
 #endif
