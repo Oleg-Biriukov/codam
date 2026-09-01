@@ -1,12 +1,15 @@
 [project]
-name = "call_me_maybe"
+name = "llm-sdk"
 version = "0.1.0"
-description = ".."
+description = "LLM SDK for local model inference"
 requires-python = ">=3.10"
 dependencies = [
     "torch>=2.0.0",
     "transformers>=4.40.0",
     "huggingface-hub>=0.20.0",
+    "pydantic>=2.12.5",
+    "numpy>=2.2.6",
+    "pytest>=9.0.3",
 ]
 
 [build-system]
