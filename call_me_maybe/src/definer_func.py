@@ -23,3 +23,7 @@ class FuncDefiner(BaseModel):
                     or tp_prmtr["type"] not in Types):
                 raise ValueError("Inappropriate return type.")
         return self
+
+
+class UserPrompt(BaseModel):
+    prompt: str = Field(min_length=2, max_length=150)

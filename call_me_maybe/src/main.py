@@ -1,7 +1,6 @@
-from llm_sdk.llm_sdk import Small_LLM_Model
 import json
 import argparse
-from src.definer_func import FuncDefiner
+from src.definer_func import FuncDefiner, UserPrompt
 import os
 
 
@@ -33,20 +32,32 @@ def take_out_func_from_file(filename: str) -> list[FuncDefiner]:
     return func_list
 
 
+def get_user_prompt_from_file(filename: str) -> list[UserPrompt]:
+    users_prompt: list[FuncDefiner] = []
+    content: list[dict]
+
+    with open(filename, "r") as userprompt:
+        content = json.load(userprompt)
+    for prompt in content:
+        users_prompt.append(UserPrompt(**prompt))
+    return users_prompt
+
+
 def main():
-    model: Small_LLM_Model
     arg: argparse.Namespace
     function_list: list[FuncDefiner]
+    users_prompt: list[UserPrompt]
 
-    # model = Small_LLM_Model()
     arg = take_out_arg()
     function_list = take_out_func_from_file(arg.functions_definition)
+    users_prompt = get_user_prompt_from_file(arg.input)
     # while 1:
-    #     logits = enumerate(model.get_logits_from_input_ids(prompt))
-    #     logits = sorted(logits, key=lambda x: x[1], reverse=True)
+    #     
     #     prompt.append(logits[0][0])
     #     print(model.decode([logits[0][0]]), end='', flush=True)
     #     if logits[0][0] == 151645:
     #         break
+
+
 if __name__ == "__main__":
     main()
