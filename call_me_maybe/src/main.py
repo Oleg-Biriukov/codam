@@ -1,6 +1,7 @@
 import json
 import argparse
 from src.definer_func import FuncDefiner, UserPrompt
+from src.state_machine import StateMachine
 import os
 
 
@@ -51,6 +52,11 @@ def main():
     arg = take_out_arg()
     function_list = take_out_func_from_file(arg.functions_definition)
     users_prompt = get_user_prompt_from_file(arg.input)
+    state_machine = StateMachine(user_prompt=users_prompt[0],
+                                 functions=function_list)
+    state_machine.gen_text()
+    # print(state_machine.output.name)
+    
     # while 1:
     #     
     #     prompt.append(logits[0][0])

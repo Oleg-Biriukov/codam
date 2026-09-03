@@ -8,7 +8,7 @@ class Types(Enum):
 
 
 class FuncDefiner(BaseModel):
-    name: str = Field(min_length=2, max_length=50)
+    name: str = Field(pattern="^[a-zA-Z_]{2,50}$")
     description: str = Field(min_length=2, max_length=500)
     parameters: dict[str, dict[str, Types]]
     returns: dict[str, Types]
@@ -27,3 +27,9 @@ class FuncDefiner(BaseModel):
 
 class UserPrompt(BaseModel):
     prompt: str = Field(min_length=2, max_length=150)
+
+
+class Output(BaseModel):
+    prompt: str = None
+    name: str = None
+    parameters: dict = None
