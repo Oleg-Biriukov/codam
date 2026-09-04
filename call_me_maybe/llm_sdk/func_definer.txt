@@ -7,15 +7,25 @@ CRITICAL RULES:
 
 EXAMPLES:
 User: "What is the sum of 2 and 3?"
-Available: fn_add_numbers, fn_greet, fn_reverse_string
+Available functions:
+- fn_add_numbers: Add two numbers (a: number, b: number)
+- fn_greet: Greet a person (name: string)
+- fn_reverse_string: Reverse a string (s: string)
 Correct: "fn_add_numbers"
 
 User: "Say hello to John"
-Available: fn_add_numbers, fn_greet, fn_reverse_string
+Available functions:
+- fn_add_numbers: Add two numbers (a: number, b: number)
+- fn_greet: Greet a person (name: string)
+- fn_reverse_string: Reverse a string (s: string)
 Correct: "fn_greet"
 
 User: "Flip the word 'hello' backwards"
-Available: fn_add_numbers, fn_greet, fn_reverse_string
+Available functions:
+- fn_add_numbers: Add two numbers (a: number, b: number)
+- fn_greet: Greet a person (name: string)
+- fn_reverse_string: Reverse a string (s: string)
 Correct: "fn_reverse_string"
 
 Select the function now. Return ONLY the function name in quotes, nothing else.
+

@@ -32,21 +32,21 @@ class StateMachine(BaseModel):
             self.output.name = self._llm.decode(self._res)
             return
         logits = np.array(self._llm.get_logits_from_input_ids(prompt))
-        if self._state is State.EXPECT_QUOTE:
-            while self._state is State.EXPECT_QUOTE:
-                token = int(np.argmax(logits))
-                if '"' in self._llm.decode(token)[0]:
-                    self._state = State.EXPECT_FUNC
-                else:
-                    logits[token] = float("-inf")
         if self._state is State.EXPECT_FUNC:
             token = int(np.argmax(logits))
             if list(set(self._llm.decode([token])) & set(self._stop_id)): # probably problem somewhere here but im not sure
                 self._state = State.EXPECT_PRMTR
-            elif re.fullmatch('^[a-zA-Z_"]$', self._llm.decode(token)):
+            elif re.fullmatch('^[a-zA-Z_"]$', self._llm.decode(token)) and ' ' not in self._llm.decode(token):
                 self._state = State.EXPECT_FUNC
             else:
                 logits[token] = float("-inf")
+        if self._state is State.EXPECT_QUOTE:
+            while self._state is State.EXPECT_QUOTE:
+                token = int(np.argmax(logits))
+                if '"' in self._llm.decode(token)[0] and ' ' not in self._llm.decode(token):
+                    self._state = State.EXPECT_FUNC
+                else:
+                    logits[token] = float("-inf")
         print(self._llm.decode(token), end='', flush=True)
         prompt.append(token)
         self._res.append(token)
@@ -61,7 +61,7 @@ class StateMachine(BaseModel):
 
         # extractor_prmt = self._llm.encode(get_extr_prompt(self.user_prompt, self.functions)).tolist()[0]
         extractor_func = self._llm.encode(get_func_prompt(self.user_prompt.prompt, self.functions)).tolist()[0]
-        self._stop_id = ['}', '"}', ' "}', '"', ' "', '" ']
+        self._stop_id = ['}', '"}', ' "}', '"']
         if self._state is State.EXPECT_FUNC:
             self._state = State.EXPECT_QUOTE
             self._func_gen(extractor_func)
