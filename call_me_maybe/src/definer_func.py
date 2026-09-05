@@ -5,6 +5,7 @@ from enum import Enum
 class Types(Enum):
     STRING = 'string'
     NUM = 'number'
+    NONE = 'None'
 
 
 class FuncDefiner(BaseModel):

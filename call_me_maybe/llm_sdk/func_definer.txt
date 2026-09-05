@@ -8,24 +8,27 @@ CRITICAL RULES:
 EXAMPLES:
 User: "What is the sum of 2 and 3?"
 Available functions:
-- fn_add_numbers: Add two numbers (a: number, b: number)
-- fn_greet: Greet a person (name: string)
-- fn_reverse_string: Reverse a string (s: string)
+- "fn_add_numbers": Add two numbers (a: number, b: number)
+- "fn_greet": Greet a person (name: string)
+- "fn_reverse_string": Reverse a string (s: string)
+- "None": In case if you cannot find needed function ()
 Correct: "fn_add_numbers"
 
 User: "Say hello to John"
 Available functions:
-- fn_add_numbers: Add two numbers (a: number, b: number)
-- fn_greet: Greet a person (name: string)
-- fn_reverse_string: Reverse a string (s: string)
+- "fn_add_numbers": Add two numbers (a: number, b: number)
+- "fn_greet": Greet a person (name: string)
+- "fn_reverse_string": Reverse a string (s: string)
+- "None": In case if you cannot find needed function ()
 Correct: "fn_greet"
 
-User: "Flip the word 'hello' backwards"
+User: "Calculate the square root of 144"
 Available functions:
-- fn_add_numbers: Add two numbers (a: number, b: number)
-- fn_greet: Greet a person (name: string)
-- fn_reverse_string: Reverse a string (s: string)
-Correct: "fn_reverse_string"
+- "fn_add_numbers": Add two numbers (a: number, b: number)
+- "fn_greet": Greet a person (name: string)
+- "fn_reverse_string": Reverse a string (s: string)
+- "None": In case if you cannot find needed function ()
+Correct: "None"
 
 Select the function now. Return ONLY the function name in quotes, nothing else.
 

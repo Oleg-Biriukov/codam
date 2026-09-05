@@ -27,6 +27,7 @@ class StateMachine(BaseModel):
 
     def _func_gen(self, prompt: list[int]) -> None:
         token: int
+        text_token: str
 
         if self._state is State.EXPECT_PRMTR:
             self.output.name = self._llm.decode(self._res)
@@ -34,18 +35,23 @@ class StateMachine(BaseModel):
         logits = np.array(self._llm.get_logits_from_input_ids(prompt))
         if self._state is State.EXPECT_FUNC:
             token = int(np.argmax(logits))
-            if list(set(self._llm.decode([token])) & set(self._stop_id)): # probably problem somewhere here but im not sure
+            text_token = self._llm.decode(token)
+            # print(text_token)
+            if list(set(text_token) & set(self._stop_id)): # probably problem somewhere here but im not sure
                 self._state = State.EXPECT_PRMTR
-            elif re.fullmatch('^[a-zA-Z_"]$', self._llm.decode(token)) and ' ' not in self._llm.decode(token):
+            elif re.fullmatch('^[a-zA-Z_"]$', text_token):
                 self._state = State.EXPECT_FUNC
             else:
                 logits[token] = float("-inf")
         if self._state is State.EXPECT_QUOTE:
             while self._state is State.EXPECT_QUOTE:
                 token = int(np.argmax(logits))
-                if '"' in self._llm.decode(token)[0] and ' ' not in self._llm.decode(token):
+                text_token = self._llm.decode(token)
+                if '"' in text_token[0]:
                     self._state = State.EXPECT_FUNC
+                    # print(f"'{text_token}' OK")
                 else:
+                    # print(f"'{text_token}' -inf")
                     logits[token] = float("-inf")
         print(self._llm.decode(token), end='', flush=True)
         prompt.append(token)

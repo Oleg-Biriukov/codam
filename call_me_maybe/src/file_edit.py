@@ -24,10 +24,20 @@ def get_extr_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
 
 def get_func_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
     extr_prompt: str = ""
+    len_prmtr: int
+
     with open("llm_sdk/func_definer.txt", "r") as func:
         extr_prompt += func.read()
 
     extr_prompt += f'User: "{user_prompt}"\nAvailable functions:\n'
     for func in functs:
-        extr_prompt += f"- {func.name}: {func.description}\n"
+        extr_prompt += f'- "{func.name}": {func.description} ('
+        len_prmtr = len(func.parameters)
+        for name, type in func.parameters.items():
+            if len_prmtr > 1:
+                extr_prompt += f'{name}: {type['type'].value}, '
+            else:
+                extr_prompt += f'{name}: {type['type'].value}'
+            len_prmtr -= 1
+        extr_prompt += ')\n'
     return extr_prompt + "Correct: "
