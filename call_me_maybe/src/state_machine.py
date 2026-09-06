@@ -10,7 +10,7 @@ import re
 
 class State(Enum):
     EXPECT_CBRC = auto()
-    EXPECT_QUOTE = auto()
+    EXPECT_BGNG = auto()
     EXPECT_FUNC = auto()
     EXPECT_PRMTR = auto()
     DONE = auto()
@@ -28,6 +28,9 @@ class StateMachine(BaseModel):
     def _func_gen(self, prompt: list[int]) -> None:
         token: int
         text_token: str
+        # made for begng state to determine the start point (take quarter of name and split it into letters )
+        f_t: list = [self._llm.encode(fn.name).tolist()[0] for fn in self.functions]
+        f_t = [t for l_t in f_t for t in l_t]
 
         if self._state is State.EXPECT_PRMTR:
             self.output.name = self._llm.decode(self._res)
@@ -39,15 +42,15 @@ class StateMachine(BaseModel):
             # print(text_token)
             if list(set(text_token) & set(self._stop_id)): # probably problem somewhere here but im not sure
                 self._state = State.EXPECT_PRMTR
-            elif re.fullmatch('^[a-zA-Z_"]$', text_token):
+            elif token in f_t:
                 self._state = State.EXPECT_FUNC
             else:
                 logits[token] = float("-inf")
-        if self._state is State.EXPECT_QUOTE:
-            while self._state is State.EXPECT_QUOTE:
+        if self._state is State.EXPECT_BGNG:
+            while self._state is State.EXPECT_BGNG:
                 token = int(np.argmax(logits))
                 text_token = self._llm.decode(token)
-                if '"' in text_token[0]:
+                if token in f_t:
                     self._state = State.EXPECT_FUNC
                     # print(f"'{text_token}' OK")
                 else:
@@ -67,9 +70,9 @@ class StateMachine(BaseModel):
 
         # extractor_prmt = self._llm.encode(get_extr_prompt(self.user_prompt, self.functions)).tolist()[0]
         extractor_func = self._llm.encode(get_func_prompt(self.user_prompt.prompt, self.functions)).tolist()[0]
-        self._stop_id = ['}', '"}', ' "}', '"']
+        self._stop_id = ['}', '"}', ' "}', '"', ' ', '\n', '\r']
         if self._state is State.EXPECT_FUNC:
-            self._state = State.EXPECT_QUOTE
+            self._state = State.EXPECT_BGNG
             self._func_gen(extractor_func)
             print(self._res)
             # print(self._llm.decode(self._res))

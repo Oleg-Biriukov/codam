@@ -57,11 +57,11 @@ def main():
     arg = take_out_arg()
     function_list = take_out_func_from_file(arg.functions_definition)
     users_prompt = get_user_prompt_from_file(arg.input)
-    state_machine = StateMachine(user_prompt=users_prompt[0],
+    print(get_func_prompt(users_prompt[4].prompt, function_list), flush=True)
+    state_machine = StateMachine(user_prompt=users_prompt[4],
                                  functions=function_list)
     state_machine.gen_text()
-    print(state_machine.output.name)
-    # print(get_func_prompt(users_prompt[0].prompt, function_list))
+    # print(state_machine.output.name)
     
     # while 1:
     #     

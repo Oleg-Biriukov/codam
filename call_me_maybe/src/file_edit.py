@@ -10,8 +10,8 @@ def get_extr_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
         extr_prompt += "Parameters:\n"
         for var, type in func.parameters.items():
             extr_prompt += f"\tName: {var}\n"
-            extr_prompt += f"\tType: {type["type"].value}\n\n"
-        extr_prompt += f"Return Type: {func.returns["type"].value}\n---\n"
+            extr_prompt += f"\tType: {type['type'].value}\n\n"
+        extr_prompt += f"Return Type: {func.returns['type'].value}\n---\n"
 
     extr_prompt += '===\n\n'
     
@@ -31,7 +31,7 @@ def get_func_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
 
     extr_prompt += f'User: "{user_prompt}"\nAvailable functions:\n'
     for func in functs:
-        extr_prompt += f'- "{func.name}": {func.description} ('
+        extr_prompt += f'- {func.name}: {func.description} ('
         len_prmtr = len(func.parameters)
         for name, type in func.parameters.items():
             if len_prmtr > 1:
