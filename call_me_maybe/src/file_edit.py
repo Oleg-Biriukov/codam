@@ -1,30 +1,45 @@
 from src.definer_func import FuncDefiner
 
+def _print_prmt(func: FuncDefiner) -> str:
+    prmt_l: str = ""
+    len_prmtr: int
 
-def get_extr_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
-    extr_prompt: str = "\tList of Func\n"
+    len_prmtr = len(func.parameters)
+    for name, type in func.parameters.items():
+        if len_prmtr > 1:
+            prmt_l += f'{name}: {type['type'].value}, '
+        else:
+            prmt_l += f'{name}: {type['type'].value}'
+        len_prmtr -= 1
+    return prmt_l
 
-    for func in functs:
-        extr_prompt += f"Name: {func.name}\n"
-        extr_prompt += f"Description: {func.description}\n"
-        extr_prompt += "Parameters:\n"
-        for var, type in func.parameters.items():
-            extr_prompt += f"\tName: {var}\n"
-            extr_prompt += f"\tType: {type['type'].value}\n\n"
-        extr_prompt += f"Return Type: {func.returns['type'].value}\n---\n"
 
-    extr_prompt += '===\n\n'
-    
+def get_prmt_prompt(user_prompt: str, functs: list[FuncDefiner]) -> callable:
+    def get_func(fn_name: str) -> FuncDefiner:
+        func: FuncDefiner
+
+        for fn in functs:
+            if fn.name == fn_name:
+                func = fn
+                break
+        return func
+
+    extr_prompt: str = ""
+    rtn: callable
+
     with open("llm_sdk/extractor_prompt.txt", "r") as prm:
         extr_prompt += prm.read()
 
-    extr_prompt += '\n===\n'
+    rtn = lambda func_name: f'''{extr_prompt}
 
-    return extr_prompt + "Prompt: " + user_prompt
+User: "{user_prompt}"
+Selected function: {func_name}
+Available parameters: {_print_prmt(get_func(func_name))}
+Correct: '''
+    return rtn
 
 def get_func_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
     extr_prompt: str = ""
-    len_prmtr: int
 
     with open("llm_sdk/func_definer.txt", "r") as func:
         extr_prompt += func.read()
@@ -32,12 +47,5 @@ def get_func_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
     extr_prompt += f'User: "{user_prompt}"\nAvailable functions:\n'
     for func in functs:
         extr_prompt += f'- {func.name}: {func.description} ('
-        len_prmtr = len(func.parameters)
-        for name, type in func.parameters.items():
-            if len_prmtr > 1:
-                extr_prompt += f'{name}: {type['type'].value}, '
-            else:
-                extr_prompt += f'{name}: {type['type'].value}'
-            len_prmtr -= 1
-        extr_prompt += ')\n'
+        extr_prompt += f'{_print_prmt(func)})\n'
     return extr_prompt + "Correct: "

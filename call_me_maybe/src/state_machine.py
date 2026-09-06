@@ -3,14 +3,13 @@ from enum import Enum, auto
 import numpy as np
 from llm_sdk.llm_sdk import Small_LLM_Model
 from src.definer_func import FuncDefiner, UserPrompt, Output
-from src.file_edit import get_extr_prompt, get_func_prompt
+from src.file_edit import get_prmt_prompt, get_func_prompt
 import functools as f
 import re
 
 
 class State(Enum):
     EXPECT_CBRC = auto()
-    EXPECT_BGNG = auto()
     EXPECT_FUNC = auto()
     EXPECT_PRMTR = auto()
     DONE = auto()
@@ -27,39 +26,30 @@ class StateMachine(BaseModel):
 
     def _func_gen(self, prompt: list[int]) -> None:
         token: int
-        text_token: str
+        logits: list
         # made for begng state to determine the start point (take quarter of name and split it into letters )
-        f_t: list = [self._llm.encode(fn.name).tolist()[0] for fn in self.functions]
-        f_t = [t for l_t in f_t for t in l_t]
+        f_tokens: list = [self._llm.encode(fn.name).tolist()[0] for fn in self.functions]
+        all_possible_tokens: list = [t for l_t in f_tokens for t in l_t]
 
         if self._state is State.EXPECT_PRMTR:
             self.output.name = self._llm.decode(self._res)
             return
         logits = np.array(self._llm.get_logits_from_input_ids(prompt))
-        if self._state is State.EXPECT_FUNC:
+        token = int(np.argmax(logits))
+        # print(text_token)
+        # print(all_possible_tokens, f_tokens)
+        while self._res not in f_tokens:
             token = int(np.argmax(logits))
-            text_token = self._llm.decode(token)
-            # print(text_token)
-            if list(set(text_token) & set(self._stop_id)): # probably problem somewhere here but im not sure
-                self._state = State.EXPECT_PRMTR
-            elif token in f_t:
-                self._state = State.EXPECT_FUNC
+            if token in all_possible_tokens:
+                print(self._llm.decode(token), end='', flush=True)
+                prompt.append(token)
+                self._res.append(token)
+                logits = np.array(self._llm.get_logits_from_input_ids(prompt))
+                token = int(np.argmax(logits))
             else:
                 logits[token] = float("-inf")
-        if self._state is State.EXPECT_BGNG:
-            while self._state is State.EXPECT_BGNG:
-                token = int(np.argmax(logits))
-                text_token = self._llm.decode(token)
-                if token in f_t:
-                    self._state = State.EXPECT_FUNC
-                    # print(f"'{text_token}' OK")
-                else:
-                    # print(f"'{text_token}' -inf")
-                    logits[token] = float("-inf")
-        print(self._llm.decode(token), end='', flush=True)
-        prompt.append(token)
-        self._res.append(token)
-        return self._func_gen(prompt)
+        self._state = State.EXPECT_PRMTR
+        # return self._func_gen(prompt)
 
     def _prmt_gen(self):
         pass
@@ -68,12 +58,9 @@ class StateMachine(BaseModel):
         extractor_prmt: list
         extractor_func: list
 
-        # extractor_prmt = self._llm.encode(get_extr_prompt(self.user_prompt, self.functions)).tolist()[0]
+        extractor_prmt = self._llm.encode(get_prmt_prompt(self.user_prompt, self.functions)).tolist()[0]
         extractor_func = self._llm.encode(get_func_prompt(self.user_prompt.prompt, self.functions)).tolist()[0]
         self._stop_id = ['}', '"}', ' "}', '"', ' ', '\n', '\r']
         if self._state is State.EXPECT_FUNC:
-            self._state = State.EXPECT_BGNG
             self._func_gen(extractor_func)
-            print(self._res)
-            # print(self._llm.decode(self._res))
             
