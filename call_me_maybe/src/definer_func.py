@@ -1,11 +1,25 @@
 from pydantic import BaseModel, model_validator, Field
 from enum import Enum
+import re
 
 
 class Types(Enum):
     STRING = 'string'
-    NUM = 'number'
-    NONE = 'None'
+    NUM = "number"
+    LIST = "list"
+    FLOAT = "float"
+    BOOL = "bool"
+    NONE = "None"
+
+
+tp: dict = {
+    Types.STRING: r'^[^"\']{1,50}$',
+    Types.NUM: r"^-?\d+$",
+    Types.LIST: r"^\[.*\]$",
+    Types.FLOAT: r"^-?\d+\.\d+$",
+    Types.BOOL: r"^(True|False)$",
+    Types.NONE: r"^None$"
+}
 
 
 class FuncDefiner(BaseModel):

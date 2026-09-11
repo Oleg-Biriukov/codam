@@ -15,15 +15,6 @@ def _print_prmt(func: FuncDefiner) -> str:
 
 
 def get_prmt_prompt(user_prompt: str, functs: list[FuncDefiner]) -> callable:
-    def get_func(fn_name: str) -> FuncDefiner:
-        func: FuncDefiner
-
-        for fn in functs:
-            if fn.name == fn_name:
-                func = fn
-                break
-        return func
-
     extr_prompt: str = ""
     rtn: callable
 
@@ -33,8 +24,8 @@ def get_prmt_prompt(user_prompt: str, functs: list[FuncDefiner]) -> callable:
     rtn = lambda func_name: f'''{extr_prompt}
 
 User: "{user_prompt}"
-Selected function: {func_name}
-Available parameters: {_print_prmt(get_func(func_name))}
+Selected function: {func_name.name}
+Available parameters: {_print_prmt(func_name)}
 Correct: '''
     return rtn
 
