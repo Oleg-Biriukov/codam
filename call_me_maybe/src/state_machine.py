@@ -75,7 +75,7 @@ class PrmtChecker(BaseModel):
 
 
 class StateMachine(BaseModel):
-    # _llm: Small_LLM_Model = Small_LLM_Model()
+    _llm: Small_LLM_Model = Small_LLM_Model()
     _stop_id: list
     _res: list[int] = []
     _func: FuncDefiner
@@ -105,27 +105,26 @@ class StateMachine(BaseModel):
         self._state = State.EXPECT_PRMTR
         self.output.name = self._llm.decode(self._res)
 
-    def _prmt_gen(self, prompt: list[int]):
+    def _prmt_gen(self, prompt: list[int]) -> None:
         token: int
         logits: list
         tkn_text: str
-        # made for begng state to determine the start point (take quarter of name and split it into letters )
-        f_tokens: list = [self._llm.encode(fn.name).tolist()[0]
-                          for fn in self.functions]
+        prmtr_checker: PrmtChecker
 
         logits = np.array(self._llm.get_logits_from_input_ids(prompt))
-        token = int(np.argmax(logits))
-        tkn_text = self._llm.decode(token)
-        while self._state is not State.DONE:
+        prmtr_checker = PrmtChecker(prompt=self.user_prompt.prompt,
+                                    func=self._func)
+        while prmtr_checker._state is not State.DONE:
             token = int(np.argmax(logits))
-            # if token in all_possible_tokens:
-            print(self._llm.decode(token), end='', flush=True)
-            prompt.append(token)
-            self._res.append(token)
-            logits = np.array(self._llm.get_logits_from_input_ids(prompt))
-            token = int(np.argmax(logits))
-            # else:
-            #     logits[token] = float("-inf")
+            tkn_text = self._llm.decode(token)
+            if prmtr_checker.is_ok(tkn_text):
+                print(self._llm.decode(token), end='', flush=True)
+                prompt.append(token)
+                self._res.append(token)
+                logits = np.array(self._llm.get_logits_from_input_ids(prompt))
+                token = int(np.argmax(logits))
+            else:
+                logits[token] = float("-inf")
 
     def gen_text(self):
         def get_func(fn_name: str) -> FuncDefiner:
@@ -140,30 +139,17 @@ class StateMachine(BaseModel):
         extractor_prmt: list
         extractor_func: list
 
-        # extractor_func = self._llm.encode(get_func_prompt(self.user_prompt.prompt, self.functions)).tolist()[0]
-        self.output.name = "fn_greet"
+        extractor_func = self._llm.encode(get_func_prompt(self.user_prompt.prompt, self.functions)).tolist()[0]
+        self.output.name = "fn_substitute_string_with_regex"
         self._func = get_func(self.output.name)
-        # extractor_prmt = self._llm.encode(get_prmt_prompt(self.user_prompt,
-        #                                                   self.functions)
-        #                                   (self._func)).tolist()[0]
-        prmtr_checker = PrmtChecker(prompt=self.user_prompt.prompt,
-                                    func=self._func)
-        # print(prmtr_checker.is_ok('{"a": '))
-        # print(prmtr_checker.is_ok('40'))
-        # print(prmtr_checker.is_ok('3 ,'))
-        # print(prmtr_checker.is_ok('f,'))
-        # print(prmtr_checker.is_ok(','))
-        # print(prmtr_checker.is_ok('3,'))
-        # print(prmtr_checker.is_ok(' "d": 30}'))
-        # print(prmtr_checker.is_ok(' "c": 30}'))
-        # print(prmtr_checker.is_ok(' "b": 30'))
-        # print(prmtr_checker.is_ok('}'), prmtr_checker._state)
-        
+        extractor_prmt = self._llm.encode(get_prmt_prompt(self.user_prompt,
+                                                          self.functions)
+                                          (self._func)).tolist()[0]
         # if self._state is State.EXPECT_FUNC:
         #     self._func_gen(extractor_func)
         #     extractor_prmt = self._llm.encode(get_prmt_prompt(self.user_prompt,
         #                                                       self.functions)
         #                                       (self.output.name)
         #                                       ).tolist()[0]
-        # self._prmt_gen(extractor_prmt)
+        self._prmt_gen(extractor_prmt)
         
