@@ -13,7 +13,7 @@ class Types(Enum):
 
 
 tp: dict = {
-    Types.STRING: r'^[^"\']{1,50}$',
+    Types.STRING: "^[a-zA-Z_'\"]$",
     Types.NUM: r"^-?\d+$",
     Types.LIST: r"^\[.*\]$",
     Types.FLOAT: r"^-?\d+\.\d+$",
