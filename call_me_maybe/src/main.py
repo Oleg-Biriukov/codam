@@ -59,18 +59,14 @@ def main():
     users_prompt = get_user_prompt_from_file(arg.input)
     # print(get_prmt_prompt(users_prompt[0].prompt, function_list)(function_list[0].name), flush=True, end=' ')
     # print(get_func_prompt(users_prompt[9].prompt, function_list), flush=True, end=' ')
-    state_machine = StateMachine(user_prompt=users_prompt[9],
-                                 functions=function_list)
-    state_machine.gen_text()
+    
     # print(users_prompt[9])
     # print(state_machine.output.name)
     
-    # while 1:
-    #     
-    #     prompt.append(logits[0][0])
-    #     print(model.decode([logits[0][0]]), end='', flush=True)
-    #     if logits[0][0] == 151645:
-    #         break
+    state_machine = StateMachine(user_prompt=users_prompt,
+                                 functions=function_list)
+    state_machine.gen_text()
+        
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from src.definer_func import tp
 from src.file_edit import get_prmt_prompt, get_func_prompt
 import functools as f
 import re
+import json
 
 
 class State(Enum):
@@ -46,7 +47,8 @@ class PrmtChecker(BaseModel):
 
         if self._state is State.DONE:
             return True
-        for ltr in tkn_str:
+        # print(tkn_str)
+        for ltr in tkn_str[:len(self._pattern) - self._pointer]:
             if self._res[-2:] == State.EXPECT_VALUE.value:
                 self._state = State.EXPECT_VALUE
 
@@ -63,7 +65,7 @@ class PrmtChecker(BaseModel):
                 if re.fullmatch(tp[tpe], ltr) is None:
                     return False
 
-            if ltr == '}' and self._pattern[self._pointer] == '}':
+            if self._pattern[self._pointer] == '}':
                 self._state = State.DONE
                 return True
 
@@ -79,7 +81,8 @@ class StateMachine(BaseModel):
     _stop_id: list
     _res: list[int] = []
     _func: FuncDefiner
-    user_prompt: UserPrompt
+    _voc: dict
+    user_prompt: list[UserPrompt]
     functions: list[FuncDefiner]
     output: Output = Output()
 
@@ -95,30 +98,31 @@ class StateMachine(BaseModel):
         while self._res not in f_tokens:
             token = int(np.argmax(logits))
             if token in all_possible_tokens:
-                print(self._llm.decode(token), end='', flush=True)
+                print(self._voc[token], end='', flush=True)
                 prompt.append(token)
                 self._res.append(token)
                 logits = np.array(self._llm.get_logits_from_input_ids(prompt))
                 token = int(np.argmax(logits))
             else:
                 logits[token] = float("-inf")
-        self._state = State.EXPECT_PRMTR
         self.output.name = self._llm.decode(self._res)
 
-    def _prmt_gen(self, prompt: list[int]) -> None:
+    def _prmt_gen(self, prompt: list[int], txt_prompt: str) -> None:
         token: int
         logits: list
         tkn_text: str
         prmtr_checker: PrmtChecker
 
         logits = np.array(self._llm.get_logits_from_input_ids(prompt))
-        prmtr_checker = PrmtChecker(prompt=self.user_prompt.prompt,
+        prmtr_checker = PrmtChecker(prompt=txt_prompt,
                                     func=self._func)
+        # print(prmtr_checker._pattern, flush=True)
         while prmtr_checker._state is not State.DONE:
             token = int(np.argmax(logits))
+            # tkn_text = self._voc[token]
             tkn_text = self._llm.decode(token)
             if prmtr_checker.is_ok(tkn_text):
-                print(self._llm.decode(token), end='', flush=True)
+                print(tkn_text, end='', flush=True)
                 prompt.append(token)
                 self._res.append(token)
                 logits = np.array(self._llm.get_logits_from_input_ids(prompt))
@@ -139,17 +143,23 @@ class StateMachine(BaseModel):
         extractor_prmt: list
         extractor_func: list
 
-        extractor_func = self._llm.encode(get_func_prompt(self.user_prompt.prompt, self.functions)).tolist()[0]
-        self.output.name = "fn_substitute_string_with_regex"
+        with open(self._llm.get_path_to_vocab_file(), "r") as v:
+            self._voc = json.load(v)
+            self._voc = {int(idx): item for item, idx in self._voc.items()}
+        # for prompt in self.user_prompt:
+        prompt = self.user_prompt[1]
+        extractor_func = self._llm.encode(get_func_prompt(prompt.prompt,
+                                                          self.functions)
+                                          ).tolist()[0]
+        print(f'"prompt": {prompt.prompt}, ', end='', flush=True)
+        print('name: "', end='', flush=True)
+        self._func_gen(extractor_func)
         self._func = get_func(self.output.name)
         extractor_prmt = self._llm.encode(get_prmt_prompt(self.user_prompt,
                                                           self.functions)
                                           (self._func)).tolist()[0]
-        # if self._state is State.EXPECT_FUNC:
-        #     self._func_gen(extractor_func)
-        #     extractor_prmt = self._llm.encode(get_prmt_prompt(self.user_prompt,
-        #                                                       self.functions)
-        #                                       (self.output.name)
-        #                                       ).tolist()[0]
-        self._prmt_gen(extractor_prmt)
-        
+        print('", parameters: ', end='', flush=True)
+        self._res = []
+        self._prmt_gen(extractor_prmt, prompt.prompt)
+        print(flush=True)
+        self._res = []

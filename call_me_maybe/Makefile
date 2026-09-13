@@ -3,9 +3,11 @@ ARG =
 UV_R = uv run python
 UV_S = uv sync
 ENV_DIR = /home/obirukov/sgoinfre/uv_env
+TOKEN = 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
 
 export UV_PROJECT_ENVIRONMENT := $(ENV_DIR)
 export HF_HUB_DISABLE_IMPLICIT_TOKEN_WARNING := 1
+export HF_TOKEN := $(TOKEN)
 
 install:
 	$(UV_S)
