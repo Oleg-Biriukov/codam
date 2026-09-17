@@ -10,16 +10,21 @@ EXAMPLES:
 User: "What is the sum of 2 and 3?"
 Selected function: fn_add_numbers
 Available parameters: a: number, b: number
-Correct: {"a": 2.0, "b": 3.0}
+Correct: {"a": 2, "b": 3}
 
 User: "Say hello to John"
 Selected function: fn_greet
 Available parameters: name: string
 Correct: {"name": "John"}
 
-User: "Flip the word 'hello' backwards"
+User: "Reverse the string 'hello'"
 Selected function: fn_reverse_string
 Available parameters: s: string
 Correct: {"s": "hello"}
+
+User: "Replace all vowels in 'Programming is fun' with asterisks"
+Selected function: fn_substitute_string_with_regex
+Available parameters: source_string: string, regex: string, replacement: string
+Correct: {"source_string": "Programming is fun", "regex": "[aeiouAEIOU]", "replacement": "*"}
 
 Extract the parameters now. Return ONLY the JSON object, nothing else.

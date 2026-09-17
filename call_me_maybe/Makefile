@@ -16,7 +16,7 @@ run: install
 	$(UV_R) -m $(NAME) $(ARG)
 
 debug: install
-	$(UV_R) -m pdb $(NAME) $(ARG)
+	$(UV_R) -m pdb src/main.py $(ARG)
 
 clean:
 	@rm -rf __pycache__
