@@ -83,6 +83,10 @@ class StateMachine(BaseModel):
     functions: list[FuncDefiner]
     output: Output = Output()
 
+    def _softmax(self, logits: np.array) -> np.array:
+        exp = np.exp(logits - np.max(logits))
+        return exp / np.sum(exp)
+
     def _func_gen(self, prompt: list[int]) -> None:
         token: int
         logits: list
@@ -91,6 +95,7 @@ class StateMachine(BaseModel):
         all_possible_tokens: list = [t for l_t in f_tokens for t in l_t]
 
         logits = np.array(self._llm.get_logits_from_input_ids(prompt))
+        logits = self._softmax(logits)
         token = int(np.argmax(logits))
         while self._res not in f_tokens:
             token = int(np.argmax(logits))
@@ -99,6 +104,7 @@ class StateMachine(BaseModel):
                 prompt.append(token)
                 self._res.append(token)
                 logits = np.array(self._llm.get_logits_from_input_ids(prompt))
+                logits = self._softmax(logits)
                 token = int(np.argmax(logits))
             else:
                 logits[token] = float("-inf")
@@ -114,23 +120,21 @@ class StateMachine(BaseModel):
         prmtr_checker = PrmtChecker(prompt=txt_prompt,
                                     func=self._func)
         # print(prmtr_checker._pattern, flush=True)
-        try:
-            while not prmtr_checker._is_done:
+        while not prmtr_checker._is_done:
+            token = int(np.argmax(logits))
+            tkn_text = self._voc[token]
+            # tkn_text = self._llm.decode(token)
+            if prmtr_checker.is_ok(tkn_text):
+                print(tkn_text, end='', flush=True)
+                prompt.append(token)
+                self._res.append(token)
+                logits = np.array(self._llm.get_logits_from_input_ids(prompt))
                 token = int(np.argmax(logits))
-                # tkn_text = self._voc[token]
-                tkn_text = self._llm.decode(token)
-                if prmtr_checker.is_ok(tkn_text):
-                    print(tkn_text, end='', flush=True)
-                    prompt.append(token)
-                    self._res.append(token)
-                    logits = np.array(self._llm.get_logits_from_input_ids(prompt))
-                    token = int(np.argmax(logits))
-                else:
-                    logits[token] = float("-inf")
-        except Exception:
-            # print(prmtr_checker._state)
-            print(flush=True)
-            print(prmtr_checker._test, flush=True)
+            else:
+                logits[token] = float("-inf")
+        # print(prmtr_checker._state)
+        print(flush=True)
+        print(prmtr_checker._test, flush=True)
 
     def gen_text(self):
         def get_func(fn_name: str) -> FuncDefiner:
