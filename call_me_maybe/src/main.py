@@ -1,7 +1,7 @@
 import json
 import argparse
 from src.definer_func import FuncDefiner, UserPrompt
-from src.state_machine import StateMachine
+from src.state_machine import MiddlePerson
 from src.file_edit import get_prmt_prompt, get_func_prompt
 import os
 import time
@@ -58,8 +58,9 @@ def main():
     arg = take_out_arg()
     function_list = take_out_func_from_file(arg.functions_definition)
     users_prompt = get_user_prompt_from_file(arg.input)
-    state_machine = StateMachine(user_prompt=users_prompt,
+    state_machine = MiddlePerson(user_prompt=users_prompt,
                                  functions=function_list)
+    # print(get_func_prompt(users_prompt[0].prompt, function_list))
 # ===========================test===========================
     # import numpy as np
     # print(state_machine._llm.get_path_to_vocab_file())
@@ -82,7 +83,7 @@ def main():
     start = time.perf_counter()
     state_machine.gen_text()
     end = time.perf_counter()
-    print(f'LLM completed in {(end-start)/60:.6f} min')
+    print(f'LLM completed in {(end-start):.6f} min')
 
 
 if __name__ == "__main__":
