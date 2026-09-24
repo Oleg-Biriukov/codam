@@ -83,7 +83,7 @@ def main():
     start = time.perf_counter()
     state_machine.gen_text()
     end = time.perf_counter()
-    print(f'LLM completed in {(end-start):.6f} min')
+    print(f'LLM completed in {(end-start)/60:.6f} min')
 
 
 if __name__ == "__main__":
