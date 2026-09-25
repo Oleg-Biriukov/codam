@@ -29,7 +29,7 @@ Available parameters: {_print_prmt(func_name)}
 Correct: '''
     return rtn
 
-def get_func_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
+def get_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
     extr_prompt: str = ""
 
     with open("llm_sdk/func_definer.txt", "r") as func:

@@ -1,11 +1,9 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel
 from enum import Enum, auto
-import numpy as np
 from llm_sdk.llm_sdk import Small_LLM_Model
-from src.definer_func import FuncDefiner, UserPrompt, Output
+from src.definer_func import FuncDefiner, UserPrompt
 from src.definer_func import tp, Types
-from src.file_edit import get_prmt_prompt, get_func_prompt
-import functools as f
+from src.file_edit import get_prompt
 import re
 import json
 
@@ -23,6 +21,7 @@ class StateMachine(BaseModel):
     _func: FuncDefiner = None
     _is_done: bool = False
     _pointer: int = 0
+    _is_was_qt: bool = True
     _i: int = 0
     _allowed_tkn = ['}', '"', '"}', ', ', ',', ' ']
 
@@ -54,17 +53,17 @@ class StateMachine(BaseModel):
         logits: list = llm.get_logits_from_input_ids(prompt)
         if self._state is State.PICK_FUNC:
             return max(allowed_tokens, key=lambda tkn: logits[tkn])
-        return sorted(enumerate(logits), key=lambda _, p: p, reverse=True)
+        return sorted(list(enumerate(logits)),
+                      key=lambda tkn: tkn[1],
+                      reverse=True)
 
     def is_ok(self, tkn_str: str, type: Types) -> bool:
-        is_going_end: bool = True if self._state is State.PICK_STRING else False
-
         for ltr in tkn_str:
-            if is_going_end and ltr == ',':
+            if self._is_was_qt and (ltr == ',' or ltr == '}'):
                 self._state = State.PICK_NAME
                 break
             if ltr == '"' and self._state is State.PICK_STRING:
-                is_going_end = True
+                self._is_was_qt = True
                 continue
             if not re.fullmatch(tp[type], ltr):
                 return False
@@ -79,7 +78,16 @@ class MiddlePerson(BaseModel):
     _types: list
     user_prompt: list[UserPrompt]
     functions: list[FuncDefiner]
-    output: Output = Output()
+    _output: list = []
+
+    def _get_func(self, fn_name: str) -> FuncDefiner:
+        func: FuncDefiner
+
+        for fn in self.functions:
+            if fn.name == fn_name:
+                func = fn
+                break
+        return func
 
     def _func_gen(self, prompt: list[int], allowed_tkn: list) -> None:
         token: int
@@ -90,7 +98,8 @@ class MiddlePerson(BaseModel):
             print(self._llm.decode(token), end='', flush=True)
             prompt.append(token)
             res.append(token)
-        self.output.name = self._llm.decode(res)
+        self._func = self._get_func(self._llm.decode(res))
+        self._s_m._func = self._func
         self._s_m._state = State.PICK_NAME
 
     def _prmt_gen(self, prompt: list[int]) -> None:
@@ -104,6 +113,7 @@ class MiddlePerson(BaseModel):
                 print(self._llm.decode(pattern.pop()), end='', flush=True)
                 if self._types is Types.STRING:
                     self._s_m._state = State.PICK_STRING
+                    self._is_was_qt = False
                 else:
                     self._s_m._state = State.PICK_OTHERS
             tkn_text = ''
@@ -117,40 +127,34 @@ class MiddlePerson(BaseModel):
             if self._s_m._state is State.PICK_NAME:
                 self._types.pop(0)
 
-    def gen_text(self):
-        def get_func(fn_name: str) -> FuncDefiner:
-            func: FuncDefiner
+    def get_out(self) -> list:
+        self._output = [json.loads(resp) for resp in self._output]
+        return self._output
 
-            for fn in self.functions:
-                if fn.name == fn_name:
-                    func = fn
-                    break
-            return func
+    def gen_text(self) -> None:
+        allowed_func_tkn: list
+        prompt: list
+        res: list
 
         self._s_m = StateMachine(llm=self._llm)
-        extractor_prmt: list
-        extractor_func: list
-        allowed_func_tkn: list = self._s_m.get_allowed_func_tokens(self._llm,
-                                                                   self.functions)
-        allowed_prmtr_tkn: list
-        
-
+        allowed_func_tkn = self._s_m.get_allowed_func_tokens(self._llm,
+                                                             self.functions)
         for prompt in self.user_prompt:
-        # prompt = self.user_prompt[1]
-            res = self._llm.encode(get_func_prompt(prompt.prompt,
-                                                   self.functions)).tolist()[0]
-            # print(self._llm.decode(res), end='', flush=True)
-            res += self._llm.encode('{' + f'"prompt": {prompt.prompt}, name: "').tolist()[0]
-            print('{' + f'"prompt": {prompt.prompt}, name: "', end='', flush=True)
-            self._func_gen(res, allowed_func_tkn)
+            llmprmt = self._llm.encode(get_prompt(prompt.prompt,
+                                                  self.functions)).tolist()[0]
+            res = self._llm.encode(
+                '{' + f'"prompt": "{prompt.prompt}", "name": "'
+                                   ).tolist()[0]
+            print('{' + f'"prompt": "{prompt.prompt}", "name": "',
+                  end='',
+                  flush=True)
+            self._func_gen(llmprmt+res, allowed_func_tkn)
             res += self._llm.encode('", ').tolist()[0]
             print('", ', end='', flush=True)
-            self._func = get_func(self.output.name)
-            self._s_m._func = self._func
             self._types = [t["type"] for _, t in self._func.parameters.items()]
-            print("parameters: ", end='', flush=True)
+            print('"parameters": ', end='', flush=True)
             res += self._llm.encode("parameters: ").tolist()[0]
-            self._prmt_gen(res)
-            res = []
+            self._prmt_gen(llmprmt+res)
+            self._s_m._state = State.PICK_FUNC
+            self._output.append(self._llm.decode(res))
             print(flush=True)
-        

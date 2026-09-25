@@ -1,6 +1,5 @@
 from pydantic import BaseModel, model_validator, Field
 from enum import Enum
-import re
 
 
 class Types(Enum):

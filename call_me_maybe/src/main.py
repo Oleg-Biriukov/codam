@@ -2,7 +2,6 @@ import json
 import argparse
 from src.definer_func import FuncDefiner, UserPrompt
 from src.state_machine import MiddlePerson
-from src.file_edit import get_prmt_prompt, get_func_prompt
 import os
 import time
 
@@ -50,6 +49,11 @@ def get_user_prompt_from_file(filename: str) -> list[UserPrompt]:
     return users_prompt
 
 
+def load_response_to_file(filename: str, response: list) -> None:
+    with open(filename, "w") as output:
+        json.dump(response, output, indent=4)
+
+
 def main():
     arg: argparse.Namespace
     function_list: list[FuncDefiner]
@@ -60,30 +64,11 @@ def main():
     users_prompt = get_user_prompt_from_file(arg.input)
     state_machine = MiddlePerson(user_prompt=users_prompt,
                                  functions=function_list)
-    # print(get_func_prompt(users_prompt[0].prompt, function_list))
-# ===========================test===========================
-    # import numpy as np
-    # print(state_machine._llm.get_path_to_vocab_file())
-    # with open(state_machine._llm.get_path_to_vocab_file(), "r") as v:
-    #     _voc = json.load(v)
-    #     _voc = {int(idx): item for item, idx in _voc.items()}
-
-    # def softmax(logits: np.array):
-    #     exp = np.exp(logits - np.max(logits))
-    #     return exp / np.sum(exp)
-    # req = state_machine._llm.encode(get_func_prompt(users_prompt, function_list)).tolist()[0]
-    # logits = np.array(state_machine._llm.get_logits_from_input_ids(req))
-    # print(len(logits), len(_voc))
-    # # logits = softmax(logits)
-    # for _ in range(10):
-    #     lg = int(np.argmax(logits))
-    #     print(state_machine._llm.decode(lg))
-    #     logits[lg] = float("-inf")
-# ==========================================================
     start = time.perf_counter()
     state_machine.gen_text()
     end = time.perf_counter()
     print(f'LLM completed in {(end-start)/60:.6f} min')
+    load_response_to_file(arg.output, state_machine.get_out())
 
 
 if __name__ == "__main__":
