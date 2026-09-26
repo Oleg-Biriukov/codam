@@ -1,0 +1,31 @@
+[
+    {
+        "prompt": "What is the sum of -5 and -10?",
+        "name": "fn_add_numbers",
+        "parameters": {
+            "a": 5,
+            "b": 10
+        }
+    },
+    {
+        "prompt": "Replace spaces in 'hello world' with dashes",
+        "name": "fn_substitute_string_with_regex",
+        "parameters": {
+            "source_string": "hello world",
+            "regex": " ",
+            "replacement": " - "
+        }
+    },
+    {
+        "prompt": "Reverse the string ''",
+        "name": "fn_reverse_string",
+        "parameters": {
+            "s": ""
+        }
+    },
+    {
+        "prompt": "do something random",
+        "name": "None",
+        "parameters": {}
+    }
+]

@@ -1,3 +1,6 @@
 [
-    {"prompt": "What is the sum of -5 and 10?"}
+    {"prompt": "What is the sum of -5 and -10?"},
+    {"prompt": "Replace spaces in 'hello world' with dashes"},
+    {"prompt": "Reverse the string ''"},
+    {"prompt": "do something random"}
 ]
