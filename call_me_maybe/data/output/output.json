@@ -1,10 +1,10 @@
 [
     {
-        "prompt": "What is the sum of -5.4 and -10?",
+        "prompt": "What is the sum of -4 and -5 ?",
         "name": "fn_add_numbers",
         "parameters": {
-            "a": 5.4,
-            "b": 10
+            "a": 4.0,
+            "b": 5
         }
     }
 ]

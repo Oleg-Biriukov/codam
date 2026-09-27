@@ -14,7 +14,7 @@ class Types(Enum):
 tp: dict = {
     Types.STRING: r"^[a-zA-Z0-9_\-*+/\\'\" ]*$",
     Types.NUM: r"^[0-9 -]*$",
-    Types.LIST: r"^\[.*\]$",
+    Types.LIST: r"^.*$",
     Types.FLOAT: r"^[0-9 -.]*$",
     Types.BOOL: r"^(True|False)$",
     Types.NONE: r"^None$"
