@@ -3,7 +3,7 @@ from enum import Enum, auto
 from llm_sdk.llm_sdk import Small_LLM_Model
 from src.definer_func import FuncDefiner, UserPrompt
 from src.definer_func import tp, Types
-from src.file_edit import get_prompt
+from src.file_edit import get_func_prompt, get_prmt_prompt
 import re
 import json
 
@@ -22,8 +22,10 @@ class StateMachine(BaseModel):
     _is_done: bool = False
     _pointer: int = 0
     _is_was_qt: bool = True
-    _i: int = 0
+    usr_prompt: str = ''
+    _is_negtv: bool = False
     _allowed_tkn = ['}', '"', '"}', ', ', ',', ' ']
+    dash_token: list
 
     def get_pattern(self, _llm: any) -> any:
         name: list = [(n, t["type"]) for n, t in self._func.parameters.items()]
@@ -33,6 +35,8 @@ class StateMachine(BaseModel):
         for name, type in name:
             if type is Types.STRING:
                 pattern[-1] += f'"{name}": "'
+            elif type is Types.LIST:
+                pattern[-1] += f'"{name}": ['
             else:
                 pattern[-1] += f'"{name}": '
             # pattern.append(tpe)
@@ -61,16 +65,16 @@ class StateMachine(BaseModel):
         for ltr in tkn_str:
             if self._is_was_qt and (ltr == ',' or ltr == '}'):
                 self._state = State.PICK_NAME
+                self._is_negtv = False
                 break
             if ltr == '"' and self._state is State.PICK_STRING:
                 self._is_was_qt = True
                 continue
             if not re.fullmatch(tp[type], ltr):
                 return False
-        if type is Types.NUM:
-            tp[type] = r"^[0-9 ]*$"
-        elif type is Types.FLOAT:
-            tp[type] = r"^[0-9 .]*$"
+            elif (type is Types.NUM or type is Types.FLOAT) and ltr != '-':
+                if self.usr_prompt[self.usr_prompt.find(ltr)-1] == '-':
+                    self._is_negtv = True
         return True
 
 
@@ -123,20 +127,21 @@ class MiddlePerson(BaseModel):
                     self._is_was_qt = False
                 else:
                     self._s_m._state = State.PICK_OTHERS
-                if self._types[0] is Types.NUM:
-                    tp[self._types[0]] = r"^[0-9 -]*$"
-                if self._types[0] is Types.FLOAT:
-                    tp[self._types[0]] = r"^[0-9 -.]*$"
             tkn_text = ''
             logits = self._s_m.pick_token(self._llm, prompt)
             for token, _ in logits:
                 tkn_text = self._llm.decode(token)
-                if self._func.name == 'fn_add_numbers':
-                    print(' ' + tkn_text, flush=True, end=' ')
+                # if self._func.name == 'fn_add_numbers':
+                #     print(f'| "{tkn_text}" |', flush=True, end=' ')
                 if self._s_m.is_ok(tkn_text, self._types[0]):
                     break
-            print(tkn_text, end='', flush=True)
-            prompt.append(token)
+            print('-' + tkn_text if self._s_m._is_negtv else tkn_text,
+                  end='', flush=True)
+            if self._s_m._is_negtv:
+                prompt += self._s_m.dash_token + [token]
+                self._s_m._is_negtv = False
+            else:
+                prompt.append(token)
             if self._s_m._state is State.PICK_NAME:
                 self._types.pop(0)
 
@@ -146,35 +151,44 @@ class MiddlePerson(BaseModel):
 
     def gen_text(self) -> None:
         allowed_func_tkn: list
-        prompt: list
+        ins: list
         offset: int
+        res:    str
 
-        self._s_m = StateMachine(llm=self._llm)
+        self._s_m = StateMachine(llm=self._llm,
+                                 dash_token=self._llm.encode('-').tolist()[0])
         allowed_func_tkn = self._s_m.get_allowed_func_tokens(self._llm,
                                                              self.functions)
         for prompt in self.user_prompt:
-            res = self._llm.encode(get_prompt(prompt.prompt,
-                                              self.functions)).tolist()[0]
-            offset = len(res)
-            res += self._llm.encode(
+            self._s_m.usr_prompt = prompt.prompt
+            ins = self._llm.encode(get_func_prompt(prompt.prompt,
+                                                   self.functions)).tolist()[0]
+            offset = len(ins)
+            ins += self._llm.encode(
                 '{' + f'"prompt": "{prompt.prompt}", "name": "'
                                    ).tolist()[0]
             print('{' + f'"prompt": "{prompt.prompt}", "name": "',
                   end='',
                   flush=True)
-            self._func_gen(res, allowed_func_tkn)
+            self._func_gen(ins, allowed_func_tkn)
 
-            res += self._llm.encode('", ').tolist()[0]
+            ins += self._llm.encode('", ').tolist()[0]
             print('", ', end='', flush=True)
 
             self._types = [t["type"] for _, t in self._func.parameters.items()]
             print('"parameters": ', end='', flush=True)
-            res += self._llm.encode('"parameters": ').tolist()[0]
+            ins += self._llm.encode('"parameters": ').tolist()[0]
+            res = self._llm.decode(ins[offset:])
+            ins = self._llm.encode(get_prmt_prompt(prompt.prompt,
+                                                   self._func,
+                                                   res)).tolist()[0]
+            offset = len(ins)
             if self._s_m._state is State.PICK_NAME:
-                self._prmt_gen(res)
+                self._prmt_gen(ins)
             else:
-                res += self._llm.encode('{}}').tolist()[0]
+                ins += self._llm.encode('{}}').tolist()[0]
                 print(r'{}}', flush=True, end='')
             self._s_m._state = State.PICK_FUNC
-            self._output.append(self._llm.decode(res[offset:]))
+            res += self._llm.decode(ins[offset:])
+            self._output.append(res)
             print(flush=True)

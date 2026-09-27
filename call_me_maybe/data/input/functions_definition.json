@@ -4,14 +4,14 @@
     "description": "Add two numbers together and return their sum.",
     "parameters": {
       "a": {
-        "type": "number"
+        "type": "float"
       },
       "b": {
         "type": "number"
       }
     },
     "returns": {
-      "type": "number"
+      "type": "float"
     }
   },
   {
@@ -66,6 +66,18 @@
     },
     "returns": {
       "type": "string"
+    }
+  },
+  {
+    "name": "fn_sort",
+    "description": "For sorting list of integers in ascending order",
+    "parameters": {
+      "list": {
+        "type": "list"
+      }
+    },
+    "returns": {
+      "type": "list"
     }
   }
 ]

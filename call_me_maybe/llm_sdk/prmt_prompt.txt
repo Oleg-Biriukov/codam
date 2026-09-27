@@ -1,0 +1,6 @@
+Extract parameters from the user request. Take the negetive numbers into account.
+Return ONLY a JSON object. Nothing else.
+RULES:
+1. Take into account about negetive values(for example '-10', '-5.4').
+Example:
+{"a": -5.4,"b": -10}

@@ -1,0 +1,6 @@
+Select the correct function for the user request.
+Return ONLY the function name. Nothing else. No explanation.
+
+RULES:
+1. Pick the function that MOST CLOSELY matches the user intent.
+2. If nothing matches return: None
