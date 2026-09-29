@@ -2,11 +2,6 @@ Extract parameters from the user request for the selected function.
 Return ONLY a JSON object. Nothing else. No explanation.
 
 RULES:
-1. Extract parameters in the EXACT order they appear in the user request.
-2. NEGATIVE NUMBERS: "-5 and 10" means first=-5 second=10. NEVER drop the dash sign.
+1. Extract parameters whick appeared in prompt (even if the value is emplty as "").
+2. Extract parameters in the EXACT order they appear in the user request.
 3. Do not calculate or interpret values. Extract them exactly as stated.
-4. If symbol is named (like 'asterisks') use actual character ('*').
-
-NEGATIVE NUMBER EXAMPLE:
-"sum of -5 and 10" → {"a": -5.0, "b": 10.0}
-"sum of -100 and -3" → {"a": -100.0, "b": -3.0}

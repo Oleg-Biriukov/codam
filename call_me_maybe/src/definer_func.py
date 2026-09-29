@@ -42,6 +42,11 @@ class FuncDefiner(BaseModel):
 class UserPrompt(BaseModel):
     prompt: str = Field(min_length=2, max_length=150)
 
+    @model_validator(mode='after')
+    def swap_quote(self):
+        self.prompt = self.prompt.replace('"', '\'')
+        return self
+
 
 class Output(BaseModel):
     prompt: str = None

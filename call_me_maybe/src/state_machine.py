@@ -61,10 +61,12 @@ class StateMachine(BaseModel):
                       key=lambda tkn: tkn[1],
                       reverse=True)
 
-    def is_ok(self, tkn_str: str, type: Types) -> bool:
+    def is_ok(self, tkn_str: str, type: list) -> bool:
         for ltr in tkn_str:
             if (self._is_was_qt and self._is_was_br and
                     (ltr == ',' or ltr == '}')):
+                if ltr == ',' and len(type) == 1:
+                    return False
                 self._state = State.PICK_NAME
                 break
             if ltr == '"' and self._state is State.PICK_STRING:
@@ -72,9 +74,8 @@ class StateMachine(BaseModel):
                 continue
             if ltr == ']' and self._state is State.PICK_BRCKT:
                 self._is_was_br = True
-                print(1)
                 continue
-            if not re.fullmatch(tp[type], ltr):
+            if not re.fullmatch(tp[type[0]], ltr):
                 return False
         return True
 
@@ -126,7 +127,7 @@ class MiddlePerson(BaseModel):
                 if self._types[0] is Types.STRING:
                     self._s_m._state = State.PICK_STRING
                     self._s_m._is_was_qt = False
-                if self._types[0] is Types.LIST:
+                elif self._types[0] is Types.LIST:
                     self._s_m._state = State.PICK_BRCKT
                     self._s_m._is_was_br = False
                 else:
@@ -135,9 +136,7 @@ class MiddlePerson(BaseModel):
             logits = self._s_m.pick_token(self._llm, prompt)
             for token, _ in logits:
                 tkn_text = self._llm.decode(token)
-                # if self._func.name == 'fn_add_numbers':
-                #     print(f'| "{tkn_text}" |', flush=True, end=' ')
-                if self._s_m.is_ok(tkn_text, self._types[0]):
+                if self._s_m.is_ok(tkn_text, self._types):
                     break
             print(tkn_text, end='', flush=True)
             prompt.append(token)
@@ -183,7 +182,7 @@ class MiddlePerson(BaseModel):
             if self._s_m._state is State.PICK_NAME:
                 self._prmt_gen(ins)
             else:
-                ins += self._llm.encode('{}}').tolist()[0]
+                ins += self._llm.encode(r'{}}').tolist()[0]
                 print(r'{}}', flush=True, end='')
             self._s_m._state = State.PICK_FUNC
             res += self._llm.decode(ins[offset:])
