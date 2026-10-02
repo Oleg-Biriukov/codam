@@ -24,7 +24,7 @@ class StateMachine(BaseModel):
     _pointer: int = 0
     _is_was_qt: bool = True
     _is_was_br: bool = True
-    usr_prompt: str = ''
+    _last_state: State = State.PICK_OTHERS
     _allowed_tkn = ['}', '"', '"}', ', ', ',', ' ']
 
     def get_pattern(self, _llm: any) -> any:
@@ -63,17 +63,22 @@ class StateMachine(BaseModel):
 
     def is_ok(self, tkn_str: str, type: list) -> bool:
         for ltr in tkn_str:
+            if self._state is State.PICK_NAME:
+                self._state = self._last_state
+                return False
             if (self._is_was_qt and self._is_was_br and
                     (ltr == ',' or ltr == '}')):
                 if ltr == ',' and len(type) == 1:
                     return False
+                self._last_state = self._state
                 self._state = State.PICK_NAME
-                break
             if ltr == '"' and self._state is State.PICK_STRING:
                 self._is_was_qt = True
                 continue
             if ltr == ']' and self._state is State.PICK_BRCKT:
                 self._is_was_br = True
+                continue
+            if self._state is State.PICK_NAME:
                 continue
             if not re.fullmatch(tp[type[0]], ltr):
                 return False
@@ -142,6 +147,8 @@ class MiddlePerson(BaseModel):
             prompt.append(token)
             if self._s_m._state is State.PICK_NAME:
                 self._types.pop(0)
+        print('}', end='', flush=True)
+        prompt += self._llm.encode("}").tolist()[0]
 
     def get_out(self) -> list:
         self._output = [json.loads(resp) for resp in self._output]

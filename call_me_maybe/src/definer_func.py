@@ -1,21 +1,22 @@
 from pydantic import BaseModel, model_validator, Field
 from enum import Enum
+import json
 
 
 class Types(Enum):
     STRING = 'string'
+    INTEGER = 'integer'
     NUM = "number"
     LIST = "list"
-    FLOAT = "float"
-    BOOL = "bool"
+    BOOL = "boolean"
     NONE = "None"
 
 
 tp: dict = {
-    Types.STRING: r"^[a-zA-Z0-9_\-*+/\\'\" ]*$",
-    Types.NUM: r"^[0-9 -]*$",
+    Types.STRING: r"^[a-zA-Z0-9_\-*+/\\'\" .{}()]*$",
+    Types.NUM: r"^[0-9 -.]*$",
+    Types.INTEGER: r"^[0-9 -]*$",
     Types.LIST: r"^.*$",
-    Types.FLOAT: r"^[0-9 -.]*$",
     Types.BOOL: r"^(True|False)$",
     Types.NONE: r"^None$"
 }
@@ -43,8 +44,8 @@ class UserPrompt(BaseModel):
     prompt: str = Field(min_length=2, max_length=150)
 
     @model_validator(mode='after')
-    def swap_quote(self):
-        self.prompt = self.prompt.replace('"', '\'')
+    def swap_json_escape(self):
+        self.prompt = json.dumps(self.prompt.strip('"'))
         return self
 
 
