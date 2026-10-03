@@ -1,5 +1,5 @@
 NAME = src.main
-ARG =
+ARG = --input='asdf'
 UV_R = uv run python
 UV_S = uv sync
 ENV_DIR = /home/obirukov/sgoinfre/uv_env
