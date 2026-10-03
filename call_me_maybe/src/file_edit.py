@@ -8,9 +8,15 @@ def _print_prmt(func: FuncDefiner) -> str:
     len_prmtr = len(func.parameters)
     for name, type in func.parameters.items():
         if len_prmtr > 1:
-            prmt_l += f"{name}: {type['type'].value}, "
+            if type['type'].value == 'number':
+                prmt_l += f"{name}: float, "
+            else:
+                prmt_l += f"{name}: {type['type'].value}, "
         else:
-            prmt_l += f"{name}: {type['type'].value}"
+            if type['type'].value == 'number':
+                prmt_l += f"{name}: float"
+            else:
+                prmt_l += f"{name}: {type['type'].value}"
         len_prmtr -= 1
     return prmt_l
 
@@ -26,7 +32,7 @@ def get_prmt_prompt(user_prompt: str, func: FuncDefiner, res: str) -> str:
 <|im_end|>
 <|im_start|>user
 {user_prompt}
-Selected function: {func.name} ({_print_prmt(func)})\n'''
+Selected function: {func.name} ({_print_prmt(func)}) - {func.description}\n'''
     return extr_prompt + f"<|im_end|>\n<|im_start|>assistant\nAnswer: {res}"
 
 

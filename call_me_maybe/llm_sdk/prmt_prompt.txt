@@ -5,3 +5,6 @@ RULES:
 1. Extract parameters whick appeared in prompt (even if the value is emplty as "").
 2. Extract parameters in the EXACT order they appear in the user request.
 3. Do not calculate or interpret values. Extract them exactly as stated.
+4. Float has to be float
+
+{"prompt": "Format template: Say "hello" to {name}", "name": "fn_format_template", "parameters": {"template": "Say \"hello\" to {name}"}}

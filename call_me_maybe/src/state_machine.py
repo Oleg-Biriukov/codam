@@ -24,8 +24,7 @@ class StateMachine(BaseModel):
     _pointer: int = 0
     _is_was_qt: bool = True
     _is_was_br: bool = True
-    _last_state: State = State.PICK_OTHERS
-    _allowed_tkn = ['}', '"', '"}', ', ', ',', ' ']
+    _backslash: bool = False
 
     def get_pattern(self, _llm: any) -> any:
         name: list = [(n, t["type"]) for n, t in self._func.parameters.items()]
@@ -39,7 +38,6 @@ class StateMachine(BaseModel):
                 pattern[-1] += f'"{name}": ['
             else:
                 pattern[-1] += f'"{name}": '
-            # pattern.append(tpe)
             pattern.append('')
         pattern = [_llm.encode(txt).tolist()[0] for txt in pattern]
         return pattern
@@ -62,18 +60,19 @@ class StateMachine(BaseModel):
                       reverse=True)
 
     def is_ok(self, tkn_str: str, type: list) -> bool:
+        last_state: State = self._state
         for ltr in tkn_str:
             if self._state is State.PICK_NAME:
-                self._state = self._last_state
+                self._state = last_state
                 return False
             if (self._is_was_qt and self._is_was_br and
                     (ltr == ',' or ltr == '}')):
                 if ltr == ',' and len(type) == 1:
                     return False
-                self._last_state = self._state
                 self._state = State.PICK_NAME
             if ltr == '"' and self._state is State.PICK_STRING:
-                self._is_was_qt = True
+                if not self._backslash:
+                    self._is_was_qt = True
                 continue
             if ltr == ']' and self._state is State.PICK_BRCKT:
                 self._is_was_br = True
@@ -82,6 +81,10 @@ class StateMachine(BaseModel):
                 continue
             if not re.fullmatch(tp[type[0]], ltr):
                 return False
+            if ltr == '\\':
+                self._backslash = True
+            else:
+                self._backslash = False
         return True
 
 
@@ -151,6 +154,7 @@ class MiddlePerson(BaseModel):
         prompt += self._llm.encode("}").tolist()[0]
 
     def get_out(self) -> list:
+        # print(repr(self._output[0]))
         self._output = [json.loads(resp) for resp in self._output]
         return self._output
 
@@ -168,9 +172,9 @@ class MiddlePerson(BaseModel):
                                                    self.functions)).tolist()[0]
             offset = len(ins)
             ins += self._llm.encode(
-                '{' + f'"prompt": "{prompt.prompt}", "name": "'
+                '{' + f'"prompt": "{repr(prompt.prompt).strip("\"'").replace('"', '\\"')}", "name": "'
                                    ).tolist()[0]
-            print('{' + f'"prompt": "{prompt.prompt}", "name": "',
+            print('{' + f'"prompt": "{repr(prompt.prompt).strip("\"'").replace('"', '\\"')}", "name": "',
                   end='',
                   flush=True)
             self._func_gen(ins, allowed_func_tkn)

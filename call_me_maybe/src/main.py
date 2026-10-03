@@ -50,6 +50,12 @@ def get_user_prompt_from_file(filename: str) -> list[UserPrompt]:
 
 
 def load_response_to_file(filename: str, response: list) -> None:
+    for r in response:
+        r['name'] = r['name'].strip()
+        for name, value in r['parameters'].items():
+            if isinstance(r['parameters'][name], str):
+                r['parameters'][name] = value.strip()
+                
     with open(filename, "w") as output:
         json.dump(response, output, indent=4)
 
