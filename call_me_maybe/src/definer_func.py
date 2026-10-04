@@ -1,6 +1,7 @@
-from pydantic import BaseModel, model_validator, Field
+from pydantic import BaseModel, model_validator, Field, ConfigDict
 from enum import Enum
-import json
+from typing import Any
+import re
 
 
 class Types(Enum):
@@ -23,33 +24,26 @@ tp: dict = {
 
 
 class FuncDefiner(BaseModel):
+    model_config = ConfigDict(extra='forbid')
     name: str = Field(pattern="^[a-zA-Z_]{2,50}$")
     description: str = Field(min_length=2, max_length=500)
     parameters: dict[str, dict[str, Types]]
     returns: dict[str, Types]
 
     @model_validator(mode="after")
-    def check_correctness(self):
+    def check_correctness(self) -> Any:
         if len(self.returns.keys()) > 1 or "type" not in self.returns.keys():
             raise ValueError("Inappropriate return type.")
-        for _, tp_prmtr in self.parameters.items():
-            if (len(tp_prmtr.keys()) > 1
-                    or "type" not in tp_prmtr.keys()
-                    or tp_prmtr["type"] not in Types):
-                raise ValueError("Inappropriate return type.")
+        for n, tp_prmtr in self.parameters.items():
+            if not re.fullmatch("^[a-zA-Z_]{0,50}$", n):
+                raise ValueError(f"Inappropriate name of the parameter.({n})")
+            if (len(tp_prmtr.keys()) > 0):
+                if ("type" not in tp_prmtr.keys()
+                        or tp_prmtr["type"] not in Types):
+                    raise ValueError("Inappropriate parameter property.")
         return self
 
 
 class UserPrompt(BaseModel):
-    prompt: str = Field(min_length=2, max_length=150)
-
-    @model_validator(mode='after')
-    def swap_json_escape(self):
-        # self.prompt = self.prompt.replace('"', '\'')
-        return self
-
-
-class Output(BaseModel):
-    prompt: str = None
-    name: str = None
-    parameters: dict = None
+    model_config = ConfigDict(extra='forbid')
+    prompt: str = Field(min_length=1, max_length=300)

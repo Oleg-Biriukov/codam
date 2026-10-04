@@ -5,7 +5,14 @@ from src.definer_func import FuncDefiner, UserPrompt
 from src.definer_func import tp, Types
 from src.file_edit import get_func_prompt, get_prmt_prompt
 import re
+from typing import Any
 import json
+
+
+None_Func: FuncDefiner = FuncDefiner(name="None",
+                                     description="Ifdffdn",
+                                     parameters={},
+                                     returns={'type': Types.NONE})
 
 
 class State(Enum):
@@ -17,16 +24,17 @@ class State(Enum):
 
 
 class StateMachine(BaseModel):
-    _f_tokens: list = 0
+    llm: Any = None
+    _f_tokens: list = []
     _state: State = State.PICK_FUNC
-    _func: FuncDefiner = None
+    _func: FuncDefiner = None_Func
     _is_done: bool = False
     _pointer: int = 0
     _is_was_qt: bool = True
     _is_was_br: bool = True
     _backslash: bool = False
 
-    def get_pattern(self, _llm: any) -> any:
+    def get_pattern(self, _llm: Any) -> Any:
         name: list = [(n, t["type"]) for n, t in self._func.parameters.items()]
         pattern: list = ['']
 
@@ -42,16 +50,12 @@ class StateMachine(BaseModel):
         pattern = [_llm.encode(txt).tolist()[0] for txt in pattern]
         return pattern
 
-    def get_allowed_prmt_tokens(self, _llm: any, prompt: str) -> any:
-        tokens = [tkn for txt in self._allowed_tkn
-                  for tkn in _llm.encode(txt).tolist()[0]]
-        return _llm.encode(prompt).tolist()[0] + tokens
-
-    def get_allowed_func_tokens(self, llm: any, func: list) -> list:
+    def get_allowed_func_tokens(self, llm: Any, func: list) -> list:
         self._f_tokens = [llm.encode(fn.name).tolist()[0] for fn in func]
         return [t for l_t in self._f_tokens for t in l_t]
 
-    def pick_token(self, llm: any, prompt: list, allowed_tokens: list = None):
+    def pick_token(self, llm: Any, prompt: list,
+                   allowed_tokens: list = []) -> Any:
         logits: list = llm.get_logits_from_input_ids(prompt)
         if self._state is State.PICK_FUNC:
             return max(allowed_tokens, key=lambda tkn: logits[tkn])
@@ -89,11 +93,10 @@ class StateMachine(BaseModel):
 
 
 class MiddlePerson(BaseModel):
-    _llm: Small_LLM_Model = Small_LLM_Model()
-    _stop_id: list
-    _func: FuncDefiner
-    _s_m: StateMachine
-    _types: list
+    _llm: Any = Small_LLM_Model()
+    _func: FuncDefiner = None_Func
+    _s_m: StateMachine = StateMachine()
+    _types: list = []
     user_prompt: list[UserPrompt]
     functions: list[FuncDefiner]
     _output: list = []
@@ -164,7 +167,7 @@ class MiddlePerson(BaseModel):
         offset: int
         res:    str
 
-        self._s_m = StateMachine(llm=self._llm)
+        self._s_m.llm = self._llm
         allowed_func_tkn = self._s_m.get_allowed_func_tokens(self._llm,
                                                              self.functions)
         for prompt in self.user_prompt:
@@ -172,9 +175,12 @@ class MiddlePerson(BaseModel):
                                                    self.functions)).tolist()[0]
             offset = len(ins)
             ins += self._llm.encode(
-                '{' + f'"prompt": "{repr(prompt.prompt).strip("\"'").replace('"', '\\"')}", "name": "'
-                                   ).tolist()[0]
-            print('{' + f'"prompt": "{repr(prompt.prompt).strip("\"'").replace('"', '\\"')}", "name": "',
+                '{' + '"prompt": "' +
+                repr(prompt.prompt).strip("\"'").replace('"', '\\"') +
+                '", "name": "').tolist()[0]
+            print('{' + '"prompt": "' +
+                  repr(prompt.prompt).strip("\"'").replace('"', '\\"') +
+                  '", "name": "',
                   end='',
                   flush=True)
             self._func_gen(ins, allowed_func_tkn)

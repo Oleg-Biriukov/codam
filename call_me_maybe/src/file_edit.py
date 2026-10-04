@@ -37,17 +37,17 @@ Selected function: {func.name} ({_print_prmt(func)}) - {func.description}\n'''
 
 
 def get_func_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
-    extr_prompt: str = ""
+    prompt: str = ""
 
-    with open("llm_sdk/func_prompt.txt", "r") as func:
-        extr_prompt += func.read()
+    with open("llm_sdk/func_prompt.txt", "r") as f:
+        prompt += f.read()
 
-    extr_prompt = f'''<|im_start|>system
-{extr_prompt}
+    prompt = f'''<|im_start|>system
+{prompt}
 <|im_end|>
 <|im_start|>user
 {user_prompt}
 Available functions:\n'''
     for func in functs:
-        extr_prompt += f'"{func.name}":{func.description}({_print_prmt(func)})\n'
-    return extr_prompt + "<|im_end|>\n<|im_start|>assistant\nAnswer: "
+        prompt += f'"{func.name}":{func.description}({_print_prmt(func)})\n'
+    return prompt + "<|im_end|>\n<|im_start|>assistant\nAnswer: "
