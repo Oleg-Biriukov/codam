@@ -24,6 +24,12 @@ class State(Enum):
 
 
 class StateMachine(BaseModel):
+    """
+    Class that coordinate these steps
+    1. Select the token from logits.
+    2. Guide llm for generating correct json format
+    3. Prepare pattern for constrain decode
+    """
     llm: Any = None
     _f_tokens: list = []
     _state: State = State.PICK_FUNC
@@ -35,6 +41,10 @@ class StateMachine(BaseModel):
     _backslash: bool = False
 
     def get_pattern(self, _llm: Any) -> Any:
+        """
+        Generate pattern that partly in response and
+        contain which type llm should generate
+        """
         name: list = [(n, t["type"]) for n, t in self._func.parameters.items()]
         pattern: list = ['']
 
@@ -51,6 +61,7 @@ class StateMachine(BaseModel):
         return pattern
 
     def get_allowed_func_tokens(self, llm: Any, func: list) -> list:
+        """create tokens from functins name to shring field of selection."""
         self._f_tokens = [llm.encode(fn.name).tolist()[0] for fn in func]
         return [t for l_t in self._f_tokens for t in l_t]
 
@@ -64,6 +75,9 @@ class StateMachine(BaseModel):
                       reverse=True)
 
     def is_ok(self, tkn_str: str, type: list) -> bool:
+        """
+        Guide llm for generating correct json format
+        """
         last_state: State = self._state
         for ltr in tkn_str:
             if self._state is State.PICK_NAME:
@@ -74,14 +88,15 @@ class StateMachine(BaseModel):
                 if ltr == ',' and len(type) == 1:
                     return False
                 self._state = State.PICK_NAME
+                continue
             if ltr == '"' and self._state is State.PICK_STRING:
                 if not self._backslash:
                     self._is_was_qt = True
                 continue
+            if ltr != '"' and self._state is State.PICK_STRING:
+                self._is_was_qt = False
             if ltr == ']' and self._state is State.PICK_BRCKT:
                 self._is_was_br = True
-                continue
-            if self._state is State.PICK_NAME:
                 continue
             if not re.fullmatch(tp[type[0]], ltr):
                 return False
@@ -93,6 +108,9 @@ class StateMachine(BaseModel):
 
 
 class MiddlePerson(BaseModel):
+    """
+    bridge between user and llm
+    """
     _llm: Any = Small_LLM_Model()
     _func: FuncDefiner = None_Func
     _s_m: StateMachine = StateMachine()
@@ -102,6 +120,7 @@ class MiddlePerson(BaseModel):
     _output: list = []
 
     def _get_func(self, fn_name: str) -> FuncDefiner:
+        """return func object by name"""
         func: FuncDefiner
 
         for fn in self.functions:
@@ -111,6 +130,7 @@ class MiddlePerson(BaseModel):
         return func
 
     def _func_gen(self, prompt: list[int], allowed_tkn: list) -> None:
+        """Start generate function"""
         token: int
         res: list = []
 
@@ -127,6 +147,7 @@ class MiddlePerson(BaseModel):
             self._s_m._state = State.PICK_NAME
 
     def _prmt_gen(self, prompt: list[int]) -> None:
+        """generate parameters if needed"""
         token: int
         tkn_text: str
         pattern: list = self._s_m.get_pattern(self._llm)[::-1]
@@ -157,11 +178,24 @@ class MiddlePerson(BaseModel):
         prompt += self._llm.encode("}").tolist()[0]
 
     def get_out(self) -> list:
-        # print(repr(self._output[0]))
+        """convert from str to json format."""
         self._output = [json.loads(resp) for resp in self._output]
         return self._output
 
     def gen_text(self) -> None:
+        """launchs and manages generating"""
+        def get_true_repr(text: str) -> str:
+            text = repr(text).strip("\"'").replace('"', '\\"')
+            text = text.replace("\\'", "'")
+            return text
+
+        def _print_inst(text: list, ins: list) -> list:
+            ins += self._llm.encode(text).tolist()[0]
+            print(text,
+                  end='',
+                  flush=True)
+            return ins
+
         allowed_func_tkn: list
         ins: list
         offset: int
@@ -174,23 +208,19 @@ class MiddlePerson(BaseModel):
             ins = self._llm.encode(get_func_prompt(prompt.prompt,
                                                    self.functions)).tolist()[0]
             offset = len(ins)
-            ins += self._llm.encode(
-                '{' + '"prompt": "' +
-                repr(prompt.prompt).strip("\"'").replace('"', '\\"') +
-                '", "name": "').tolist()[0]
-            print('{' + '"prompt": "' +
-                  repr(prompt.prompt).strip("\"'").replace('"', '\\"') +
-                  '", "name": "',
-                  end='',
-                  flush=True)
+
+            _print_inst('{' + '"prompt": "', ins)
+            _print_inst(get_true_repr(prompt.prompt), ins)
+            _print_inst('", "name": "', ins)
+
             self._func_gen(ins, allowed_func_tkn)
 
-            ins += self._llm.encode('", ').tolist()[0]
-            print('", ', end='', flush=True)
+            _print_inst('", ', ins)
 
             self._types = [t["type"] for _, t in self._func.parameters.items()]
-            print('"parameters": ', end='', flush=True)
-            ins += self._llm.encode('"parameters": ').tolist()[0]
+
+            _print_inst('"parameters": ', ins)
+
             res = self._llm.decode(ins[offset:])
             ins = self._llm.encode(get_prmt_prompt(prompt.prompt,
                                                    self._func,
@@ -199,8 +229,7 @@ class MiddlePerson(BaseModel):
             if self._s_m._state is State.PICK_NAME:
                 self._prmt_gen(ins)
             else:
-                ins += self._llm.encode(r'{}}').tolist()[0]
-                print(r'{}}', flush=True, end='')
+                _print_inst('{}}', ins)
             self._s_m._state = State.PICK_FUNC
             res += self._llm.decode(ins[offset:])
             self._output.append(res)

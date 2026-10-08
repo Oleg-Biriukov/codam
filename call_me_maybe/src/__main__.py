@@ -2,14 +2,19 @@ import json
 import argparse
 from src.definer_func import FuncDefiner, UserPrompt, Types
 from src.state_machine import MiddlePerson
+from src.error_handler import error_handler
 import os
 import time
-from src.error_handler import error_handler
 
 
 @error_handler
 def take_out_arg() -> argparse.Namespace:
+    """
+    Function for parcing the arguments and preparing field for executing
+    """
     parser: argparse.ArgumentParser
+    arg: argparse.Namespace
+    out_dir: str = "data/output"
 
     parser = argparse.ArgumentParser(
         prog='call_me_maybe',
@@ -22,11 +27,19 @@ def take_out_arg() -> argparse.Namespace:
         os.mkdir("data/output")
     parser.add_argument("--output", type=str,
                         default="data/output/output.json")
-    return parser.parse_args()
+    arg = parser.parse_args()
+    if not os.path.isdir(out_dir) and out_dir in arg.output:
+        os.mkdir(out_dir)
+    if not os.path.isdir('/'.join(arg.output.split('/')[:-1])):
+        raise FileExistsError("output")
+    return arg
 
 
 @error_handler
 def take_out_func_from_file(filename: str) -> list:
+    """
+    Parcing function and store them into FuncDefiner Class.
+    """
     func_list: list = []
     content: list
     dscpt: str = "In case if you cannot find needed function"
@@ -44,6 +57,9 @@ def take_out_func_from_file(filename: str) -> list:
 
 @error_handler
 def get_user_prompt_from_file(filename: str) -> list:
+    """
+    Read prompts and let them trow UserPrompt validator.
+    """
     users_prompt: list = []
     content: list
 
@@ -56,11 +72,19 @@ def get_user_prompt_from_file(filename: str) -> list:
 
 @error_handler
 def load_response_to_file(filename: str, response: list) -> None:
+    """
+    Save responses in file
+    """
     for r in response:
         r['name'] = r['name'].strip()
+        if r['parameters'] is None:
+            continue
         for name, value in r['parameters'].items():
             if isinstance(r['parameters'][name], str):
-                r['parameters'][name] = value.strip()
+                if r['parameters'][name] != ' ':
+                    r['parameters'][name] = value.strip()
+                if r['parameters'][name] == "string":
+                    r['parameters'][name] = ""
 
     with open(filename, "w") as output:
         json.dump(response, output, indent=4)

@@ -24,6 +24,8 @@ tp: dict = {
 
 
 class FuncDefiner(BaseModel):
+    """Class that stores all needed field and rules for that
+    for receiving func"""
     model_config = ConfigDict(extra='forbid')
     name: str = Field(pattern="^[a-zA-Z_]{2,50}$")
     description: str = Field(min_length=2, max_length=500)
@@ -45,5 +47,7 @@ class FuncDefiner(BaseModel):
 
 
 class UserPrompt(BaseModel):
+    """Class that stores all needed field and rules for that
+        for receiving prompt"""
     model_config = ConfigDict(extra='forbid')
     prompt: str = Field(min_length=1, max_length=300)

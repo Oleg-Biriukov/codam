@@ -1,4 +1,4 @@
-NAME = src.main
+NAME = src
 UV_R = uv run python
 UV_S = uv sync
 ENV_DIR = /home/obirukov/sgoinfre/uv_env
@@ -19,6 +19,7 @@ debug: install
 	$(UV_R) -m pdb src/main.py $(ARG)
 
 clean:
+	@rm -rf .mypy_cache
 	@rm -rf __pycache__
 	@rm -rf ./*/__pycache__
 	@rm -rf ./*/*/__pycache__

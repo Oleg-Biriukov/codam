@@ -5,6 +5,7 @@ from typing import Any, Callable
 
 
 def unpacking_validation_error(e: Any) -> str:
+    """unpacks validation errors that Pydantic raise"""
     error_string: str = ""
     loc: str
     msg: str
@@ -20,11 +21,13 @@ errors: dict = {
     ValueError: lambda txt: txt,
     FileNotFoundError: lambda txt: txt,
     ValidationError: unpacking_validation_error,
-    JSONDecodeError: lambda txt: txt
+    JSONDecodeError: lambda txt: txt,
+    FileExistsError: lambda txt: f"No such {txt} directory."
 }
 
 
 def error_handler(func: Callable) -> Callable:
+    """Wrapper for catching errors"""
     @wraps(func)
     def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
@@ -33,6 +36,7 @@ def error_handler(func: Callable) -> Callable:
             if errors.get(type(e)):
                 print(f"Error caused: {errors[type(e)](e)}")
             else:
-                print(f"New type detected: {type(e).__name__}: {e}")
+                print(f"New type detected: {type(e).__name__}: {e} \
+in {func.__name__}")
             exit()
     return wrapper

@@ -2,6 +2,7 @@ from src.definer_func import FuncDefiner
 
 
 def _print_prmt(func: FuncDefiner) -> str:
+    """print parameters with , seperator"""
     prmt_l: str = ""
     len_prmtr: int
 
@@ -22,6 +23,7 @@ def _print_prmt(func: FuncDefiner) -> str:
 
 
 def get_prmt_prompt(user_prompt: str, func: FuncDefiner, res: str) -> str:
+    """return prompt for prmtr extractor that listed all rules for that"""
     extr_prompt: str = ""
 
     with open("llm_sdk/prmt_prompt.txt", "r") as f:
@@ -37,6 +39,7 @@ Selected function: {func.name} ({_print_prmt(func)}) - {func.description}\n'''
 
 
 def get_func_prompt(user_prompt: str, functs: list[FuncDefiner]) -> str:
+    """return prompt for func extractor that listed all rules for that"""
     prompt: str = ""
 
     with open("llm_sdk/func_prompt.txt", "r") as f:

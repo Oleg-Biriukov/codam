@@ -1,10 +1,8 @@
-Extract parameters from the user request for the selected function.
-Return ONLY a JSON object. Nothing else. No explanation.
+Extract parameters from the user request. Return ONLY a JSON object.
 
-RULES:
-1. Extract parameters whick appeared in prompt (even if the value is emplty as "").
-2. Extract parameters in the EXACT order they appear in the user request.
-3. Do not calculate or interpret values. Extract them exactly as stated.
-4. Float has to be float
+1. Extract ALL parameters exactly as stated, even if empty "".
+2. Keep original order from the request.
+3. Number type is fload number(12 -> 12.0).
 
 {"prompt": "Format template: Say "hello" to {name}", "name": "fn_format_template", "parameters": {"template": "Say \"hello\" to {name}"}}
+{"prompt": "Greet shrek", "name": "fn_greet", "parameters": {"name": "shrek"}}

@@ -3,4 +3,4 @@ Return ONLY the function name. Nothing else. No explanation.
 
 RULES:
 1. Pick the function that MOST CLOSELY matches the user intent.
-2. If nothing matches return: None
+2. If nothing matches choose None function (name: None)
