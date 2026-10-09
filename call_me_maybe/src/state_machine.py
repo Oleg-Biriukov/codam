@@ -88,15 +88,14 @@ class StateMachine(BaseModel):
                 if ltr == ',' and len(type) == 1:
                     return False
                 self._state = State.PICK_NAME
-                continue
             if ltr == '"' and self._state is State.PICK_STRING:
                 if not self._backslash:
                     self._is_was_qt = True
                 continue
-            if ltr != '"' and self._state is State.PICK_STRING:
-                self._is_was_qt = False
             if ltr == ']' and self._state is State.PICK_BRCKT:
                 self._is_was_br = True
+                continue
+            if self._state is State.PICK_NAME:
                 continue
             if not re.fullmatch(tp[type[0]], ltr):
                 return False
@@ -179,7 +178,19 @@ class MiddlePerson(BaseModel):
 
     def get_out(self) -> list:
         """convert from str to json format."""
-        self._output = [json.loads(resp) for resp in self._output]
+        def problemSolver(resp: str) -> Any:
+            list_resp: list
+
+            try:
+                return json.loads(resp)
+            except json.decoder.JSONDecodeError as e:
+                if 'Invalid \\escape' not in e.msg:
+                    raise e
+                list_resp = list(resp)
+                list_resp.insert(e.colno-1, '\\')
+                return problemSolver(''.join(list_resp))
+
+        self._output = [problemSolver(resp) for resp in self._output]
         return self._output
 
     def gen_text(self) -> None:
@@ -189,7 +200,7 @@ class MiddlePerson(BaseModel):
             text = text.replace("\\'", "'")
             return text
 
-        def _print_inst(text: list, ins: list) -> list:
+        def _print_inst(text: str, ins: list) -> list:
             ins += self._llm.encode(text).tolist()[0]
             print(text,
                   end='',
