@@ -1,4 +1,4 @@
-from CLI import CLI
+from src.CLI import CLI
 import fire
 
 
