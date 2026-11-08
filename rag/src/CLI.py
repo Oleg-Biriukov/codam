@@ -1,4 +1,4 @@
-from src.chunker import Chunker
+from src.chunker import Indexer
 from pydantic import BaseModel
 
 
@@ -6,9 +6,11 @@ class CLI(BaseModel):
     input_file: str
 
     def index(self, max_chunk_size: int):
-        if max_chunk_size > 2000:
-            return ValueError("Error")
-        return Chunker.create(self.input_file)
+        chunker: Indexer
+
+        chunker = Indexer.build(self.input_file, max_chunk_size)
+        chunker.chunk()
+        chunker.process()
 
     def search(self, query: str, k: int):
         pass
