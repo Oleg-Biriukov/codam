@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, model_serializer
 from typing import ClassVar
 from glob import glob
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
@@ -6,9 +6,9 @@ from tqdm import tqdm
 import os
 import bm25s
 
-from src.index import BM25Index
+# from src.index import BM25Index
 
-CHUNK_FD = os.path.abspath("data/processed/chunks.json")
+CHUNK_INDEX_FD = os.path.abspath("data/processed/index_chunks")
 
 
 class Chunk(BaseModel):
@@ -104,8 +104,10 @@ class Indexer(Chunker):
     def process(self):
         tokens: any
         retriever: any
+        metadata: list = [c.model_dump() for c in Chunker.chunks]
 
         tokens = bm25s.tokenize([chunk.text for chunk in Chunker.chunks])
-        retriever = bm25s.BM25()
-        retriever.index(tokens)
-        
+        retriever = bm25s.BM25(corpus=metadata)
+
+        retriever.index(tokens, corpus=metadata)
+        retriever.save(CHUNK_INDEX_FD)
