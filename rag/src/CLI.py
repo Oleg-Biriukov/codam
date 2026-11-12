@@ -1,5 +1,7 @@
-from src.chunker import Indexer
+from src.chunker import Indexer, CHUNK_INDEX_FD
+from src.datasets import MinimalSource
 from pydantic import BaseModel
+from src.retriever import Retriever
 
 
 class CLI(BaseModel):
@@ -13,7 +15,14 @@ class CLI(BaseModel):
         chunker.process()
 
     def search(self, query: str, k: int):
-        pass
+        retriever: Retriever
+        sources: list[MinimalSource]
+
+        retriever = Retriever.create(index_save_fld=CHUNK_INDEX_FD)
+        sources = retriever.score_question(query, k)
+        for s in sources:
+            print(f"{s.file_path} [{s.first_character_index}:"
+                  f"{s.last_character_index}] {s.text}")
 
     def search_dataset(self, dataset_path: str, k: int, save_directory: str):
         pass

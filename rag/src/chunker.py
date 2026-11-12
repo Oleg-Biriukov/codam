@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, model_validator, model_serializer
+from pydantic import BaseModel, model_validator
 from typing import ClassVar
 from glob import glob
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
@@ -6,21 +6,21 @@ from tqdm import tqdm
 import os
 import bm25s
 
-# from src.index import BM25Index
+from src.datasets import MinimalSource
 
 CHUNK_INDEX_FD = os.path.abspath("data/processed/index_chunks")
 
 
-class Chunk(BaseModel):
-    file_path: str
-    first_character_index: int
-    last_character_index: int = 0
-    text: str
+# class Chunk(BaseModel):
+#     file_path: str
+#     first_character_index: int
+#     last_character_index: int = 0
+#     text: str
 
-    @model_validator(mode="after")
-    def filling_last_character_index(self):
-        self.last_character_index = self.first_character_index + len(self.text)
-        return self
+#     @model_validator(mode="after")
+#     def filling_last_character_index(self):
+#         self.last_character_index = self.first_character_index + len(self.text)
+#         return self
 
 
 class Chunker(BaseModel):
@@ -57,11 +57,11 @@ class Chunker(BaseModel):
         with open(py_file, "r") as c:
             content = c.read()
 
-        for chunk in splitter.create_documents([content]):
+        for c in splitter.create_documents([content]):
             Chunker.chunks.append(
-                Chunk(file_path=py_file,
-                      first_character_index=chunk.metadata["start_index"],
-                      text=chunk.page_content)
+                MinimalSource(file_path=py_file,
+                              first_character_index=c.metadata["start_index"],
+                              text=c.page_content)
             )
 
     @staticmethod
@@ -71,11 +71,11 @@ class Chunker(BaseModel):
         with open(md_file, "r") as c:
             content = c.read()
 
-        for chunk in splitter.create_documents([content]):
+        for c in splitter.create_documents([content]):
             Chunker.chunks.append(
-                Chunk(file_path=md_file,
-                      first_character_index=chunk.metadata["start_index"],
-                      text=chunk.page_content)
+                MinimalSource(file_path=md_file,
+                              first_character_index=c.metadata["start_index"],
+                              text=c.page_content)
             )
 
 
@@ -109,5 +109,5 @@ class Indexer(Chunker):
         tokens = bm25s.tokenize([chunk.text for chunk in Chunker.chunks])
         retriever = bm25s.BM25(corpus=metadata)
 
-        retriever.index(tokens, corpus=metadata)
+        retriever.index(tokens)
         retriever.save(CHUNK_INDEX_FD)

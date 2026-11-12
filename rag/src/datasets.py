@@ -1,11 +1,17 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 import uuid
 
 
 class MinimalSource(BaseModel):
     file_path: str
     first_character_index: int
-    last_character_index: int
+    last_character_index: int = Field(default=0)
+    text: str
+
+    @model_validator(mode="after")
+    def filling_last_character_index(self):
+        self.last_character_index = self.first_character_index + len(self.text)
+        return self
 
 
 class UnansweredQuestion(BaseModel):
