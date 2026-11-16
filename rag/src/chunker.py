@@ -2,13 +2,18 @@ from pydantic import BaseModel, model_validator
 from typing import ClassVar
 from glob import glob
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
+from sentence_transformers import SentenceTransformer as ST
 from tqdm import tqdm
 import os
+import numpy as np
+import faiss
 import bm25s
 
 from src.datasets import MinimalSource
 
 CHUNK_INDEX_FD = os.path.abspath("data/processed/index_chunks")
+
+os.makedirs(CHUNK_INDEX_FD, exist_ok=True)
 
 
 # class Chunk(BaseModel):
@@ -102,12 +107,49 @@ class Indexer(Chunker):
                    max_size_chunk=max_size_chunk)
 
     def process(self):
-        tokens: any
-        retriever: any
-        metadata: list = [c.model_dump() for c in Chunker.chunks]
+        chunks: list = [chunk.text for chunk in Chunker.chunks]
 
-        tokens = bm25s.tokenize([chunk.text for chunk in Chunker.chunks])
-        retriever = bm25s.BM25(corpus=metadata)
+        def build_bm25_indexes() -> None:
+            tokens: any
+            retriever: any
 
-        retriever.index(tokens)
-        retriever.save(CHUNK_INDEX_FD)
+            metadata: list = [c.model_dump() for c in Chunker.chunks]
+
+            tokens = bm25s.tokenize(chunks)
+            retriever = bm25s.BM25(corpus=metadata)
+
+            retriever.index(tokens)
+            retriever.save(CHUNK_INDEX_FD+"/bm25")
+
+        def build_faiss_indexes() -> None:
+            model: any
+            embeddings: list
+            faiss_index: any
+            ids: list = np.arange(len(Chunker.chunks))
+
+            model = ST("sentence-transformers/all-MiniLM-L6-v2")
+            embeddings = model.encode(
+                chunks,
+                batch_size=64,
+                show_progress_bar=True,
+                normalize_embeddings=True
+            )
+
+            embeddings = np.asarray(
+                embeddings,
+                dtype="float32"
+            )
+
+            faiss_index = faiss.IndexFlatIP(embeddings.shape[1])
+# i added embeddings with their ids that represent
+# the current id of chunks which make my rrf calculation much easier
+            faiss_index.add_with_ids(embeddings, ids)
+
+            faiss.write_index(
+                faiss_index,
+                f"{CHUNK_INDEX_FD}/faiss_.index"
+            )
+        print("bm25 indexing ...")
+        build_bm25_indexes()
+        print("faiss indexing ...")
+        build_faiss_indexes()

@@ -1,8 +1,11 @@
 from pydantic import BaseModel, Field, model_validator
+from typing import ClassVar
 import uuid
 
 
 class MinimalSource(BaseModel):
+    counter: ClassVar[int] = 0
+    id: int = Field(default=0)
     file_path: str
     first_character_index: int
     last_character_index: int = Field(default=0)
@@ -10,7 +13,9 @@ class MinimalSource(BaseModel):
 
     @model_validator(mode="after")
     def filling_last_character_index(self):
+        self.id = MinimalSource.counter
         self.last_character_index = self.first_character_index + len(self.text)
+        MinimalSource.counter += 1
         return self
 
 

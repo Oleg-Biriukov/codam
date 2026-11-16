@@ -1,12 +1,20 @@
 NAME = src
-UV_R = uv run python
+PATH_ENV = /sgoinfre/obirukov/uv_env/.venv
+UV_R = uv run python3
 UV_S = uv sync
-ARG := 
+QUERY = "What are the default values for FP8_MIN and FP8_MAX constants in vLLM's triton_flash_attention module?"
+ARG := index --max_chunk_size 2000
+# ARG := search --query $(QUERY) --k 10
+# ARG := answer --query $(QUERY) --k 10
+
+
+
+export UV_PROJECT_ENVIRONMENT = $(PATH_ENV)
 
 install:
 	$(UV_S)
 
-run: install
+run: 
 	$(UV_R) -m $(NAME) $(ARG)
 
 debug: install
