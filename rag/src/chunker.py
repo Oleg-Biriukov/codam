@@ -8,24 +8,18 @@ import os
 import numpy as np
 import faiss
 import bm25s
+import pickle
 
 from src.datasets import MinimalSource
 
 CHUNK_INDEX_FD = os.path.abspath("data/processed/index_chunks")
+PICKLE_FD = os.path.abspath("data/processed/index_chunks") + '/pickle_obj'
 
 os.makedirs(CHUNK_INDEX_FD, exist_ok=True)
 
-
-# class Chunk(BaseModel):
-#     file_path: str
-#     first_character_index: int
-#     last_character_index: int = 0
-#     text: str
-
-#     @model_validator(mode="after")
-#     def filling_last_character_index(self):
-#         self.last_character_index = self.first_character_index + len(self.text)
-#         return self
+if os.path.exists(PICKLE_FD):
+    os.removedirs(PICKLE_FD, )
+os.makedirs(PICKLE_FD, exist_ok=True)
 
 
 class Chunker(BaseModel):
@@ -58,30 +52,34 @@ class Chunker(BaseModel):
     @staticmethod
     def py_chunker(splitter: any, py_file: str):
         content: str
+        chunk: MinimalSource
 
         with open(py_file, "r") as c:
             content = c.read()
 
         for c in splitter.create_documents([content]):
-            Chunker.chunks.append(
-                MinimalSource(file_path=py_file,
-                              first_character_index=c.metadata["start_index"],
-                              text=c.page_content)
-            )
+            chunk = MinimalSource(file_path=py_file,
+                                  first_character_index=c.metadata["start_index"],
+                                  text=c.page_content)
+            Chunker.chunks.append(chunk)
+            with open(PICKLE_FD + f'/chunk{chunk.id}.pkl', "wb") as file:
+                pickle.dump(chunk, file)
 
     @staticmethod
     def md_chunker(splitter: any, md_file: str):
         content: str
+        chunk: MinimalSource
 
         with open(md_file, "r") as c:
             content = c.read()
 
         for c in splitter.create_documents([content]):
-            Chunker.chunks.append(
-                MinimalSource(file_path=md_file,
-                              first_character_index=c.metadata["start_index"],
-                              text=c.page_content)
-            )
+            chunk = MinimalSource(file_path=md_file,
+                                  first_character_index=c.metadata["start_index"],
+                                  text=c.page_content)
+            Chunker.chunks.append(chunk)
+            with open(PICKLE_FD + f'/chunk{chunk.id}.pkl', "wb") as file:
+                pickle.dump(chunk, file)
 
 
 class Indexer(Chunker):
@@ -141,6 +139,8 @@ class Indexer(Chunker):
             )
 
             faiss_index = faiss.IndexFlatIP(embeddings.shape[1])
+# allow wrap data with ids
+            faiss_index = faiss.IndexIDMap(faiss_index)
 # i added embeddings with their ids that represent
 # the current id of chunks which make my rrf calculation much easier
             faiss_index.add_with_ids(embeddings, ids)

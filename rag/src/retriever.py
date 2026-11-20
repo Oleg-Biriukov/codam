@@ -58,12 +58,15 @@ class Retriever(HybrydSearch):
         return cls(bm25=bm25, faiss_index=faiss_index, faiss_m=faiss_m)
 
     def rrf(self, question: str, k: int):
+        # def get_by_id(id: int)
         sources: list[MinimalSource]
         bm25_ids: list
-    
+
         res, faiss_ids = self.get_faiss_rank(question=question, k=k)
-        sources = self.get_faiss_rank(question=question, k=k)
+        sources = self.get_bm25_rank(question=question, k=k)
         bm25_ids = [c.id for c in sources]
+        print()
+        
 
     def save_datasets(self):
         pass
