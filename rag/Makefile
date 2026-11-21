@@ -2,10 +2,10 @@ NAME = src
 PATH_ENV = /sgoinfre/obirukov/uv_env/.venv
 UV_R = uv run python3
 UV_S = uv sync
-QUERY = "What are the default values for FP8_MIN and FP8_MAX constants in vLLM's triton_flash_attention module?"
-ARG := index --max_chunk_size 2000
+QUERY = "What determines whether vLLM's sampler returns Pythonized results or deferred Pythonization arguments?"
+# ARG := index --max_chunk_size 2000
 # ARG := search --query $(QUERY) --k 10
-# ARG := answer --query $(QUERY) --k 10
+ARG := answer --query $(QUERY) --k 10
 
 
 

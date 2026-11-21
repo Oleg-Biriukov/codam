@@ -12,13 +12,11 @@ import pickle
 
 from src.datasets import MinimalSource
 
-CHUNK_INDEX_FD = os.path.abspath("data/processed/index_chunks")
+CHUNK_INDEX_FD = os.path.abspath("data/processed/index_chunks") + "/bm25"
 PICKLE_FD = os.path.abspath("data/processed/index_chunks") + '/pickle_obj'
 
 os.makedirs(CHUNK_INDEX_FD, exist_ok=True)
 
-if os.path.exists(PICKLE_FD):
-    os.removedirs(PICKLE_FD, )
 os.makedirs(PICKLE_FD, exist_ok=True)
 
 
@@ -117,39 +115,7 @@ class Indexer(Chunker):
             retriever = bm25s.BM25(corpus=metadata)
 
             retriever.index(tokens)
-            retriever.save(CHUNK_INDEX_FD+"/bm25")
+            retriever.save(CHUNK_INDEX_FD)
 
-        def build_faiss_indexes() -> None:
-            model: any
-            embeddings: list
-            faiss_index: any
-            ids: list = np.arange(len(Chunker.chunks))
-
-            model = ST("sentence-transformers/all-MiniLM-L6-v2")
-            embeddings = model.encode(
-                chunks,
-                batch_size=64,
-                show_progress_bar=True,
-                normalize_embeddings=True
-            )
-
-            embeddings = np.asarray(
-                embeddings,
-                dtype="float32"
-            )
-
-            faiss_index = faiss.IndexFlatIP(embeddings.shape[1])
-# allow wrap data with ids
-            faiss_index = faiss.IndexIDMap(faiss_index)
-# i added embeddings with their ids that represent
-# the current id of chunks which make my rrf calculation much easier
-            faiss_index.add_with_ids(embeddings, ids)
-
-            faiss.write_index(
-                faiss_index,
-                f"{CHUNK_INDEX_FD}/faiss_.index"
-            )
         print("bm25 indexing ...")
         build_bm25_indexes()
-        print("faiss indexing ...")
-        build_faiss_indexes()

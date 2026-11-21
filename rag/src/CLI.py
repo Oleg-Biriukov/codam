@@ -1,5 +1,5 @@
 from src.chunker import Indexer, CHUNK_INDEX_FD
-from src.datasets import MinimalSource
+from src.datasets import MinimalSource, RagDataset
 from src.retriever import Retriever, Generator
 from pydantic import BaseModel
 
@@ -18,15 +18,23 @@ class CLI(BaseModel):
         retriever: Retriever
         sources: list[MinimalSource]
 
-        retriever = Retriever.create(bm25_save_fld=f"{CHUNK_INDEX_FD}/bm25",
-                                     faiss_save_fld=f"{CHUNK_INDEX_FD}/faiss_.index")
-        sources = retriever.rrf(query, k)
-        # for s in sources:
-        #     print(f"{s.file_path} [{s.first_character_index}:"
-        #           f"{s.last_character_index}]")
+        retriever = Retriever.create(bm25_save_fld=CHUNK_INDEX_FD)
+        sources = retriever.score_question(query, k)
+        for s in sources:
+            print(f"{s.file_path} [{s.first_character_index}:"
+                  f"{s.last_character_index}]")
 
     def search_dataset(self, dataset_path: str, k: int, save_directory: str):
-        pass
+        retriever: Retriever
+        sources: list[MinimalSource]
+        rag_dataset: RagDataset
+        
+
+        retriever = Retriever.create(bm25_save_fld=CHUNK_INDEX_FD)
+        rag_dataset = retriever.load_dataset(dataset_path)
+        for q in rag_dataset.rag_questions:
+            
+        
 
     def answer(self, query: str, k: int):
         gen: Generator
@@ -35,7 +43,7 @@ class CLI(BaseModel):
         prompt: str
 
         gen = Generator.create()
-        retriever = Retriever.create(index_save_fld=CHUNK_INDEX_FD)
+        retriever = Retriever.create(bm25_save_fld=CHUNK_INDEX_FD)
         sources = retriever.score_question(query, k)
         prompt = gen.format_prompt(query, sources)
         print(gen.generate(prompt))

@@ -6,17 +6,14 @@ import torch
 import bm25s
 import faiss
 import os
+import json
 import numpy as np
 
-from src.datasets import MinimalSource
-
-SAVE_MINIMAL_SEARCH = os.path.abspath("data/Un")
+from src.datasets import MinimalSource, RagDataset, StudentSearchResults
 
 
 class HybrydSearch(BaseModel):
     bm25: Any
-    faiss_m: Any
-    faiss_index: Any
 
     def get_bm25_rank(self, question: str, k: int) -> list[MinimalSource]:
         sources: list[MinimalSource] = list()
@@ -29,47 +26,35 @@ class HybrydSearch(BaseModel):
             sources.append(MinimalSource(**chunk))
         return sources
 
-    def get_faiss_rank(self, question: str, k: int):
-        vector_q: Any
-
-        vector_q = self.faiss_m.encode(
-            [question],
-            normalize_embeddings=True
-        )
-        vector_q = np.asarray(vector_q, dtype="float32")
-        return self.faiss_index.search(
-            vector_q,
-            k
-        )
-
 
 class Retriever(HybrydSearch):
     @classmethod
-    def create(cls, bm25_save_fld: str, faiss_save_fld: str) -> "Retriever":
+    def create(cls, bm25_save_fld: str) -> "Retriever":
         bm25: Any
-        faiss_m: Any
-        faiss_index: Any
 
-        if not os.path.exists(faiss_save_fld) or not os.path.exists(bm25_save_fld):
+        if not os.path.exists(bm25_save_fld):
             raise FileExistsError("Do index first.")
         bm25 = bm25s.BM25().load(bm25_save_fld, load_corpus=True)
-        faiss_index = faiss.read_index(faiss_save_fld)
-        faiss_m = ST("sentence-transformers/all-MiniLM-L6-v2")
-        return cls(bm25=bm25, faiss_index=faiss_index, faiss_m=faiss_m)
+        return cls(bm25=bm25)
 
-    def rrf(self, question: str, k: int):
-        # def get_by_id(id: int)
+    def score_question(self, question: str, k: int):
         sources: list[MinimalSource]
-        bm25_ids: list
 
-        res, faiss_ids = self.get_faiss_rank(question=question, k=k)
         sources = self.get_bm25_rank(question=question, k=k)
-        bm25_ids = [c.id for c in sources]
-        print()
-        
+        return sources
 
-    def save_datasets(self):
-        pass
+    def load_dataset(self, dataset_dir: str) -> RagDataset:
+        rag_datasets: RagDataset
+
+        with open(dataset_dir, "r") as f:
+            rag_datasets = RagDataset(**json.load(f))
+        return rag_datasets
+
+    def save_datasets(self, dataset_dir: str, save_dir: str, dataset: StudentSearchResults) -> None:
+        _, filename = os.path.split(dataset_dir)
+
+        with open(save_dir + filename, "a+") as f:
+            json.dump(f, dataset.model_dump())
 
     def score_datasets(self):
         pass
