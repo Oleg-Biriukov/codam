@@ -1,5 +1,5 @@
 from src.chunker import Indexer, CHUNK_INDEX_FD
-from src.datasets import MinimalSource, RagDataset
+from src.datasets import MinimalSource, RagDataset, StudentSearchResults, StudentSearchResultsAndAnswer
 from src.retriever import Retriever, Generator
 from pydantic import BaseModel
 
@@ -26,15 +26,14 @@ class CLI(BaseModel):
 
     def search_dataset(self, dataset_path: str, k: int, save_directory: str):
         retriever: Retriever
-        sources: list[MinimalSource]
+        sources: StudentSearchResults
         rag_dataset: RagDataset
-        
 
         retriever = Retriever.create(bm25_save_fld=CHUNK_INDEX_FD)
         rag_dataset = retriever.load_dataset(dataset_path)
-        for q in rag_dataset.rag_questions:
-            
-        
+        sources = retriever.score_datasets(rag_dataset, k)
+        retriever.save_datasets(dataset_path, save_directory, sources)
+
 
     def answer(self, query: str, k: int):
         gen: Generator
@@ -46,10 +45,17 @@ class CLI(BaseModel):
         retriever = Retriever.create(bm25_save_fld=CHUNK_INDEX_FD)
         sources = retriever.score_question(query, k)
         prompt = gen.format_prompt(query, sources)
-        print(gen.generate(prompt))
+        print(gen.answer(prompt))
 
     def answer_dataset(self, student_search_results_path: str, save_directory: str):
-        pass
+        gen: Generator
+        s_res: StudentSearchResults
+        answers: StudentSearchResultsAndAnswer
+
+        gen = Generator.create()
+        s_res = gen.load_student_search(student_search_results_path)
+        answers = gen.answer_dataset(s_res)
+        gen.dump_dataset(student_search_results_path, save_directory, answers)
 
     def evaluate(self, student_search_results_path: str, dataset_path: str):
         pass

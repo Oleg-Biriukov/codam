@@ -44,10 +44,10 @@ class MinimalAnswer(MinimalSearchResults):
 
 
 class StudentSearchResults(BaseModel):
-    search_results: list[MinimalSearchResults]
+    search_results: list[MinimalSearchResults] = Field(default_factory=list[MinimalSearchResults])
     k: int
 
 
 class StudentSearchResultsAndAnswer(BaseModel):
-    search_results: list[MinimalAnswer]
+    search_results: list[MinimalAnswer] = Field(default_factory=list[MinimalAnswer])
     k: int
