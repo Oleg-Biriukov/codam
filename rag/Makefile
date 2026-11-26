@@ -5,9 +5,9 @@ UV_S = uv sync
 QUERY = "What determines whether vLLM's sampler returns Pythonized results or deferred Pythonization arguments?"
 # ARG := index --max_chunk_size 2000
 # ARG := search --query $(QUERY) --k 10
-# ARG := search_dataset --dataset_path "datasets_public/public/UnansweredQuestions/dataset_docs_public.json" --k 10 --save_directory "./"
+ARG := search_dataset --dataset_path "datasets_public/public/UnansweredQuestions/dataset_code_public.json" --k 10 --save_directory "./"
 # ARG := answer --query $(QUERY) --k 10
-ARG := answer_dataset --student_search_results_path "./dataset_docs_public.json" --save_directory "./data/datasets" --k 10
+# ARG := answer_dataset --student_search_results_path "./dataset_docs_public.json" --save_directory "./data/datasets/"
 
 
 

@@ -1,11 +1,12 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, model_serializer
 from typing import ClassVar
 import uuid
+import os
 
 
 class MinimalSource(BaseModel):
     counter: ClassVar[int] = 0
-    id: int = Field(default=0)
+    id: int = Field(default=0, exlude=True)
     file_path: str
     first_character_index: int
     last_character_index: int = Field(default=0)
@@ -17,6 +18,15 @@ class MinimalSource(BaseModel):
         self.last_character_index = self.first_character_index + len(self.text)
         MinimalSource.counter += 1
         return self
+
+    @model_serializer(mode="plain")
+    def serializer(self):
+        return {
+            "file_path": os.path.relpath(self.file_path, os.getcwd()),
+            "first_character_index": self.first_character_index,
+            "last_character_index": self.last_character_index,
+        }
+
 
 
 class UnansweredQuestion(BaseModel):
