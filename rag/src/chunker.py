@@ -1,12 +1,9 @@
-from pydantic import BaseModel, model_validator
+from pydantic import BaseModel
 from typing import ClassVar
 from glob import glob
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
-from sentence_transformers import SentenceTransformer as ST
 from tqdm import tqdm
 import os
-import numpy as np
-import faiss
 import bm25s
 import pickle
 
@@ -27,7 +24,7 @@ class Chunker(BaseModel):
 
     chunks: ClassVar[list] = []
 
-    def chunk(self):
+    def chunk(self) -> None:
         py_splitter: any = RecursiveCharacterTextSplitter.from_language(
                     language=Language.PYTHON,
                     chunk_size=self.max_size_chunk,
@@ -48,7 +45,7 @@ class Chunker(BaseModel):
                 Chunker.py_chunker(py_splitter, f)
 
     @staticmethod
-    def py_chunker(splitter: any, py_file: str):
+    def py_chunker(splitter: any, py_file: str) -> None:
         content: str
         chunk: MinimalSource
 
@@ -57,14 +54,15 @@ class Chunker(BaseModel):
 
         for c in splitter.create_documents([content]):
             chunk = MinimalSource(file_path=py_file,
-                                  first_character_index=c.metadata["start_index"],
+                                  first_character_index=c.metadata
+                                  ["start_index"],
                                   text=c.page_content)
             Chunker.chunks.append(chunk)
             with open(PICKLE_FD + f'/chunk{chunk.id}.pkl', "wb") as file:
                 pickle.dump(chunk, file)
 
     @staticmethod
-    def md_chunker(splitter: any, md_file: str):
+    def md_chunker(splitter: any, md_file: str) -> None:
         content: str
         chunk: MinimalSource
 
@@ -73,8 +71,8 @@ class Chunker(BaseModel):
 
         for c in splitter.create_documents([content]):
             chunk = MinimalSource(file_path=md_file,
-                                  first_character_index=c.metadata["start_index"],
-                                  text=c.page_content)
+                                  first_character_index=c.metadata
+                                  ["start_index"])
             Chunker.chunks.append(chunk)
             with open(PICKLE_FD + f'/chunk{chunk.id}.pkl', "wb") as file:
                 pickle.dump(chunk, file)
@@ -102,7 +100,7 @@ class Indexer(Chunker):
                    md_files=md_files,
                    max_size_chunk=max_size_chunk)
 
-    def process(self):
+    def process(self) -> None:
         chunks: list = [chunk.text for chunk in Chunker.chunks]
 
         def build_bm25_indexes() -> None:

@@ -4994,14 +4994,14 @@
                     "last_character_index": 1970
                 },
                 {
-                    "file_path": "data/raw/vllm-0.10.1/examples/online_serving/openai_transcription_client.py",
-                    "first_character_index": 0,
-                    "last_character_index": 710
-                },
-                {
                     "file_path": "data/raw/vllm-0.10.1/docs/deployment/frameworks/chatbox.md",
                     "first_character_index": 0,
                     "last_character_index": 895
+                },
+                {
+                    "file_path": "data/raw/vllm-0.10.1/examples/online_serving/openai_transcription_client.py",
+                    "first_character_index": 0,
+                    "last_character_index": 710
                 },
                 {
                     "file_path": "data/raw/vllm-0.10.1/docs/features/structured_outputs.md",
